@@ -35,4 +35,6 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 
 	//Determin whether it's accelerating(add a small value to avoid jitter)
 	bAccelerating = BlasterCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.0f ? true : false;
+
+	bWeaponEquipped = BlasterCharacter->IsWeaponEquipped();
 }

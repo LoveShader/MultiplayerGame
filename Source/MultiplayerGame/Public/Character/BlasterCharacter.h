@@ -68,4 +68,5 @@ private:
 	void ServerEquipButtonPressed();
 public:
 	void SetOverlappedWeapon(AWeapon* Weapon);
+	bool IsWeaponEquipped() const;
 };
