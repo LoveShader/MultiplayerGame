@@ -32,6 +32,7 @@ protected:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void EquipButtonPressed();
+	void CrouchButtonPressed();
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* CameraBoom;
@@ -52,6 +53,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputAction* EquipAction;
 
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* CrouchAction;
+	
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputMappingContext* InputContext;
 
