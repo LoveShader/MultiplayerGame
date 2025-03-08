@@ -3,6 +3,7 @@
 #include "BlasterComponents/CombatComponent.h"
 #include "Weapon/Weapon.h"
 #include "Character/BlasterCharacter.h"
+#include "Components/SphereComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 
 UCombatComponent::UCombatComponent()
@@ -27,7 +28,6 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	RightHandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
 	//set Owner
 	EquippedWeapon->SetOwner(Character);
-	EquippedWeapon->ShowPickupWidget(false);
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

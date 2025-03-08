@@ -31,7 +31,7 @@ protected:
 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
-	void EquipButtonPressed(const FInputActionValue& Value);
+	void EquipButtonPressed();
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* CameraBoom;
@@ -63,6 +63,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	UCombatComponent* Combat;
+
+	UFUNCTION(Server, Reliable)
+	void ServerEquipButtonPressed();
 public:
 	void SetOverlappedWeapon(AWeapon* Weapon);
 };
