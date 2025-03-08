@@ -1,0 +1,37 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#include "BlasterComponents/CombatComponent.h"
+#include "Weapon/Weapon.h"
+#include "Character/BlasterCharacter.h"
+#include "Engine/SkeletalMeshSocket.h"
+
+UCombatComponent::UCombatComponent()
+{
+	PrimaryComponentTick.bCanEverTick = false;
+
+}
+
+void UCombatComponent::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
+{
+	if (!Character || !WeaponToEquip)	return;
+
+	EquippedWeapon = WeaponToEquip;
+	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	const USkeletalMeshSocket* RightHandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
+	if (!RightHandSocket)	return;
+	RightHandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
+	//set Owner
+	EquippedWeapon->SetOwner(Character);
+	EquippedWeapon->ShowPickupWidget(false);
+}
+
+void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
+

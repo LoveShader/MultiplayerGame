@@ -2,13 +2,14 @@
 
 
 #include "Character/BlasterCharacter.h"
-
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "BlasterComponents/CombatComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "BlasterComponents/CombatComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Weapon/Weapon.h"
 
@@ -29,6 +30,10 @@ ABlasterCharacter::ABlasterCharacter()
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 400.0f, 0.0f);
+
+	//Create Combat Component
+	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("Combat"));
+	Combat->SetIsReplicated(true);
 }
 
 void ABlasterCharacter::BeginPlay()
@@ -78,6 +83,14 @@ void ABlasterCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+void ABlasterCharacter::EquipButtonPressed(const FInputActionValue& Value)
+{
+	if (Combat && HasAuthority())
+	{
+		Combat->EquipWeapon(OverlappedWeapon);
+	}
+}
+
 void ABlasterCharacter::OnRep_OverlappedWeapon(AWeapon* LastWeapon)
 {
 	if (LastWeapon)
@@ -121,6 +134,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInput->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Move);
 		EnhancedInput->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Look);
 		EnhancedInput->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+		EnhancedInput->BindAction(EquipAction, ETriggerEvent::Started, this, &ABlasterCharacter::EquipButtonPressed);
 	}
 }
 
@@ -130,3 +144,12 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimePropert
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappedWeapon, COND_OwnerOnly);
 }
 
+void ABlasterCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	if (Combat)
+	{
+		Combat->Character = this;
+	}
+}

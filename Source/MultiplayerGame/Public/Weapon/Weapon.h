@@ -47,4 +47,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	EWeaponState WeaponState;
+public:
+	FORCEINLINE void SetWeaponState(EWeaponState State) {WeaponState = State;}
 };
