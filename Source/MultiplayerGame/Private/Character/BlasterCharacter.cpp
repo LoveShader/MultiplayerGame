@@ -112,6 +112,22 @@ void ABlasterCharacter::CrouchButtonPressed()
 	}
 }
 
+void ABlasterCharacter::AimButtonPressed()
+{
+	if (Combat)
+	{
+		Combat->SetAiming(true);
+	} 
+}
+
+void ABlasterCharacter::AimButtonReleased()
+{
+	if (Combat)
+	{
+		Combat->SetAiming(false);
+	} 
+}
+
 void ABlasterCharacter::OnRep_OverlappedWeapon(AWeapon* LastWeapon)
 {
 	if (LastWeapon)
@@ -154,6 +170,11 @@ bool ABlasterCharacter::IsWeaponEquipped() const
 	return Combat && Combat->EquippedWeapon;
 }
 
+bool ABlasterCharacter::IsAiming() const
+{
+	return Combat && Combat->bIsAiming;
+}
+
 void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -170,6 +191,8 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInput->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 		EnhancedInput->BindAction(EquipAction, ETriggerEvent::Started, this, &ABlasterCharacter::EquipButtonPressed);
 		EnhancedInput->BindAction(CrouchAction, ETriggerEvent::Started, this, &ABlasterCharacter::CrouchButtonPressed);
+		EnhancedInput->BindAction(AimAction, ETriggerEvent::Started, this, &ABlasterCharacter::AimButtonPressed);
+		EnhancedInput->BindAction(AimAction, ETriggerEvent::Completed, this, &ABlasterCharacter::AimButtonReleased);
 	}
 }
 
