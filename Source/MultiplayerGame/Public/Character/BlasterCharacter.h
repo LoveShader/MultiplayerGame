@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "BlasterCharacter.generated.h"
 
+class AWeapon;
 class UWidgetComponent;
 class UCameraComponent;
 class USpringArmComponent;
@@ -22,6 +23,7 @@ public:
 	ABlasterCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 protected:
 	virtual void BeginPlay() override;
 
@@ -46,4 +48,12 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputMappingContext* InputContext;
+
+	UPROPERTY(ReplicatedUsing = OnRep_OverlappedWeapon)
+	AWeapon* OverlappedWeapon;
+
+	UFUNCTION()
+	void OnRep_OverlappedWeapon(AWeapon* LastWeapon);
+public:
+	void SetOverlappedWeapon(AWeapon* Weapon);
 };
