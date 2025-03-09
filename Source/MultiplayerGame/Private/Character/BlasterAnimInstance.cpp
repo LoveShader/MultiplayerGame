@@ -5,6 +5,7 @@
 
 #include "Character/BlasterCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Widgets/Text/ISlateEditableTextWidget.h"
 
 void UBlasterAnimInstance::NativeInitializeAnimation()
@@ -41,4 +42,25 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bIsCrouched = BlasterCharacter->bIsCrouched;
 
 	bIsAiming = BlasterCharacter->IsAiming();
+
+	//Character's base aiming rotation, generally aligned with the controller's rotation.
+	//if (!BlasterCharacter->HasAuthority() && !BlasterCharacter->IsLocallyControlled())
+	//{
+	FRotator AimRotation = BlasterCharacter->GetBaseAimRotation();
+	FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(BlasterCharacter->GetVelocity());
+	//UE_LOG(LogTemp, Warning, TEXT("AimRotation Yaw: %f"), AimRotation.Yaw);
+	//UE_LOG(LogTemp, Warning, TEXT("MovementRotation Yaw: %f"), MovementRotation.Yaw);
+	//}
+	FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AimRotation);
+	DeltaRotation = FMath::RInterpTo(DeltaRotation, DeltaRot, DeltaTime, 15.0f);
+	YawOffset = DeltaRotation.Yaw;
+
+	
+	//Calculate Lean offset 
+	CharacterRotationLastFrame = CharacterRotation;
+	CharacterRotation = BlasterCharacter->GetActorRotation();
+	const FRotator Delta = UKismetMathLibrary::NormalizedDeltaRotator(CharacterRotation, CharacterRotationLastFrame);
+	const float Target = Delta.Yaw / DeltaTime;
+	const float InTerp = FMath::FInterpTo(Lean, Target, DeltaTime, 6.0f);
+	Lean = FMath::Clamp(InTerp, -90.0f, 90.0f);
 }
