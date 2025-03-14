@@ -11,6 +11,7 @@
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "BlasterComponents/CombatComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Weapon/Weapon.h"
@@ -39,6 +40,10 @@ ABlasterCharacter::ABlasterCharacter()
 
 	//Set Crouch Enabled
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
+
+	//Set Capsule and Mesh collision sets
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 }
 
 void ABlasterCharacter::BeginPlay()

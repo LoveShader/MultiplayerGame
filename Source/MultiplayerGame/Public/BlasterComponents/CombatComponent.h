@@ -37,4 +37,11 @@ private:
 
 	UPROPERTY(Replicated, VisibleAnywhere)
 	bool bIsAiming;
+
+	/* Unequipped Max Speed and Aim Max Walk Speed*/
+	UPROPERTY(EditAnywhere, Category = Movement)
+	float BaseWalkSpeed;
+
+	UPROPERTY(EditAnywhere, Category = Movement)
+	float AimWalkSpeed;
 };

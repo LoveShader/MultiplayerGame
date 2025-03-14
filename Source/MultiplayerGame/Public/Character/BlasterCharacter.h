@@ -77,6 +77,8 @@ private:
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
 
+
+	
 	/* Calculate AimOffset yaw and pitch */
 	float AO_Yaw;
 	float AO_Pitch;
