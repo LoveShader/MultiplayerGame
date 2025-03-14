@@ -6,10 +6,12 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "NetworkReplayStreaming.h"
 #include "BlasterComponents/CombatComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "BlasterComponents/CombatComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Weapon/Weapon.h"
 
@@ -128,6 +130,34 @@ void ABlasterCharacter::AimButtonReleased()
 	} 
 }
 
+void ABlasterCharacter::AimOffset(float DeltaTime)
+{
+	//if don't equip weapon, then just return
+	if (Combat && Combat->EquippedWeapon == nullptr)	return;
+
+	//Get Character Velocity
+	FVector Velocity = GetVelocity();
+	Velocity.Z = 0.0f;
+	float Speed = Velocity.Size();
+	bool bIsInAir = GetCharacterMovement()->IsFalling();
+	
+	if (Speed == 0.0f && !bIsInAir)	// stand, not running and jumping
+	{
+		FRotator CurrentAimRotation = GetBaseAimRotation();
+		FRotator Delta = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
+		AO_Yaw = Delta.Yaw;
+		bUseControllerRotationYaw = false;
+	}
+
+	if (Speed > 0.0f || bIsInAir)
+	{
+		StartingAimRotation = FRotator(0.0f, GetBaseAimRotation().Yaw, 0.0f);
+		AO_Yaw = 0.0f;	//when running and jumping, need set AO_Yaw equal 0.0f
+		bUseControllerRotationYaw = true;
+	}
+	AO_Pitch = GetBaseAimRotation().Pitch;
+}
+
 void ABlasterCharacter::OnRep_OverlappedWeapon(AWeapon* LastWeapon)
 {
 	if (LastWeapon)
@@ -178,6 +208,7 @@ bool ABlasterCharacter::IsAiming() const
 void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	AimOffset(DeltaTime);
 }
 
 void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
