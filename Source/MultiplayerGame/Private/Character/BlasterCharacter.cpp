@@ -149,6 +149,7 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 	if (Speed == 0.0f && !bIsInAir)	// stand, not running and jumping
 	{
 		FRotator CurrentAimRotation = GetBaseAimRotation();
+		FRotator CurrentAimRotation = FRotator(0.0f, GetBaseAimRotation().Yaw, 0.0f);;
 		FRotator Delta = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
 		AO_Yaw = Delta.Yaw;
 		bUseControllerRotationYaw = false;
@@ -161,6 +162,13 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		bUseControllerRotationYaw = true;
 	}
 	AO_Pitch = GetBaseAimRotation().Pitch;
+	//because Pitch is compress to [0, 360), there need convert this to [-90,0)
+	if (AO_Pitch > 90.0f && !IsLocallyControlled())
+	{
+		FVector2D InRange = FVector2D(270.0f,360.0f);
+		FVector2D OutRange = FVector2D(-90.0f, 0.0f);
+		AO_Pitch =  FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
+	}
 }
 
 void ABlasterCharacter::OnRep_OverlappedWeapon(AWeapon* LastWeapon)

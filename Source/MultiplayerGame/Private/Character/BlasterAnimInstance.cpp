@@ -6,7 +6,7 @@
 #include "Character/BlasterCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Widgets/Text/ISlateEditableTextWidget.h"
+#include "Weapon/Weapon.h"
 
 void UBlasterAnimInstance::NativeInitializeAnimation()
 {
@@ -38,23 +38,18 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bAccelerating = BlasterCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.0f ? true : false;
 
 	bWeaponEquipped = BlasterCharacter->IsWeaponEquipped();
+	EquippedWeapon = BlasterCharacter->GetEquippedWeapon();
 
 	bIsCrouched = BlasterCharacter->bIsCrouched;
 
 	bIsAiming = BlasterCharacter->IsAiming();
 
 	//Character's base aiming rotation, generally aligned with the controller's rotation.
-	//if (!BlasterCharacter->HasAuthority() && !BlasterCharacter->IsLocallyControlled())
-	//{
 	FRotator AimRotation = BlasterCharacter->GetBaseAimRotation();
 	FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(BlasterCharacter->GetVelocity());
-	//UE_LOG(LogTemp, Warning, TEXT("AimRotation Yaw: %f"), AimRotation.Yaw);
-	//UE_LOG(LogTemp, Warning, TEXT("MovementRotation Yaw: %f"), MovementRotation.Yaw);
-	//}
 	FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AimRotation);
 	DeltaRotation = FMath::RInterpTo(DeltaRotation, DeltaRot, DeltaTime, 15.0f);
 	YawOffset = DeltaRotation.Yaw;
-
 	
 	//Calculate Lean offset 
 	CharacterRotationLastFrame = CharacterRotation;
@@ -67,4 +62,16 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	//get AO_Yaw and AO_Pitch from BlasterCharacter
 	AO_Yaw = BlasterCharacter->GetAO_Yaw();
 	AO_Pitch = BlasterCharacter->GetAO_Pitch();
+
+	//tweak Weapon Socket Translation
+	if (bWeaponEquipped && EquippedWeapon && BlasterCharacter->GetMesh())
+	{
+		LeftHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("LeftHand"), RTS_World);
+
+		FVector OutLocation;
+		FRotator OutRotation;
+		BlasterCharacter->GetMesh()->TransformToBoneSpace("hand_r", LeftHandTransform.GetLocation(),FRotator::ZeroRotator, OutLocation, OutRotation);
+		LeftHandTransform.SetLocation(OutLocation);
+		LeftHandTransform.SetRotation(FQuat(OutRotation));
+	}
 }
