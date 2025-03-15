@@ -36,13 +36,11 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 
 	//Determin whether it's accelerating(add a small value to avoid jitter)
 	bAccelerating = BlasterCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.0f ? true : false;
-
 	bWeaponEquipped = BlasterCharacter->IsWeaponEquipped();
 	EquippedWeapon = BlasterCharacter->GetEquippedWeapon();
-
 	bIsCrouched = BlasterCharacter->bIsCrouched;
-
 	bIsAiming = BlasterCharacter->IsAiming();
+	TurningInPlace = BlasterCharacter->GetTurningInPlace();
 
 	//Character's base aiming rotation, generally aligned with the controller's rotation.
 	FRotator AimRotation = BlasterCharacter->GetBaseAimRotation();

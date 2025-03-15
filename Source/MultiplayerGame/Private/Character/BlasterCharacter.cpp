@@ -44,6 +44,9 @@ ABlasterCharacter::ABlasterCharacter()
 	//Set Capsule and Mesh collision sets
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+
+	//set Turn in place state
+	TurningInPlace = ETurningInPlace::ETIP_NoTurning;
 }
 
 void ABlasterCharacter::BeginPlay()
@@ -148,20 +151,26 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 	
 	if (Speed == 0.0f && !bIsInAir)	// stand, not running and jumping
 	{
-		FRotator CurrentAimRotation = GetBaseAimRotation();
 		FRotator CurrentAimRotation = FRotator(0.0f, GetBaseAimRotation().Yaw, 0.0f);;
 		FRotator Delta = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
 		AO_Yaw = Delta.Yaw;
-		bUseControllerRotationYaw = false;
+		if (TurningInPlace == ETurningInPlace::ETIP_NoTurning)
+		{
+			InterpAO_Yaw = AO_Yaw;
+		}
+		bUseControllerRotationYaw = true;
+		TurnInPlace(DeltaTime);
 	}
 
 	if (Speed > 0.0f || bIsInAir)
 	{
 		StartingAimRotation = FRotator(0.0f, GetBaseAimRotation().Yaw, 0.0f);
 		AO_Yaw = 0.0f;	//when running and jumping, need set AO_Yaw equal 0.0f
+		TurningInPlace = ETurningInPlace::ETIP_NoTurning;
 		bUseControllerRotationYaw = true;
 	}
 	AO_Pitch = GetBaseAimRotation().Pitch;
+
 	//because Pitch is compress to [0, 360), there need convert this to [-90,0)
 	if (AO_Pitch > 90.0f && !IsLocallyControlled())
 	{
@@ -192,6 +201,28 @@ void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 	}
 }
 
+void ABlasterCharacter::TurnInPlace(float DeltaTime)
+{
+	if (AO_Yaw > 90.0f)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_Right;
+	} else if (AO_Yaw < -90.0f)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_Left;
+	}
+
+	if (TurningInPlace != ETurningInPlace::ETIP_NoTurning)
+	{
+		InterpAO_Yaw = FMath::FInterpTo(InterpAO_Yaw, 0.0f, DeltaTime, 5.0f);
+		AO_Yaw = InterpAO_Yaw;
+		if (FMath::Abs(AO_Yaw) < 15.0f)
+		{
+			TurningInPlace = ETurningInPlace::ETIP_NoTurning;
+			StartingAimRotation = FRotator(0.0f, GetBaseAimRotation().Yaw, 0.0f);
+		}
+	}
+}
+
 void ABlasterCharacter::SetOverlappedWeapon(AWeapon* Weapon)
 {
 	if (OverlappedWeapon)
@@ -216,6 +247,12 @@ bool ABlasterCharacter::IsWeaponEquipped() const
 bool ABlasterCharacter::IsAiming() const
 {
 	return Combat && Combat->bIsAiming;
+}
+
+AWeapon* ABlasterCharacter::GetEquippedWeapon() const
+{
+	if (Combat == nullptr) return nullptr;
+	return Combat->EquippedWeapon;
 }
 
 void ABlasterCharacter::Tick(float DeltaTime)

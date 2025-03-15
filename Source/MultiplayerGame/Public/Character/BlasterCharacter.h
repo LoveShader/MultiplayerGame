@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "MultiplayerGame/BlasterTypes/TurnInPlace.h"
 #include "BlasterCharacter.generated.h"
 
 class UCombatComponent;
@@ -76,13 +77,16 @@ private:
 
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
-
-
 	
 	/* Calculate AimOffset yaw and pitch */
 	float AO_Yaw;
+	float InterpAO_Yaw;
 	float AO_Pitch;
 	FRotator StartingAimRotation;
+
+	/* Turning In Place State */
+	ETurningInPlace TurningInPlace;
+	void TurnInPlace(float DeltaTime);
 public:
 	void SetOverlappedWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped() const;
@@ -90,4 +94,5 @@ public:
 	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
 	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
 	AWeapon* GetEquippedWeapon() const;
+	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 };
