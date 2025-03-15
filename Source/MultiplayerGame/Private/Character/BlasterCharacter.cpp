@@ -32,7 +32,7 @@ ABlasterCharacter::ABlasterCharacter()
 	FollowCamera->bUsePawnControlRotation = false;
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 400.0f, 0.0f);
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 850.0f, 0.0f);
 
 	//Create Combat Component
 	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("Combat"));
@@ -180,6 +180,17 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 	}
 }
 
+void ABlasterCharacter::Jump()
+{
+	if (bIsCrouched)
+	{
+		UnCrouch();
+	} else
+	{
+		Super::Jump();
+	}
+}
+
 void ABlasterCharacter::OnRep_OverlappedWeapon(AWeapon* LastWeapon)
 {
 	if (LastWeapon)
@@ -269,7 +280,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	{
 		EnhancedInput->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Move);
 		EnhancedInput->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Look);
-		EnhancedInput->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+		EnhancedInput->BindAction(JumpAction, ETriggerEvent::Started, this, &ABlasterCharacter::Jump);
 		EnhancedInput->BindAction(EquipAction, ETriggerEvent::Started, this, &ABlasterCharacter::EquipButtonPressed);
 		EnhancedInput->BindAction(CrouchAction, ETriggerEvent::Started, this, &ABlasterCharacter::CrouchButtonPressed);
 		EnhancedInput->BindAction(AimAction, ETriggerEvent::Started, this, &ABlasterCharacter::AimButtonPressed);
