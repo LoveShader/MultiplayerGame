@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "CombatComponent.generated.h"
 
+#define LINETRACE_LENGTH 80000.0f
+
 class ABlasterCharacter;
 class AWeapon;
 
@@ -37,6 +39,8 @@ protected:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticastFire();
+
+	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 private:	
 	ABlasterCharacter* Character;
 
