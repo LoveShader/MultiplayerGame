@@ -191,6 +191,35 @@ void ABlasterCharacter::Jump()
 	}
 }
 
+void ABlasterCharacter::FireButtonPressed()
+{
+	if (Combat && Combat->EquippedWeapon)
+	{
+		Combat->FireButtonPressed(true);
+	}
+}
+
+void ABlasterCharacter::FireButtonReleased()
+{
+	if (Combat && Combat->EquippedWeapon)
+	{
+		Combat->FireButtonPressed(false);
+	}
+}
+
+void ABlasterCharacter::PlayFireMontage(bool bIsAiming)
+{
+	if (Combat == nullptr || Combat->EquippedWeapon == nullptr)	return;
+	
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && FireMontage)
+	{
+		AnimInstance->Montage_Play(FireMontage);
+		FName SectionName = bIsAiming ? FName("RifleAim") : FName("RifleHip");
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
 void ABlasterCharacter::OnRep_OverlappedWeapon(AWeapon* LastWeapon)
 {
 	if (LastWeapon)
@@ -285,6 +314,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInput->BindAction(CrouchAction, ETriggerEvent::Started, this, &ABlasterCharacter::CrouchButtonPressed);
 		EnhancedInput->BindAction(AimAction, ETriggerEvent::Started, this, &ABlasterCharacter::AimButtonPressed);
 		EnhancedInput->BindAction(AimAction, ETriggerEvent::Completed, this, &ABlasterCharacter::AimButtonReleased);
+		EnhancedInput->BindAction(FireAction, ETriggerEvent::Started, this, &ABlasterCharacter::FireButtonPressed);
 	}
 }
 
