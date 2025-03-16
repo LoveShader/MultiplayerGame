@@ -60,11 +60,24 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 	bFireButtonPressed = bPressed;
 	if (EquippedWeapon == nullptr) return;
 	
-	if (Character && bFireButtonPressed)
+	if (bFireButtonPressed)
+	{
+		ServerFire();
+	}
+}
+
+void UCombatComponent::NetMulticastFire_Implementation()
+{
+	if (Character)
 	{
 		Character->PlayFireMontage(bIsAiming);
 		EquippedWeapon->Fire();
 	}
+}
+
+void UCombatComponent::ServerFire_Implementation()
+{
+	NetMulticastFire();
 }
 
 
