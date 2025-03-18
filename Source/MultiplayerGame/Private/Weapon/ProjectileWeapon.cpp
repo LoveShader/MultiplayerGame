@@ -9,6 +9,8 @@ void AProjectileWeapon::Fire(const FVector& HitTarget)
 {
 	Super::Fire(HitTarget);
 
+	//Only server can Spawn and do hit event
+	if (!HasAuthority())	return;
 	//generate projectile at muzzleflash socket
 
 	//Get Muzzle flash Socket
