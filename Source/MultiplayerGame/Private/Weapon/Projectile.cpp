@@ -5,6 +5,7 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 AProjectile::AProjectile()
 {
@@ -16,7 +17,6 @@ AProjectile::AProjectile()
 
 	CollisionBox->SetCollisionObjectType(ECC_WorldDynamic);
 	CollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CollisionBox->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 	CollisionBox->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
 
@@ -40,6 +40,42 @@ void AProjectile::BeginPlay()
 			EAttachLocation::KeepWorldPosition
 		);
 	}
+
+	if (HasAuthority())
+	{
+		CollisionBox->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+	}
+}
+
+void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+	FVector NormalImpulse, const FHitResult& Hit)
+{
+	ServerHitEffects();
+}
+
+void AProjectile::NetMulticastHitEffects_Implementation()
+{
+	if (ImpactParticle)
+    {
+    	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, GetActorTransform());
+    }
+
+    if (ImpactSound)
+    {
+    	UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+    }
+}
+
+void AProjectile::ServerHitEffects_Implementation()
+{
+	NetMulticastHitEffects();	
+}
+
+void AProjectile::Destroyed()
+{
+	Super::Destroyed();
+	
+	
 }
 
 void AProjectile::Tick(float DeltaTime)

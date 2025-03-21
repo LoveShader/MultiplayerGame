@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Projectile.generated.h"
 
+class USoundCue;
 class UProjectileMovementComponent;
 class UBoxComponent;
 
@@ -17,8 +18,18 @@ class MULTIPLAYERGAME_API AProjectile : public AActor
 public:	
 	AProjectile();
 	virtual void Tick(float DeltaTime) override;
+	virtual void Destroyed() override;
 protected:
 	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+	UFUNCTION(Server, Reliable)
+	void ServerHitEffects();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastHitEffects();
 private:
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* CollisionBox;
@@ -30,4 +41,10 @@ private:
 	class UParticleSystem* Tracer;
 	
 	class UParticleSystemComponent* TracerComponent;
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* ImpactParticle;
+
+	UPROPERTY(EditAnywhere)
+	USoundCue* ImpactSound;
 };
