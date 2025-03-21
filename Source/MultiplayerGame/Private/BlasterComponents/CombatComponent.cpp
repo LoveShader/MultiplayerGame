@@ -63,8 +63,15 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 	
 	if (bFireButtonPressed)
 	{
-		ServerFire();
+		FHitResult HitResult;
+		TraceUnderCrosshairs(HitResult);
+		ServerFire(HitResult.ImpactPoint);
 	}
+}
+
+void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+{
+	NetMulticastFire(TraceHitTarget);
 }
 
 void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
@@ -101,35 +108,18 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		if (!TraceHitResult.bBlockingHit)
 		{
 			TraceHitResult.ImpactPoint = End;
-			HitTarget = End;
-		} else
-		{
-			HitTarget = TraceHitResult.ImpactPoint;
-			DrawDebugSphere(
-				GetWorld(),
-				TraceHitResult.ImpactPoint,
-				12.0f,
-				12,
-				FColor::Red
-				);
 		}
 	}
 }
 
-void UCombatComponent::NetMulticastFire_Implementation()
+void UCombatComponent::NetMulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	if (Character)
 	{
 		Character->PlayFireMontage(bIsAiming);
-		EquippedWeapon->Fire(HitTarget);
+		EquippedWeapon->Fire(TraceHitTarget);
 	}
 }
-
-void UCombatComponent::ServerFire_Implementation()
-{
-	NetMulticastFire();
-}
-
 
 void UCombatComponent::ServerSetAiming_Implementation(bool bAiming)
 {
