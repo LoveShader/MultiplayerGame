@@ -29,6 +29,7 @@ class MULTIPLAYERGAME_API ABlasterHUD : public AHUD
 public:
 	virtual void DrawHUD() override;
 private:
+	void DrawCrossHair(UTexture2D* Texture, const FVector2D& ViewportCenter);
 	FHUDPackage HUDPackage;
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }

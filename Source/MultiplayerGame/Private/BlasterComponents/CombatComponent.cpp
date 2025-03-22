@@ -131,7 +131,7 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 				HUDPackage.CrossHairCenter = EquippedWeapon->CrossHairCenter;
 				HUDPackage.CrossHairLeft = EquippedWeapon->CrossHairLeft;
 				HUDPackage.CrossHairRight = EquippedWeapon->CrossHairRight;
-				HUDPackage.CrossHairTop = EquippedWeapon->CrossHairCenter;
+				HUDPackage.CrossHairTop = EquippedWeapon->CrossHairTop;
 				HUDPackage.CrossHairBottom = EquippedWeapon->CrossHairBottom;
 			}
 			else
