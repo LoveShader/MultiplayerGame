@@ -37,10 +37,10 @@ protected:
 	void FireButtonPressed(bool bPressed);
 
 	UFUNCTION(Server, Reliable)
-	void ServerFire(const FVector_NetQuantize& HitTarget);
+	void ServerFire(const FVector_NetQuantize& TraceHitTarget);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void NetMulticastFire(const FVector_NetQuantize& HitTarget);
+	void NetMulticastFire(const FVector_NetQuantize& TraceHitTarget);
 
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
@@ -70,4 +70,6 @@ private:
 	float CrosshairVelocityFactor;
 
 	float CrosshairInAirFactor;
+
+	FVector HitTarget;
 };
