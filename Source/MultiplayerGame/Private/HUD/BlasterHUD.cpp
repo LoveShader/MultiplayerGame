@@ -15,40 +15,48 @@ void ABlasterHUD::DrawHUD()
 
 	const FVector2D ViewportCenter(ViewportSize.X / 2, ViewportSize.Y / 2);
 
+	//HUDPackage.CrossHairSpread need calculate from CombatComponent
+	float SpreadScaled = HUDPackage.CrossHairSpread * CrosshairSpreadMax;
+
 	if (HUDPackage.CrossHairCenter)
 	{
-		DrawCrossHair(HUDPackage.CrossHairCenter, ViewportCenter);
+		FVector2D Spread(0, 0);
+		DrawCrossHair(HUDPackage.CrossHairCenter, ViewportCenter, Spread);
 	}
 
 	if (HUDPackage.CrossHairLeft)
 	{
-		DrawCrossHair(HUDPackage.CrossHairLeft, ViewportCenter);
+		FVector2D Spread(-SpreadScaled, 0);
+		DrawCrossHair(HUDPackage.CrossHairLeft, ViewportCenter, Spread);
 	}
 
 	if (HUDPackage.CrossHairRight)
 	{
-		DrawCrossHair(HUDPackage.CrossHairRight, ViewportCenter);
+		FVector2D Spread(SpreadScaled, 0);
+		DrawCrossHair(HUDPackage.CrossHairRight, ViewportCenter, Spread);
 	}
 
 	if (HUDPackage.CrossHairTop)
 	{
-		DrawCrossHair(HUDPackage.CrossHairTop, ViewportCenter);
+		FVector2D Spread(0, -SpreadScaled);
+		DrawCrossHair(HUDPackage.CrossHairTop, ViewportCenter, Spread);
 	}
 
 	if (HUDPackage.CrossHairBottom)
 	{
-		DrawCrossHair(HUDPackage.CrossHairBottom, ViewportCenter);
+		FVector2D Spread(0, SpreadScaled);
+		DrawCrossHair(HUDPackage.CrossHairBottom, ViewportCenter, Spread);
 	}
 }
 
-void ABlasterHUD::DrawCrossHair(UTexture2D* Texture, const FVector2D& ViewportCenter)
+void ABlasterHUD::DrawCrossHair(UTexture2D* Texture, const FVector2D& ViewportCenter, const FVector2D& Spread)
 {
 	const float TextureWidth = Texture->GetSizeX();
 	const float TextureHeight = Texture->GetSizeY();
 
 	const FVector2D DrawPosition(
-		ViewportCenter.X - TextureWidth / 2,
-		ViewportCenter.Y - TextureHeight / 2
+		ViewportCenter.X - TextureWidth / 2 + Spread.X,
+		ViewportCenter.Y - TextureHeight / 2 + Spread.Y
 	);
 
 	DrawTexture(
