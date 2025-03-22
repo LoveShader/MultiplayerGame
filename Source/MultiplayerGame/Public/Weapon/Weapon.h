@@ -59,6 +59,23 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ACasing> CasingClass;
 public:
+	/**
+	 * Blaster CrossHair HUD Textures
+	 */
+	UPROPERTY(EditAnywhere, Category = "HUD Properties")
+	class UTexture2D* CrossHairCenter;
+
+	UPROPERTY(EditAnywhere, Category = "HUD Properties")
+	UTexture2D* CrossHairLeft;
+	
+	UPROPERTY(EditAnywhere, Category = "HUD Properties")
+	UTexture2D* CrossHairRight;
+	
+	UPROPERTY(EditAnywhere, Category = "HUD Properties")
+	UTexture2D* CrossHairTop;
+
+	UPROPERTY(EditAnywhere, Category = "HUD Properties")
+	UTexture2D* CrossHairBottom;
 	void SetWeaponState(EWeaponState State);
 	FORCEINLINE USphereComponent* GetAreaSphere() const {return AreaSphere;}
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const {return WeaponMesh;}

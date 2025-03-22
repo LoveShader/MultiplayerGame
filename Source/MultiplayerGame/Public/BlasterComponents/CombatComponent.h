@@ -8,6 +8,8 @@
 
 #define LINETRACE_LENGTH 80000.0f
 
+class ABlasterHUD;
+class ABlasterPlayerController;
 class ABlasterCharacter;
 class AWeapon;
 
@@ -41,8 +43,14 @@ protected:
 	void NetMulticastFire(const FVector_NetQuantize& HitTarget);
 
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
-private:	
+
+	void SetHUDCrosshairs(float DeltaTime);
+private:
 	ABlasterCharacter* Character;
+
+	ABlasterPlayerController* PlayerController;
+
+	ABlasterHUD* HUD;
 
 	UPROPERTY(ReplicatedUsing=OnRep_EquippedWeapon, VisibleAnywhere)
 	AWeapon* EquippedWeapon;

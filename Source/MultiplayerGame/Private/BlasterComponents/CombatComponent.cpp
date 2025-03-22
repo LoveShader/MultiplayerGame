@@ -6,8 +6,10 @@
 #include "Components/SphereComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "HUD/BlasterHUD.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "PlayerController/BlasterPlayerController.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -112,6 +114,39 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 	}
 }
 
+void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
+{
+	//check character is valid
+	if (Character == nullptr || Character->GetController() == nullptr) return;
+
+	PlayerController = PlayerController == nullptr ? Cast<ABlasterPlayerController>(Character->GetController()) : PlayerController;
+	if (PlayerController)
+	{
+		HUD = HUD == nullptr ? Cast<ABlasterHUD>(PlayerController->GetHUD()) : HUD;
+		if (HUD)
+		{
+			FHUDPackage HUDPackage;
+			if (EquippedWeapon)
+			{
+				HUDPackage.CrossHairCenter = EquippedWeapon->CrossHairCenter;
+				HUDPackage.CrossHairLeft = EquippedWeapon->CrossHairLeft;
+				HUDPackage.CrossHairRight = EquippedWeapon->CrossHairRight;
+				HUDPackage.CrossHairTop = EquippedWeapon->CrossHairCenter;
+				HUDPackage.CrossHairBottom = EquippedWeapon->CrossHairBottom;
+			}
+			else
+			{
+				HUDPackage.CrossHairCenter = nullptr;
+				HUDPackage.CrossHairLeft = nullptr;
+				HUDPackage.CrossHairRight = nullptr;
+				HUDPackage.CrossHairTop = nullptr;
+				HUDPackage.CrossHairBottom = nullptr;
+			}
+			HUD->SetHUDPackage(HUDPackage);
+		}
+	} 
+}
+
 void UCombatComponent::NetMulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	if (Character)
@@ -133,9 +168,7 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bAiming)
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	FHitResult TraceHitResult;
-	TraceUnderCrosshairs(TraceHitResult);
+	SetHUDCrosshairs(DeltaTime);
 }
 
 void UCombatComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
