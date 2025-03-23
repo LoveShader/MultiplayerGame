@@ -106,6 +106,12 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 	if (bScreenToWorld)
 	{
 		FVector Start = WorldLocation;
+		//Set the start position in front of the character, avoiding collisions with any characters behind it.
+		if (Character)
+		{
+			float DistanceToCharacter = (Character->GetActorLocation() - Start).Size();
+			Start += WorldDirection * (DistanceToCharacter + 100.0f);
+		}
 		FVector End = WorldLocation + WorldDirection * LINETRACE_LENGTH;
 
 		GetWorld()->LineTraceSingleByChannel(

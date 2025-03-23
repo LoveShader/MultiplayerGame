@@ -99,6 +99,11 @@ private:
 	/* Turning In Place State */
 	ETurningInPlace TurningInPlace;
 	void TurnInPlace(float DeltaTime);
+
+	UPROPERTY(EditAnywhere)
+	float CameraThreshold = 200.f;
+	
+	void HideCameraIfCharacterClose();
 public:
 	void SetOverlappedWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped() const;
