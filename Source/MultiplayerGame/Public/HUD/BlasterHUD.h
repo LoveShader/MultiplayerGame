@@ -18,6 +18,7 @@ public:
 	UTexture2D* CrossHairTop;
 	UTexture2D* CrossHairBottom;
 	float CrossHairSpread;
+	FColor CrossHairColor;
 };
 
 /**
@@ -30,7 +31,7 @@ class MULTIPLAYERGAME_API ABlasterHUD : public AHUD
 public:
 	virtual void DrawHUD() override;
 private:
-	void DrawCrossHair(UTexture2D* Texture, const FVector2D& ViewportCenter, const FVector2D& Spread);
+	void DrawCrossHair(UTexture2D* Texture, const FVector2D& ViewportCenter, const FVector2D& Spread, const FColor& Color);
 	FHUDPackage HUDPackage;
 
 	UPROPERTY(EditAnywhere)

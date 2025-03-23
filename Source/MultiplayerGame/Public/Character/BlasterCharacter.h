@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "Interface/InteractWithCrosshairsInterface.h"
 #include "MultiplayerGame/BlasterTypes/TurnInPlace.h"
 #include "BlasterCharacter.generated.h"
 
@@ -17,7 +18,7 @@ class UInputAction;
 class UInputMappingContext;
 
 UCLASS()
-class MULTIPLAYERGAME_API ABlasterCharacter : public ACharacter
+class MULTIPLAYERGAME_API ABlasterCharacter : public ACharacter, public IInteractWithCrosshairsInterface
 {
 	GENERATED_BODY()
 

@@ -44,6 +44,7 @@ ABlasterCharacter::ABlasterCharacter()
 	//Set Capsule and Mesh collision sets
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 
 	//set Turn in place state
 	TurningInPlace = ETurningInPlace::ETIP_NoTurning;

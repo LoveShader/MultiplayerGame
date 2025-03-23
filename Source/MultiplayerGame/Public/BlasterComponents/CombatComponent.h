@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "HUD/BlasterHUD.h"
 #include "CombatComponent.generated.h"
 
 #define LINETRACE_LENGTH 80000.0f
@@ -75,6 +76,8 @@ private:
 	float CrosshairAimFactor;
 
 	float CrosshairShootingFactor;
+
+	FHUDPackage HUDPackage;
 
 	FVector HitTarget;
 
