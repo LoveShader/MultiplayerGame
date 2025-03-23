@@ -8,6 +8,7 @@
 
 #define LINETRACE_LENGTH 80000.0f
 
+class UCameraComponent;
 class ABlasterHUD;
 class ABlasterPlayerController;
 class ABlasterCharacter;
@@ -72,4 +73,13 @@ private:
 	float CrosshairInAirFactor;
 
 	FVector HitTarget;
+
+	float DefaultFOV;
+	//use this value for interpolate FOV(from CurrentFOV to EquippedWeapon->ZoomedFOV)
+	float CurrentFOV;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	float ZoomInterpSpeed = 20.0f;
+
+	void InterpFOV(float DeltaTime);
 };
