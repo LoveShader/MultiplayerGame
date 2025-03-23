@@ -72,6 +72,10 @@ private:
 
 	float CrosshairInAirFactor;
 
+	float CrosshairAimFactor;
+
+	float CrosshairShootingFactor;
+
 	FVector HitTarget;
 
 	float DefaultFOV;
