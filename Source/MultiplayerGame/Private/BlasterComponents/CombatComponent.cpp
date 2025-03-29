@@ -122,20 +122,10 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>())
 		{
 			HUDPackage.CrossHairColor = FColor::Red;
-			if (Character->HasAuthority())
-			{
-				UE_LOG(LogTemp, Warning, TEXT("HUDPackage.CrossHairColor Red"));
-				UE_LOG(LogTemp, Warning, TEXT("Hit Actor is %s"), *TraceHitResult.GetActor()->GetName());
-			}
 		}
 		else
 		{
 			HUDPackage.CrossHairColor = FColor::White;
-			if (Character->HasAuthority())
-			{
-				UE_LOG(LogTemp, Warning, TEXT("HUDPackage.CrossHairColor White"));
-				UE_LOG(LogTemp, Warning, TEXT("Hit Actor is %s"),  *TraceHitResult.GetActor()->GetName());
-			}
 		}
 		
 		if (!TraceHitResult.bBlockingHit)

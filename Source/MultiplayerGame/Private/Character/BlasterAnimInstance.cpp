@@ -79,12 +79,13 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 			RightHandRotation = FMath::RInterpTo(RightHandRotation, LookAtRotation, DeltaTime, 30.0f);
 			bIsLocalControlled = true;
 		}
-		
+
+		/*
 		FTransform MuzzleSocketTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("MuzzleFlash"), RTS_World);
 		FVector MuzzleLocation = MuzzleSocketTransform.GetLocation();
 		FVector MuzzleRotation = FRotationMatrix(MuzzleSocketTransform.GetRotation().Rotator()).GetUnitAxis(EAxis::X);
 		
 		DrawDebugLine(GetWorld(), MuzzleLocation, MuzzleLocation + MuzzleRotation * 1000, FColor(0,255,0));
-		DrawDebugLine(GetWorld(), MuzzleLocation,BlasterCharacter->GetHitTarget(), FColor::Red);
+		DrawDebugLine(GetWorld(), MuzzleLocation,BlasterCharacter->GetHitTarget(), FColor::Red);*/
 	}
 }

@@ -25,14 +25,13 @@ class MULTIPLAYERGAME_API ABlasterCharacter : public ACharacter, public IInterac
 
 public:
 	ABlasterCharacter();
+	void UpdateHUDHealth();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 	void PlayFireMontage(bool bIsAiming);
-	
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastHit();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -47,6 +46,8 @@ protected:
 	void FireButtonPressed();
 	auto FireButtonReleased() -> void;
 	void PlayHitReactMontage();
+	UFUNCTION()
+	void ReceiveDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser );
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* CameraBoom;

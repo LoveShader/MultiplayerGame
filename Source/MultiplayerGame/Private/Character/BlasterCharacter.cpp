@@ -53,16 +53,26 @@ ABlasterCharacter::ABlasterCharacter()
 	TurningInPlace = ETurningInPlace::ETIP_NoTurning;
 }
 
-void ABlasterCharacter::BeginPlay()
+void ABlasterCharacter::UpdateHUDHealth()
 {
-	Super::BeginPlay();
-	
-	BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
+	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
 	if (BlasterPlayerController)
 	{
 		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
 	}
+}
 
+void ABlasterCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	UpdateHUDHealth();
+
+	if (HasAuthority())
+	{
+		OnTakeAnyDamage.AddDynamic(this, &ABlasterCharacter::ReceiveDamage);
+	}
+	
 	//Setup Input Mapping Context, add it to Subsystem
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
@@ -244,8 +254,11 @@ void ABlasterCharacter::PlayHitReactMontage()
 	}
 }
 
-void ABlasterCharacter::MulticastHit_Implementation()
+void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
+	 AController* InstigatedBy, AActor* DamageCauser)
 {
+	Health = FMath::Clamp(Health - Damage, 0.0f, MaxHealth);
+	UpdateHUDHealth();
 	PlayHitReactMontage();
 }
 
@@ -315,7 +328,8 @@ void ABlasterCharacter::HideCameraIfCharacterClose()
 void ABlasterCharacter::OnRep_Health()
 {
 	//我们总是在服务器端进行开火受伤检测的，因此需要将health通知到客户端，由客户端进行血条更新
-	
+	UpdateHUDHealth();
+	PlayHitReactMontage();
 }
 
 void ABlasterCharacter::SetOverlappedWeapon(AWeapon* Weapon)

@@ -30,6 +30,9 @@ protected:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticastHitEffects();
+
+	UPROPERTY(EditDefaultsOnly)
+	float Damage = 20.0f;
 private:
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* CollisionBox;
