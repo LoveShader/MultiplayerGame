@@ -15,6 +15,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "MultiplayerGame/MultiplayerGame.h"
 #include "Net/UnrealNetwork.h"
+#include "PlayerController/BlasterPlayerController.h"
 #include "Weapon/Weapon.h"
 
 ABlasterCharacter::ABlasterCharacter()
@@ -55,6 +56,12 @@ ABlasterCharacter::ABlasterCharacter()
 void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
+	if (BlasterPlayerController)
+	{
+		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
 
 	//Setup Input Mapping Context, add it to Subsystem
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
@@ -198,6 +205,7 @@ void ABlasterCharacter::FireButtonPressed()
 {
 	if (Combat && Combat->EquippedWeapon)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("FireButtonPressed"));
 		Combat->FireButtonPressed(true);
 	}
 }
@@ -206,6 +214,7 @@ void ABlasterCharacter::FireButtonReleased()
 {
 	if (Combat && Combat->EquippedWeapon)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("FireButtonReleased"));
 		Combat->FireButtonPressed(false);
 	}
 }
@@ -303,6 +312,12 @@ void ABlasterCharacter::HideCameraIfCharacterClose()
 	}
 }
 
+void ABlasterCharacter::OnRep_Health()
+{
+	//我们总是在服务器端进行开火受伤检测的，因此需要将health通知到客户端，由客户端进行血条更新
+	
+}
+
 void ABlasterCharacter::SetOverlappedWeapon(AWeapon* Weapon)
 {
 	if (OverlappedWeapon)
@@ -362,6 +377,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInput->BindAction(AimAction, ETriggerEvent::Started, this, &ABlasterCharacter::AimButtonPressed);
 		EnhancedInput->BindAction(AimAction, ETriggerEvent::Completed, this, &ABlasterCharacter::AimButtonReleased);
 		EnhancedInput->BindAction(FireAction, ETriggerEvent::Started, this, &ABlasterCharacter::FireButtonPressed);
+		EnhancedInput->BindAction(FireAction, ETriggerEvent::Completed, this, &ABlasterCharacter::FireButtonReleased);
 	}
 }
 
@@ -369,6 +385,7 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimePropert
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappedWeapon, COND_OwnerOnly);
+	DOREPLIFETIME(ABlasterCharacter, Health);
 }
 
 void ABlasterCharacter::PostInitializeComponents()

@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "BlasterPlayerController.generated.h"
 
+class ABlasterHUD;
 /**
  * 
  */
@@ -13,5 +14,8 @@ UCLASS()
 class MULTIPLAYERGAME_API ABlasterPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
+public:
+	void SetHUDHealth(float Health, float MaxHealth);
+private:
+	ABlasterHUD* BlasterHUD;
 };

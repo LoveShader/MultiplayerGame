@@ -9,6 +9,7 @@
 #include "MultiplayerGame/BlasterTypes/TurnInPlace.h"
 #include "BlasterCharacter.generated.h"
 
+class ABlasterPlayerController;
 class UCombatComponent;
 class AWeapon;
 class UWidgetComponent;
@@ -111,6 +112,24 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = Montage)
 	UAnimMontage* HitReactMontage;
+
+	/**
+	 * Health Property
+	 */
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	float MaxHealth = 100.0f;
+	
+	UPROPERTY(ReplicatedUsing=OnRep_Health)
+	float Health = 100.0f;
+	
+	UFUNCTION()
+	void OnRep_Health();
+
+	/**
+	 * Add PlayerController, Use it to controll the character's health
+	 */
+	UPROPERTY()
+	ABlasterPlayerController* BlasterPlayerController;
 public:
 	void SetOverlappedWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped() const;

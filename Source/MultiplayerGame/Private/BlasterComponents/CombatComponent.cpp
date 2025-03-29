@@ -19,6 +19,7 @@ UCombatComponent::UCombatComponent()
 
 	BaseWalkSpeed = 600.f;
 	AimWalkSpeed = 350.0f;
+	bCanFire = true;
 }
 
 void UCombatComponent::BeginPlay()
@@ -72,10 +73,7 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 	
 	if (bFireButtonPressed)
 	{
-		FHitResult HitResult;
-		TraceUnderCrosshairs(HitResult);
-		ServerFire(HitResult.ImpactPoint);
-		CrosshairShootingFactor = 0.75f;
+		Fire();
 	}
 }
 
@@ -124,10 +122,20 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>())
 		{
 			HUDPackage.CrossHairColor = FColor::Red;
+			if (Character->HasAuthority())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("HUDPackage.CrossHairColor Red"));
+				UE_LOG(LogTemp, Warning, TEXT("Hit Actor is %s"), *TraceHitResult.GetActor()->GetName());
+			}
 		}
 		else
 		{
-			HUDPackage.CrossHairColor = FColor::White;	
+			HUDPackage.CrossHairColor = FColor::White;
+			if (Character->HasAuthority())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("HUDPackage.CrossHairColor White"));
+				UE_LOG(LogTemp, Warning, TEXT("Hit Actor is %s"),  *TraceHitResult.GetActor()->GetName());
+			}
 		}
 		
 		if (!TraceHitResult.bBlockingHit)
@@ -202,6 +210,41 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 			HUD->SetHUDPackage(HUDPackage);
 		}
 	} 
+}
+
+void UCombatComponent::Fire()
+{
+	if (bCanFire)
+	{
+		ServerFire(HitTarget);
+		if (EquippedWeapon)
+		{
+			CrosshairInAirFactor = 0.75f;
+		}
+		bCanFire = false;
+		StartFireTimer();
+	}
+}
+
+void UCombatComponent::StartFireTimer()
+{
+	if (EquippedWeapon == nullptr || Character == nullptr) return;
+	
+	Character->GetWorldTimerManager().SetTimer(FireTimerHandle,
+		this,
+		&UCombatComponent::FireTimerFinished,
+		0.15f);
+}
+
+void UCombatComponent::FireTimerFinished()
+{
+	if (EquippedWeapon == nullptr) return;
+	
+	bCanFire = true;
+	if (bFireButtonPressed)
+	{
+		Fire();
+	}
 }
 
 void UCombatComponent::InterpFOV(float DeltaTime)

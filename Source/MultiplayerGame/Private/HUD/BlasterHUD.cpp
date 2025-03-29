@@ -3,6 +3,9 @@
 
 #include "HUD/BlasterHUD.h"
 
+#include "Character/CharacterOverlay.h"
+#include "Kismet/GameplayStatics.h"
+
 void ABlasterHUD::DrawHUD()
 {
 	Super::DrawHUD();
@@ -46,6 +49,25 @@ void ABlasterHUD::DrawHUD()
 	{
 		FVector2D Spread(0, SpreadScaled);
 		DrawCrossHair(HUDPackage.CrossHairBottom, ViewportCenter, Spread, HUDPackage.CrossHairColor);
+	}
+}
+
+void ABlasterHUD::BeginPlay()
+{
+	Super::BeginPlay();
+
+	AddCharacterOverlay();
+}
+
+
+void ABlasterHUD::AddCharacterOverlay()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && CharacterOverlayClass)
+	{
+
+		CharacterOverlay = CreateWidget<UCharacterOverlay>(PlayerController, CharacterOverlayClass);
+		CharacterOverlay->AddToViewport();
 	}
 }
 

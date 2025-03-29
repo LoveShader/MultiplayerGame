@@ -20,6 +20,7 @@ AProjectile::AProjectile()
 
 	CollisionBox->SetCollisionObjectType(ECC_WorldDynamic);
 	CollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	CollisionBox->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 	CollisionBox->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
 	CollisionBox->SetCollisionResponseToChannel(ECC_SkeletalMesh, ECR_Block);
@@ -59,6 +60,7 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 	{
 		BlasterCharacter->MulticastHit();
 	}
+	Destroy();
 }
 
 void AProjectile::NetMulticastHitEffects_Implementation()

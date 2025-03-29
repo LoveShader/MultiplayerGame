@@ -20,6 +20,7 @@ public:
 	float CrossHairSpread;
 	FColor CrossHairColor;
 };
+class UCharacterOverlay;
 
 /**
  * 
@@ -30,12 +31,24 @@ class MULTIPLAYERGAME_API ABlasterHUD : public AHUD
 	GENERATED_BODY()
 public:
 	virtual void DrawHUD() override;
+protected:
+	virtual void BeginPlay() override;
+	void AddCharacterOverlay();
 private:
 	void DrawCrossHair(UTexture2D* Texture, const FVector2D& ViewportCenter, const FVector2D& Spread, const FColor& Color);
 	FHUDPackage HUDPackage;
 
 	UPROPERTY(EditAnywhere)
 	float CrosshairSpreadMax = 16.f;
+	
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	TSubclassOf<class UUserWidget> CharacterOverlayClass;
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
-};
+	/**
+	 * Character Overlay Property
+	 */
+	UCharacterOverlay* CharacterOverlay;
+
+};	
+

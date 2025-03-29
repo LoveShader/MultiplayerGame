@@ -47,6 +47,12 @@ protected:
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
 	void SetHUDCrosshairs(float DeltaTime);
+
+	void Fire();
+
+	void StartFireTimer();
+
+	void FireTimerFinished();
 private:
 	ABlasterCharacter* Character;
 
@@ -89,4 +95,10 @@ private:
 	float ZoomInterpSpeed = 20.0f;
 
 	void InterpFOV(float DeltaTime);
+
+	/**
+	 * Fire Timer Handle
+	 */
+	FTimerHandle FireTimerHandle;
+	bool bCanFire;
 };
