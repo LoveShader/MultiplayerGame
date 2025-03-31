@@ -13,5 +13,6 @@ UCLASS()
 class MULTIPLAYERGAME_API ABlasterGameMode : public AGameMode
 {
 	GENERATED_BODY()
-	
+public:
+	void PlayerEliminated(class ABlasterCharacter* ElimmedCharacter, class ABlasterPlayerController* VictimController, ABlasterPlayerController* AttackerController);
 };

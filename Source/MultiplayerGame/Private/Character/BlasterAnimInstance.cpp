@@ -41,6 +41,7 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bIsCrouched = BlasterCharacter->bIsCrouched;
 	bIsAiming = BlasterCharacter->IsAiming();
 	TurningInPlace = BlasterCharacter->GetTurningInPlace();
+	bIsElimed = BlasterCharacter->GetIsElimed();
 
 	//Character's base aiming rotation, generally aligned with the controller's rotation.
 	FRotator AimRotation = BlasterCharacter->GetBaseAimRotation();

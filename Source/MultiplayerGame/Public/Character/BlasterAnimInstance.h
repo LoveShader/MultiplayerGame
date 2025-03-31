@@ -64,6 +64,9 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	bool bIsLocalControlled = false;
 
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	bool bIsElimed;
+
 	AWeapon* EquippedWeapon;
 	FRotator CharacterRotationLastFrame;
 	FRotator CharacterRotation;

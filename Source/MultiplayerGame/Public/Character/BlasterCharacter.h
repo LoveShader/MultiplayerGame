@@ -32,6 +32,8 @@ public:
 	virtual void PostInitializeComponents() override;
 	void PlayFireMontage(bool bIsAiming);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Elim();
 protected:
 	virtual void BeginPlay() override;
 
@@ -46,6 +48,7 @@ protected:
 	void FireButtonPressed();
 	auto FireButtonReleased() -> void;
 	void PlayHitReactMontage();
+	void PlayElimMontage();
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser );
 private:
@@ -83,6 +86,9 @@ private:
 	/* Montage Section */
 	UPROPERTY(EditAnywhere, Category = Montage)
 	UAnimMontage* FireMontage;
+
+	UPROPERTY(EditAnywhere, Category = Montage)
+	UAnimMontage* ElimMontage;
 
 	UPROPERTY(ReplicatedUsing = OnRep_OverlappedWeapon)
 	AWeapon* OverlappedWeapon;
@@ -131,6 +137,8 @@ private:
 	 */
 	UPROPERTY()
 	ABlasterPlayerController* BlasterPlayerController;
+
+	bool bIsElimed;
 public:
 	void SetOverlappedWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped() const;
@@ -141,4 +149,5 @@ public:
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 	FVector GetHitTarget() const;
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	FORCEINLINE bool GetIsElimed() const { return bIsElimed; }
 };

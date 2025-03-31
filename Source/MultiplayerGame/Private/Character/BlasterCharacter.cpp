@@ -17,6 +17,8 @@
 #include "Net/UnrealNetwork.h"
 #include "PlayerController/BlasterPlayerController.h"
 #include "Weapon/Weapon.h"
+#include "GameMode/BlasterGameMode.h"
+
 
 ABlasterCharacter::ABlasterCharacter()
 {
@@ -242,6 +244,12 @@ void ABlasterCharacter::PlayFireMontage(bool bIsAiming)
 	}
 }
 
+void ABlasterCharacter::Elim_Implementation()
+{
+	bIsElimed = true;
+	PlayElimMontage();
+}
+
 void ABlasterCharacter::PlayHitReactMontage()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -254,12 +262,33 @@ void ABlasterCharacter::PlayHitReactMontage()
 	}
 }
 
+void ABlasterCharacter::PlayElimMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if (AnimInstance && ElimMontage)
+	{
+		AnimInstance->Montage_Play(ElimMontage);
+	}
+}
+
 void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
-	 AController* InstigatedBy, AActor* DamageCauser)
+                                      AController* InstigatedBy, AActor* DamageCauser)
 {
 	Health = FMath::Clamp(Health - Damage, 0.0f, MaxHealth);
 	UpdateHUDHealth();
 	PlayHitReactMontage();
+
+	if (Health == 0.0f)
+	{
+		ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
+		if (BlasterGameMode)
+		{
+			BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(GetController()) : BlasterPlayerController;
+			ABlasterPlayerController* AttackerController  = Cast<ABlasterPlayerController>(InstigatedBy);
+			BlasterGameMode->PlayerEliminated(this, BlasterPlayerController, AttackerController);
+		}
+	}
 }
 
 void ABlasterCharacter::OnRep_OverlappedWeapon(AWeapon* LastWeapon)
@@ -307,6 +336,9 @@ void ABlasterCharacter::TurnInPlace(float DeltaTime)
 
 void ABlasterCharacter::HideCameraIfCharacterClose()
 {
+	//avoid other character can't see the character that owner by controller, so need this line
+	if (!IsLocallyControlled())	return;
+		
 	if (((FollowCamera->GetComponentLocation() - GetActorLocation()).Size() < CameraThreshold))
 	{
 		GetMesh()->SetVisibility(false);
