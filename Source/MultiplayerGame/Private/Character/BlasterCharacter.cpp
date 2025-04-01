@@ -244,7 +244,17 @@ void ABlasterCharacter::PlayFireMontage(bool bIsAiming)
 	}
 }
 
-void ABlasterCharacter::Elim_Implementation()
+void ABlasterCharacter::Elim()
+{
+	NetMulticastElim();
+	GetWorldTimerManager().SetTimer(
+		ElimTimer,
+		this,
+		&ABlasterCharacter::ElimTimerFinished,
+		ElimDelay);
+}
+
+void ABlasterCharacter::NetMulticastElim_Implementation()
 {
 	bIsElimed = true;
 	PlayElimMontage();
@@ -254,7 +264,7 @@ void ABlasterCharacter::PlayHitReactMontage()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
-	if (AnimInstance && HitReactMontage)
+	if (AnimInstance && HitReactMontage && !AnimInstance->IsAnyMontagePlaying())
 	{
 		AnimInstance->Montage_Play(HitReactMontage);
 		FName SectionName = FName("FromFront");
@@ -362,6 +372,15 @@ void ABlasterCharacter::OnRep_Health()
 	//我们总是在服务器端进行开火受伤检测的，因此需要将health通知到客户端，由客户端进行血条更新
 	UpdateHUDHealth();
 	PlayHitReactMontage();
+}
+
+void ABlasterCharacter::ElimTimerFinished()
+{
+	ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
+	if (BlasterGameMode)
+	{
+		BlasterGameMode->RequestRespawn(this, BlasterPlayerController);
+	}
 }
 
 void ABlasterCharacter::SetOverlappedWeapon(AWeapon* Weapon)

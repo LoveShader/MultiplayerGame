@@ -32,8 +32,9 @@ public:
 	virtual void PostInitializeComponents() override;
 	void PlayFireMontage(bool bIsAiming);
 
-	UFUNCTION(NetMulticast, Reliable)
 	void Elim();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastElim();
 protected:
 	virtual void BeginPlay() override;
 
@@ -139,6 +140,14 @@ private:
 	ABlasterPlayerController* BlasterPlayerController;
 
 	bool bIsElimed;
+
+
+	UPROPERTY(EditDefaultsOnly, Category = "Timer Properties")
+	float ElimDelay = 3.5f;
+	
+	FTimerHandle ElimTimer;
+
+	void ElimTimerFinished();
 public:
 	void SetOverlappedWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped() const;
