@@ -9,6 +9,7 @@
 #include "MultiplayerGame/BlasterTypes/TurnInPlace.h"
 #include "BlasterCharacter.generated.h"
 
+class ABlasterPlayerState;
 class ABlasterPlayerController;
 class UCombatComponent;
 class AWeapon;
@@ -140,14 +141,18 @@ private:
 	ABlasterPlayerController* BlasterPlayerController;
 
 	bool bIsElimed;
-
-
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Timer Properties")
 	float ElimDelay = 3.5f;
 	
 	FTimerHandle ElimTimer;
 
 	void ElimTimerFinished();
+
+	UPROPERTY()
+	ABlasterPlayerState* BlasterPlayerState;
+	//for init playerState and update score for the player first time spawn
+	void PollInit();
 public:
 	void SetOverlappedWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped() const;

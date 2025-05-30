@@ -18,6 +18,7 @@
 #include "PlayerController/BlasterPlayerController.h"
 #include "Weapon/Weapon.h"
 #include "GameMode/BlasterGameMode.h"
+#include "PlayerState/BlasterPlayerState.h"
 
 
 ABlasterCharacter::ABlasterCharacter()
@@ -401,6 +402,18 @@ void ABlasterCharacter::ElimTimerFinished()
 	}
 }
 
+void ABlasterCharacter::PollInit()
+{
+	if (BlasterPlayerState == nullptr)
+	{
+		BlasterPlayerState = GetPlayerState<ABlasterPlayerState>();
+		if (BlasterPlayerState)
+		{
+			BlasterPlayerState->AddScore(0.f);
+		}
+	}
+}
+
 void ABlasterCharacter::SetOverlappedWeapon(AWeapon* Weapon)
 {
 	if (OverlappedWeapon)
@@ -442,6 +455,7 @@ FVector ABlasterCharacter::GetHitTarget() const
 void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	PollInit();
 	AimOffset(DeltaTime);
 	HideCameraIfCharacterClose();
 }
