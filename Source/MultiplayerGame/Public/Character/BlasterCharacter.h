@@ -159,4 +159,6 @@ public:
 	FVector GetHitTarget() const;
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE bool GetIsElimed() const { return bIsElimed; }
+	FORCEINLINE	float GetHealth() const { return Health; }
+	FORCEINLINE	float GetMaxHealth() const { return MaxHealth; }
 };
