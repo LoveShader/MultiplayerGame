@@ -83,6 +83,8 @@ private:
 
 	float CrosshairShootingFactor;
 
+	float CrosshairTraceFactor;
+
 	FHUDPackage HUDPackage;
 
 	FVector HitTarget;

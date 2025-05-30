@@ -61,6 +61,10 @@ void UCombatComponent::OnRep_EquippedWeapon()
 {
 	if (EquippedWeapon && Character)
 	{
+		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+		const USkeletalMeshSocket* RightHandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
+		if (!RightHandSocket)	return;
+		RightHandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
 	}
@@ -183,19 +187,29 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 			if (bIsAiming)
 			{
 				CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, 0.58f, DeltaTime, 30.0f);
+				CrosshairTraceFactor = 0.f;
 			}
 			else
 			{
 				CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, 0.0f, DeltaTime, 30.f);
+				if (HUDPackage.CrossHairColor == FColor::Red)
+				{
+					CrosshairTraceFactor = FMath::FInterpTo(CrosshairTraceFactor, 0.5f, DeltaTime, 30.f);
+				}
+				else
+				{
+					CrosshairTraceFactor = FMath::FInterpTo(CrosshairTraceFactor, 0.0f, DeltaTime, 30.f);	
+				}
 			}
-
+			
 			//Shooting Factor will Interpolate to 0
 			CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.f, DeltaTime, 40.f);
 
 			HUDPackage.CrossHairSpread = 0.5 +
 							CrosshairVelocityFactor +
 							CrosshairInAirFactor -
-							CrosshairAimFactor +
+							CrosshairAimFactor -
+								CrosshairTraceFactor +
 							CrosshairShootingFactor;
 			HUD->SetHUDPackage(HUDPackage);
 		}

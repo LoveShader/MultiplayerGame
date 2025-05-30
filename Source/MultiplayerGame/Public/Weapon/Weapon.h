@@ -86,6 +86,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "HUD Properties")
 	UTexture2D* CrossHairBottom;
 	void SetWeaponState(EWeaponState State);
+
+	void DroppedWeapon();
 	FORCEINLINE USphereComponent* GetAreaSphere() const {return AreaSphere;}
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const {return WeaponMesh;}
 	FORCEINLINE float GetZoomedFOV() const {return ZoomedFOV;}

@@ -129,7 +129,7 @@ void ABlasterCharacter::EquipButtonPressed()
 		else
 		{
 			ServerEquipButtonPressed();	
-		}
+		} 
 	}
 }
 
@@ -258,6 +258,22 @@ void ABlasterCharacter::NetMulticastElim_Implementation()
 {
 	bIsElimed = true;
 	PlayElimMontage();
+	if (Combat && Combat->EquippedWeapon)
+	{
+		Combat->EquippedWeapon->DroppedWeapon();
+	}
+
+	//Disable character Movement
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->StopMovementImmediately();
+	if (BlasterPlayerController)
+	{
+		DisableInput(BlasterPlayerController);
+	}
+
+	//Disable Colliison
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ABlasterCharacter::PlayHitReactMontage()
@@ -286,7 +302,8 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
                                       AController* InstigatedBy, AActor* DamageCauser)
 {
 	Health = FMath::Clamp(Health - Damage, 0.0f, MaxHealth);
-	UpdateHUDHealth();
+	if (IsLocallyControlled())
+		UpdateHUDHealth();
 	PlayHitReactMontage();
 
 	if (Health == 0.0f)
@@ -370,7 +387,8 @@ void ABlasterCharacter::HideCameraIfCharacterClose()
 void ABlasterCharacter::OnRep_Health()
 {
 	//我们总是在服务器端进行开火受伤检测的，因此需要将health通知到客户端，由客户端进行血条更新
-	UpdateHUDHealth();
+	if (IsLocallyControlled())
+		UpdateHUDHealth();
 	PlayHitReactMontage();
 }
 
