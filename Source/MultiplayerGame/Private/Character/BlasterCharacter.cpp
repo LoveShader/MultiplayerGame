@@ -218,7 +218,6 @@ void ABlasterCharacter::FireButtonPressed()
 {
 	if (Combat && Combat->EquippedWeapon)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("FireButtonPressed"));
 		Combat->FireButtonPressed(true);
 	}
 }
@@ -227,7 +226,6 @@ void ABlasterCharacter::FireButtonReleased()
 {
 	if (Combat && Combat->EquippedWeapon)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("FireButtonReleased"));
 		Combat->FireButtonPressed(false);
 	}
 }

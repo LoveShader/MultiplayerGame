@@ -6,6 +6,9 @@
 #include "GameFramework/PlayerState.h"
 #include "BlasterPlayerState.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnScoreChanged, float, NewScore);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDefeatsChanged, int32, NewDefeats);
+
 class ABlasterPlayerController;
 /**
  * 
@@ -20,15 +23,13 @@ public:
 	
 	void AddScore(float ScoreAmount);
 	void AddDefeats(int DefeatAmount);
+
+	UPROPERTY(BlueprintAssignable, Category="Events")
+	FOnScoreChanged OnScoreChanged;
+
+	UPROPERTY(BlueprintAssignable, Category="Events")
+	FOnDefeatsChanged OnDefeatsChanged;
 private:
-	class ABlasterCharacter* Character;
-	class ABlasterPlayerController* Controller;
-
-	//helper Function
-	void SetPlayerScore(float NewScore);
-	void SetPlayerDefeats(int32 NewDefeats);
-	ABlasterPlayerController* GetController();
-
 	UPROPERTY(ReplicatedUsing = OnRep_Defeats)
 	int32 Defeats = 0;
 

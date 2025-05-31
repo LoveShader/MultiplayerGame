@@ -10,7 +10,7 @@
 void ABlasterPlayerState::OnRep_Score()
 {
 	Super::OnRep_Score();
-	SetPlayerScore(GetScore());
+	OnScoreChanged.Broadcast(GetScore());
 }
 
 void ABlasterPlayerState::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -19,37 +19,9 @@ void ABlasterPlayerState::GetLifetimeReplicatedProps(TArray<class FLifetimePrope
 	DOREPLIFETIME(ABlasterPlayerState, Defeats);
 }
 
-ABlasterPlayerController* ABlasterPlayerState::GetController()
-{
-	Character = Character == nullptr ? Cast<ABlasterCharacter>(GetPawn()) : Character;
-	if (Character)
-	{
-		Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->GetController()) : Controller;
-	}
-	return Controller;
-}
-
-void ABlasterPlayerState::SetPlayerScore(float NewScore)
-{
-	ABlasterPlayerController* PlayerController = GetController();
-	if (PlayerController)
-	{
-		PlayerController->SetHUDScore(NewScore);
-	}
-}
-
-void ABlasterPlayerState::SetPlayerDefeats(int32 NewDefeats)
-{
-	ABlasterPlayerController* PlayerController = GetController();
-	if (PlayerController)
-	{
-		PlayerController->SetHUDDefeats(NewDefeats);
-	}
-}
-
 void ABlasterPlayerState::OnRep_Defeats()
 {
-	SetPlayerDefeats(Defeats);
+	OnDefeatsChanged.Broadcast(Defeats);
 }
 
 void ABlasterPlayerState::AddScore(float ScoreAmount)
@@ -57,12 +29,12 @@ void ABlasterPlayerState::AddScore(float ScoreAmount)
 	const float NewScore = GetScore() + ScoreAmount;
 	SetScore(NewScore);
 
-	SetPlayerScore(NewScore);
+	OnScoreChanged.Broadcast(NewScore);
 }
 
 void ABlasterPlayerState::AddDefeats(int DefeatAmount)
 {
 	Defeats += DefeatAmount;
 	
-	SetPlayerDefeats(Defeats);
+	OnDefeatsChanged.Broadcast(Defeats);
 }
