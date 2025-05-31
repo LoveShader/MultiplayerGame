@@ -18,8 +18,9 @@
 #include "PlayerController/BlasterPlayerController.h"
 #include "Weapon/Weapon.h"
 #include "GameMode/BlasterGameMode.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "PlayerState/BlasterPlayerState.h"
-
 
 ABlasterCharacter::ABlasterCharacter()
 {
@@ -66,6 +67,16 @@ void ABlasterCharacter::UpdateHUDHealth()
 	if (BlasterPlayerController)
 	{
 		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
+}
+
+void ABlasterCharacter::Destroyed()
+{
+	Super::Destroyed();
+
+	if (ElimBotComponent)
+	{
+		ElimBotComponent->DestroyComponent();
 	}
 }
 
@@ -270,6 +281,27 @@ void ABlasterCharacter::NetMulticastElim_Implementation()
 		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Glow"), 200.0f);
 	}
 	StartDissolve();
+
+	//Spawn Elim bot
+	if (ElimBotParticle)
+	{
+		FVector ElimBotSpawnPoint(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 200.0f);
+		ElimBotComponent = UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			ElimBotParticle,
+			ElimBotSpawnPoint,
+			GetActorRotation()
+		);
+	}
+
+	if (ElimBotSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			ElimBotSound,
+			GetActorLocation()
+		);
+	}
 	
 	if (Combat && Combat->EquippedWeapon)
 	{

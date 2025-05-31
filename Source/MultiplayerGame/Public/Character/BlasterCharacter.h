@@ -37,6 +37,8 @@ public:
 	void Elim();
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticastElim();
+
+	virtual void Destroyed() override;
 protected:
 	virtual void BeginPlay() override;
 
@@ -171,6 +173,18 @@ private:
 	// Material instance set on the blueprint, used with the dynamic material instance
 	UPROPERTY(EditAnywhere, Category = Elim)
 	UMaterialInstance* DissolveMaterialInstance;
+
+	/**
+	 * Elim Bot Effects
+	 */
+	UPROPERTY(EditAnywhere, Category = Elim)
+	UParticleSystem* ElimBotParticle;
+
+	UPROPERTY(EditAnywhere, Category = Elim)
+	USoundBase* ElimBotSound;
+
+	UPROPERTY(VisibleAnywhere)
+	UParticleSystemComponent* ElimBotComponent;
 	
 	UPROPERTY()
 	ABlasterPlayerState* BlasterPlayerState;
