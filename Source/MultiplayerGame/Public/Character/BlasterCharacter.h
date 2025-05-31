@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "Components/TimelineComponent.h"
 #include "Interface/InteractWithCrosshairsInterface.h"
 #include "MultiplayerGame/BlasterTypes/TurnInPlace.h"
 #include "BlasterCharacter.generated.h"
@@ -149,6 +150,28 @@ private:
 
 	void ElimTimerFinished();
 
+	/**
+	 * Dissolve Effect
+	 */
+	UPROPERTY(VisibleAnywhere)
+	UTimelineComponent* DissolveTimeLine;
+	FOnTimelineFloat DissolveTrack;		//这个是delegate，与蓝图中的track是一回事
+
+	UPROPERTY(EditAnywhere)
+	UCurveFloat* DissolveCurve;
+	
+	UFUNCTION()
+	void UpdateDissolveMaterial(float DissolveValue);
+	void StartDissolve();		//To start timeLine,also need bind update function and our dissolve track
+
+	// Dynamic instance that we can change at runtime
+	UPROPERTY(VisibleAnywhere, Category = Elim)
+	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
+
+	// Material instance set on the blueprint, used with the dynamic material instance
+	UPROPERTY(EditAnywhere, Category = Elim)
+	UMaterialInstance* DissolveMaterialInstance;
+	
 	UPROPERTY()
 	ABlasterPlayerState* BlasterPlayerState;
 	//for init playerState and update score for the player first time spawn

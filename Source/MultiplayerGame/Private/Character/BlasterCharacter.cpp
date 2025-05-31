@@ -54,6 +54,10 @@ ABlasterCharacter::ABlasterCharacter()
 
 	//set Turn in place state
 	TurningInPlace = ETurningInPlace::ETIP_NoTurning;
+	NetUpdateFrequency = 66.0f;
+	MinNetUpdateFrequency = 33.0f;
+
+	DissolveTimeLine = CreateDefaultSubobject<UTimelineComponent>("DissolveTimeLineComponent");
 }
 
 void ABlasterCharacter::UpdateHUDHealth()
@@ -257,6 +261,16 @@ void ABlasterCharacter::NetMulticastElim_Implementation()
 {
 	bIsElimed = true;
 	PlayElimMontage();
+	// add dissolve material
+	if (DissolveMaterialInstance)
+	{
+		DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
+		GetMesh()->SetMaterial(0, DynamicDissolveMaterialInstance);
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Dissolve"), 0.55f);
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Glow"), 200.0f);
+	}
+	StartDissolve();
+	
 	if (Combat && Combat->EquippedWeapon)
 	{
 		Combat->EquippedWeapon->DroppedWeapon();
@@ -397,6 +411,24 @@ void ABlasterCharacter::ElimTimerFinished()
 	if (BlasterGameMode)
 	{
 		BlasterGameMode->RequestRespawn(this, BlasterPlayerController);
+	}
+}
+
+void ABlasterCharacter::UpdateDissolveMaterial(float DissolveValue)
+{
+	if (DynamicDissolveMaterialInstance)
+	{
+		DynamicDissolveMaterialInstance->SetScalarParameterValue("Dissolve", DissolveValue);
+	}
+}
+
+void ABlasterCharacter::StartDissolve()
+{
+	DissolveTrack.BindDynamic(this, &ABlasterCharacter::UpdateDissolveMaterial);
+	if (DissolveCurve && DissolveTimeLine)
+	{
+		DissolveTimeLine->AddInterpFloat(DissolveCurve, DissolveTrack);
+		DissolveTimeLine->Play();
 	}
 }
 
