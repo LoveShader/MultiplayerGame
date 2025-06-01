@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Weapon.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAmmoChanged, int32, NewAmmo);
+
 class USphereComponent;
 class UWidgetComponent;
 
@@ -29,6 +31,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	void ShowPickupWidget(bool bShowWidget);
 	virtual void Fire(const FVector& HitTarget);
+	void BroadcastCurrentAmmo() const;
 protected:
 	virtual void BeginPlay() override;
 
@@ -67,6 +70,18 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float ZoomInterpSpeed = 20.f;
+
+	//Ammo
+	UPROPERTY(EditAnywhere, ReplicatedUsing=OnRep_Ammo)
+	int32 Ammo;
+
+	UFUNCTION()
+	void OnRep_Ammo();
+
+	UPROPERTY(EditAnywhere)
+	int MagCapcity;
+
+	void SpendRound();
 public:
 	/**
 	 * Blaster CrossHair HUD Textures
@@ -92,4 +107,8 @@ public:
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const {return WeaponMesh;}
 	FORCEINLINE float GetZoomedFOV() const {return ZoomedFOV;}
 	FORCEINLINE float GetZoomInterpSpeed() const {return ZoomInterpSpeed;}
+	FORCEINLINE int32 GetWeaponAmmo() const {return Ammo;}
+public:
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnAmmoChanged OnAmmoChanged;
 };

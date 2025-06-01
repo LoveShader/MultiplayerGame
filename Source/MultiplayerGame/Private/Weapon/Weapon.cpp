@@ -88,6 +88,17 @@ void AWeapon::OnRep_WeaponState()
 	}
 }
 
+void AWeapon::OnRep_Ammo()
+{
+	OnAmmoChanged.Broadcast(Ammo);
+}
+
+void AWeapon::SpendRound()
+{
+	Ammo--;
+	OnAmmoChanged.Broadcast(Ammo);
+}
+
 void AWeapon::SetWeaponState(EWeaponState State)
 {
 	WeaponState = State;
@@ -137,6 +148,7 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLif
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AWeapon, WeaponState);
+	DOREPLIFETIME(AWeapon, Ammo);
 }
 
 void AWeapon::ShowPickupWidget(bool bShowWidget)
@@ -166,7 +178,16 @@ void AWeapon::Fire(const FVector& HitTarget)
 				World->SpawnActor<ACasing>(CasingClass, SocketTransform.GetLocation(),SocketTransform.GetRotation().Rotator());
 			}
 		}
-		
 	}
+
+	if (HasAuthority())
+	{
+		SpendRound();
+	}
+}
+
+void AWeapon::BroadcastCurrentAmmo() const
+{
+	OnAmmoChanged.Broadcast(Ammo);
 }
 

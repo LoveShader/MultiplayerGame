@@ -28,13 +28,14 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	void EquipWeapon(AWeapon* WeaponToEquip);
+	void DroppedWeapon();
 	void SetAiming(bool bAiming);
 
 	UFUNCTION(Server, Reliable)
 	void ServerSetAiming(bool bAiming);
 
 	UFUNCTION()
-	void OnRep_EquippedWeapon();
+	void OnRep_EquippedWeapon(AWeapon* LastWeapon);
 
 	void FireButtonPressed(bool bPressed);
 
@@ -53,6 +54,9 @@ protected:
 	void StartFireTimer();
 
 	void FireTimerFinished();
+
+	UFUNCTION()
+	void OnWeaponAmmoChanged(int32 NewAmmo);
 private:
 	ABlasterCharacter* Character;
 

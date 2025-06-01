@@ -20,8 +20,12 @@ public:
 	void UpdateHUDScore(float Score);
 	UFUNCTION()
 	void UpdateHUDDefeats(int32 Defeats);
+	UFUNCTION()
+	void UpdateHUDWeaponAmmo(int32 WeaponAmmo);
+	
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnRep_PlayerState() override;
+	void ClearWeaponAmmoHUD();
 protected:
 	virtual void BeginPlay() override;
 private:

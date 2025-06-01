@@ -37,14 +37,29 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	if (!Character || !WeaponToEquip)	return;
 
 	EquippedWeapon = WeaponToEquip;
+	//add delegate
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->OnAmmoChanged.AddDynamic(this, &UCombatComponent::OnWeaponAmmoChanged);
+	}
 	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 	const USkeletalMeshSocket* RightHandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
 	if (!RightHandSocket)	return;
 	RightHandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
+	EquippedWeapon->BroadcastCurrentAmmo();
 	//set Owner
 	EquippedWeapon->SetOwner(Character);
 	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 	Character->bUseControllerRotationYaw = true;
+}
+
+void UCombatComponent::DroppedWeapon()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->OnAmmoChanged.RemoveDynamic(this, &UCombatComponent::OnWeaponAmmoChanged);
+		EquippedWeapon->DroppedWeapon();
+	}
 }
 
 void UCombatComponent::SetAiming(bool bAiming)
@@ -57,14 +72,21 @@ void UCombatComponent::SetAiming(bool bAiming)
 	}
 }
 
-void UCombatComponent::OnRep_EquippedWeapon()
+void UCombatComponent::OnRep_EquippedWeapon(AWeapon* LastWeapon)
 {
+	if (LastWeapon)
+	{
+		LastWeapon->OnAmmoChanged.RemoveDynamic(this, &UCombatComponent::OnWeaponAmmoChanged);
+	}
+	
 	if (EquippedWeapon && Character)
 	{
+		EquippedWeapon->OnAmmoChanged.AddDynamic(this, &UCombatComponent::OnWeaponAmmoChanged);
 		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 		const USkeletalMeshSocket* RightHandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
 		if (!RightHandSocket)	return;
 		RightHandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
+		EquippedWeapon->BroadcastCurrentAmmo();
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
 	}
@@ -248,6 +270,18 @@ void UCombatComponent::FireTimerFinished()
 	if (bFireButtonPressed)
 	{
 		Fire();
+	}
+}
+
+void UCombatComponent::OnWeaponAmmoChanged(int32 NewAmmo)
+{
+	if (!Character)
+		return;
+	
+	PlayerController = PlayerController == nullptr ? Cast<ABlasterPlayerController>(Character->GetController()) : PlayerController;
+	if (PlayerController)
+	{
+		PlayerController->UpdateHUDWeaponAmmo(NewAmmo);
 	}
 }
 

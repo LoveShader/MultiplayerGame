@@ -9,6 +9,7 @@
 #include "Components/TextBlock.h"
 #include "HUD/BlasterHUD.h"
 #include "PlayerState/BlasterPlayerState.h"
+#include "Weapon/Weapon.h"
 
 void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 {
@@ -62,6 +63,20 @@ void ABlasterPlayerController::UpdateHUDDefeats(int32 Defeats)
 	}
 }
 
+void ABlasterPlayerController::UpdateHUDWeaponAmmo(int32 WeaponAmmo)
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+	bool bHudValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->WeaponAmmoAmount;
+	if (bHudValid)
+	{
+		FString WeaponAmmoText = FString::Printf(TEXT("%d"), WeaponAmmo);
+		BlasterHUD->CharacterOverlay->WeaponAmmoAmount->SetText(FText::FromString(WeaponAmmoText));
+	}
+}
+
 void ABlasterPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
@@ -69,7 +84,16 @@ void ABlasterPlayerController::OnPossess(APawn* InPawn)
 	if (ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(InPawn))
 	{
 		SetHUDHealth(BlasterCharacter->GetHealth(), BlasterCharacter->GetMaxHealth());
+		if (BlasterCharacter->GetEquippedWeapon())
+		{
+			UpdateHUDWeaponAmmo(BlasterCharacter->GetEquippedWeapon()->GetWeaponAmmo());
+		}
+		else
+		{
+			ClearWeaponAmmoHUD();
+		}
 	}
+	
 }
 
 void ABlasterPlayerController::OnRep_PlayerState()
@@ -81,6 +105,11 @@ void ABlasterPlayerController::OnRep_PlayerState()
 		BlasterPlayerState->OnScoreChanged.AddDynamic(this, &ABlasterPlayerController::UpdateHUDScore);
 		BlasterPlayerState->OnDefeatsChanged.AddDynamic(this, &ABlasterPlayerController::UpdateHUDDefeats);
 	}
+}
+
+void ABlasterPlayerController::ClearWeaponAmmoHUD()
+{
+	UpdateHUDWeaponAmmo(0);
 }
 
 void ABlasterPlayerController::BeginPlay()

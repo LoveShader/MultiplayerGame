@@ -63,7 +63,7 @@ ABlasterCharacter::ABlasterCharacter()
 
 void ABlasterCharacter::UpdateHUDHealth()
 {
-	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(GetController()) : BlasterPlayerController;
 	if (BlasterPlayerController)
 	{
 		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
@@ -303,9 +303,14 @@ void ABlasterCharacter::NetMulticastElim_Implementation()
 		);
 	}
 	
-	if (Combat && Combat->EquippedWeapon)
+	if (Combat)
 	{
-		Combat->EquippedWeapon->DroppedWeapon();
+		Combat->DroppedWeapon();
+		BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(GetController()) : BlasterPlayerController;
+		if (BlasterPlayerController)
+		{
+			BlasterPlayerController->ClearWeaponAmmoHUD();
+		}
 	}
 
 	//Disable character Movement
