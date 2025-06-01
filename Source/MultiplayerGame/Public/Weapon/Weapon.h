@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "WeaponTypes.h"
 #include "GameFramework/Actor.h"
 #include "Weapon.generated.h"
 
@@ -82,6 +83,9 @@ private:
 	int MagCapcity;
 
 	void SpendRound();
+
+	UPROPERTY(EditAnywhere)
+	EWeaponType WeaponType;
 public:
 	/**
 	 * Blaster CrossHair HUD Textures
@@ -108,6 +112,7 @@ public:
 	FORCEINLINE float GetZoomedFOV() const {return ZoomedFOV;}
 	FORCEINLINE float GetZoomInterpSpeed() const {return ZoomInterpSpeed;}
 	FORCEINLINE int32 GetWeaponAmmo() const {return Ammo;}
+	FORCEINLINE EWeaponType GetWeaponType() const {return WeaponType;}
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnAmmoChanged OnAmmoChanged;

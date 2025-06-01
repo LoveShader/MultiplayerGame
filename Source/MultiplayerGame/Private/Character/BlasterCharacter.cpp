@@ -80,6 +80,11 @@ void ABlasterCharacter::Destroyed()
 	}
 }
 
+UCombatComponent* ABlasterCharacter::GetCombatComponentForUI()
+{
+	return Combat;
+}
+
 void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();

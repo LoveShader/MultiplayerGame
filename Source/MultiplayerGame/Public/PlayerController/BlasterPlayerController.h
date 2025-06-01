@@ -22,6 +22,9 @@ public:
 	void UpdateHUDDefeats(int32 Defeats);
 	UFUNCTION()
 	void UpdateHUDWeaponAmmo(int32 WeaponAmmo);
+	UFUNCTION()
+	void UpdateHUDCarriedAmmo(int32 CarriedAmmo);
+
 	
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnRep_PlayerState() override;

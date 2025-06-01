@@ -3,11 +3,13 @@
 
 #include "PlayerController/BlasterPlayerController.h"
 
+#include "BlasterComponents/CombatComponent.h"
 #include "Character/BlasterCharacter.h"
 #include "Character/CharacterOverlay.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "HUD/BlasterHUD.h"
+#include "Kismet/GameplayStatics.h"
 #include "PlayerState/BlasterPlayerState.h"
 #include "Weapon/Weapon.h"
 
@@ -74,6 +76,21 @@ void ABlasterPlayerController::UpdateHUDWeaponAmmo(int32 WeaponAmmo)
 	{
 		FString WeaponAmmoText = FString::Printf(TEXT("%d"), WeaponAmmo);
 		BlasterHUD->CharacterOverlay->WeaponAmmoAmount->SetText(FText::FromString(WeaponAmmoText));
+	}
+}
+
+void ABlasterPlayerController::UpdateHUDCarriedAmmo(int32 CarriedAmmo)
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+	
+	bool bHudValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->CarriedAmmoAmount;
+	if (bHudValid)
+	{
+		FString CarriedAmmoText = FString::Printf(TEXT("%d"), CarriedAmmo);
+		BlasterHUD->CharacterOverlay->CarriedAmmoAmount->SetText(FText::FromString(CarriedAmmoText));
 	}
 }
 

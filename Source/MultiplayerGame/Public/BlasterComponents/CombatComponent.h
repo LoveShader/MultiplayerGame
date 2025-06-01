@@ -5,9 +5,11 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "HUD/BlasterHUD.h"
+#include "Weapon/WeaponTypes.h"
 #include "CombatComponent.generated.h"
 
 #define LINETRACE_LENGTH 80000.0f
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCarriedAmmoChanged, int32, NewAmmo);
 
 class UCameraComponent;
 class ABlasterHUD;
@@ -109,4 +111,23 @@ private:
 	bool bCanFire;
 
 	bool CanFire() const;
+
+	// Carried Ammo for Current Weapon Type
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_CarriedAmmo)
+	int32 CarriedAmmo;
+
+	UPROPERTY(EditAnywhere)
+	int32 StartingARAmmo = 30;
+	
+	UFUNCTION()
+	void OnRep_CarriedAmmo();
+
+	TMap<EWeaponType, int32> CarriedAmmoMap;
+
+	void InitializeCarriedAmmo();
+public:
+	/**
+	 * Getter and Setter Function
+	 */
+	FORCEINLINE int32 GetCarriedAmmo() const {return CarriedAmmo;};
 };

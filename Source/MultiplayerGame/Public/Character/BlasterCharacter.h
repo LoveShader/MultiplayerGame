@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "Components/TimelineComponent.h"
+#include "Interface/ICombatUIProvider.h"
 #include "Interface/InteractWithCrosshairsInterface.h"
 #include "MultiplayerGame/BlasterTypes/TurnInPlace.h"
 #include "BlasterCharacter.generated.h"
@@ -21,7 +22,7 @@ class UInputAction;
 class UInputMappingContext;
 
 UCLASS()
-class MULTIPLAYERGAME_API ABlasterCharacter : public ACharacter, public IInteractWithCrosshairsInterface
+class MULTIPLAYERGAME_API ABlasterCharacter : public ACharacter, public IInteractWithCrosshairsInterface, public IICombatUIProvider
 {
 	GENERATED_BODY()
 
@@ -39,6 +40,8 @@ public:
 	void NetMulticastElim();
 
 	virtual void Destroyed() override;
+
+	virtual UCombatComponent* GetCombatComponentForUI() override;
 protected:
 	virtual void BeginPlay() override;
 
@@ -140,7 +143,7 @@ private:
 	/**
 	 * Add PlayerController, Use it to controll the character's health
 	 */
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	ABlasterPlayerController* BlasterPlayerController;
 
 	bool bIsElimed;
