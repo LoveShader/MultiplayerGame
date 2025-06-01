@@ -304,6 +304,14 @@ void UCombatComponent::OnWeaponAmmoChanged(int32 NewAmmo)
 	}
 }
 
+void UCombatComponent::ServerReload_Implementation()
+{
+	if (Character)
+	{
+		Character->PlayReloadMontage();
+	}
+}
+
 void UCombatComponent::InterpFOV(float DeltaTime)
 {
 	if (EquippedWeapon == nullptr)	return;
@@ -376,4 +384,14 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
 	DOREPLIFETIME(UCombatComponent, bIsAiming);
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
+}
+
+void UCombatComponent::Reload()
+{
+	if (!EquippedWeapon)	return;
+	
+	if (CarriedAmmo > 0)
+	{
+		ServerReload();
+	}
 }

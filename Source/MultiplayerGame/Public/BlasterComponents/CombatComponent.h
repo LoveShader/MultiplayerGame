@@ -27,6 +27,7 @@ public:
 	friend class ABlasterCharacter;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	void Reload();
 protected:
 	virtual void BeginPlay() override;
 	void EquipWeapon(AWeapon* WeaponToEquip);
@@ -59,6 +60,9 @@ protected:
 
 	UFUNCTION()
 	void OnWeaponAmmoChanged(int32 NewAmmo);
+
+	UFUNCTION(Server, Reliable)
+	void ServerReload();
 private:
 	ABlasterCharacter* Character;
 
@@ -103,7 +107,6 @@ private:
 	float ZoomInterpSpeed = 20.0f;
 
 	void InterpFOV(float DeltaTime);
-
 	/**
 	 * Fire Timer Handle
 	 */

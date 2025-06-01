@@ -34,7 +34,8 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 	void PlayFireMontage(bool bIsAiming);
-
+	void PlayReloadMontage();
+	
 	void Elim();
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticastElim();
@@ -54,7 +55,10 @@ protected:
 	void AimOffset(float DeltaTime);
 	virtual void Jump() override;
 	void FireButtonPressed();
-	auto FireButtonReleased() -> void;
+	void FireButtonReleased();
+	void ReloadButtonPressed();
+
+	
 	void PlayHitReactMontage();
 	void PlayElimMontage();
 	UFUNCTION()
@@ -87,6 +91,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputAction* FireAction;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* ReloadAction;
 	
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputMappingContext* InputContext;
@@ -94,6 +101,9 @@ private:
 	/* Montage Section */
 	UPROPERTY(EditAnywhere, Category = Montage)
 	UAnimMontage* FireMontage;
+
+	UPROPERTY(EditAnywhere, Category = Montage)
+	UAnimMontage* ReloadMontage;
 
 	UPROPERTY(EditAnywhere, Category = Montage)
 	UAnimMontage* ElimMontage;
