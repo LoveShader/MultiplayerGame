@@ -36,12 +36,15 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
 	if (!Character || !WeaponToEquip)	return;
 
-	EquippedWeapon = WeaponToEquip;
-	//add delegate
 	if (EquippedWeapon)
 	{
-		EquippedWeapon->OnAmmoChanged.AddDynamic(this, &UCombatComponent::OnWeaponAmmoChanged);
+		EquippedWeapon->OnAmmoChanged.RemoveDynamic(this, &UCombatComponent::OnWeaponAmmoChanged);
+		EquippedWeapon->DroppedWeapon();
 	}
+	EquippedWeapon = WeaponToEquip;
+	//add delegate
+	EquippedWeapon->OnAmmoChanged.AddDynamic(this, &UCombatComponent::OnWeaponAmmoChanged);
+	
 	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 	const USkeletalMeshSocket* RightHandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
 	if (!RightHandSocket)	return;
