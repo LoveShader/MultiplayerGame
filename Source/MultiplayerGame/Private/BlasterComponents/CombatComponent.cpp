@@ -243,7 +243,7 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 
 void UCombatComponent::Fire()
 {
-	if (bCanFire)
+	if (CanFire())
 	{
 		ServerFire(HitTarget);
 		if (EquippedWeapon)
@@ -304,6 +304,12 @@ void UCombatComponent::InterpFOV(float DeltaTime)
 	{
 		Character->GetFollowCamera()->SetFieldOfView(CurrentFOV);
 	}
+}
+
+bool UCombatComponent::CanFire() const
+{
+	if (!EquippedWeapon)	return false;
+	return EquippedWeapon->GetWeaponAmmo() > 0 && bCanFire;
 }
 
 void UCombatComponent::NetMulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)

@@ -107,4 +107,6 @@ private:
 	 */
 	FTimerHandle FireTimerHandle;
 	bool bCanFire;
+
+	bool CanFire() const;
 };
