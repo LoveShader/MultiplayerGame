@@ -16,6 +16,8 @@ class MULTIPLAYERGAME_API ABlasterPlayerController : public APlayerController
 	GENERATED_BODY()
 public:
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void ReceivedPlayer() override; // Sync with server clock as soon as possible
+	virtual float GetServerTime() const;
 	void SetHUDHealth(float Health, float MaxHealth);
 	UFUNCTION()
 	void UpdateHUDScore(float Score);
@@ -34,6 +36,13 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRequestServerTime(float TimeOfClientRequest);
+
+	UFUNCTION(Client, Reliable)
+	void ClientReportServerTime(float TimeOfClientRequest, float TimeServerReceivedClientRequest);
+
 private:
 	UPROPERTY()
 	ABlasterHUD* BlasterHUD;
@@ -42,4 +51,12 @@ private:
 	float MatchTime = 120.f;
 
 	uint32 CountdownInt = 0;
+
+	float ClientServerDelta = 0.f; // difference between client and server time
+
+	UPROPERTY(EditAnywhere, Category = Time)
+	float TimeSyncFrequency = 5.f;
+
+	float TimeSyncRunningTime = 0.f;
+	void CheckTimeSync(float DeltaTime);
 };

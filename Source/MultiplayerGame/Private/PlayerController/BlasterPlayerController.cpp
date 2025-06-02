@@ -20,6 +20,17 @@ void ABlasterPlayerController::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	SetHUDTime();
+	CheckTimeSync(DeltaSeconds);
+}
+
+void ABlasterPlayerController::ReceivedPlayer()
+{
+	Super::ReceivedPlayer();
+	
+	if (IsLocalController())
+	{
+		ServerRequestServerTime(GetWorld()->GetTimeSeconds());
+	}
 }
 
 void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
@@ -171,10 +182,43 @@ void ABlasterPlayerController::BeginPlay()
 
 void ABlasterPlayerController::SetHUDTime()
 {
-	int32 SecondsLeft = FMath::FloorToInt(MatchTime - GetWorld()->GetTimeSeconds());
+	int32 SecondsLeft = FMath::FloorToInt(MatchTime - GetServerTime());
 	if (SecondsLeft != CountdownInt)
 	{
-		UpdateHUDMatchCountdown(SecondsLeft);
+		UpdateHUDMatchCountdown(MatchTime - GetServerTime());
 	}
 	CountdownInt = SecondsLeft;
+}
+
+void ABlasterPlayerController::CheckTimeSync(float DeltaTime)
+{
+	TimeSyncRunningTime += DeltaTime;
+	if (IsLocalController() && TimeSyncRunningTime > TimeSyncFrequency)
+	{
+		ServerRequestServerTime(GetWorld()->GetTimeSeconds());
+		TimeSyncRunningTime -= TimeSyncFrequency;
+	}
+}
+
+float ABlasterPlayerController::GetServerTime() const
+{
+	if (HasAuthority())	return GetWorld()->GetTimeSeconds();
+	else return GetWorld()->GetTimeSeconds() + ClientServerDelta;
+}
+
+void ABlasterPlayerController::ClientReportServerTime_Implementation(float TimeOfClientRequest,
+                                                                     float TimeServerReceivedClientRequest)
+{
+	//when server down to the client, server time is T1 + RTT / 2, and client time is GetWorld()->GetTimeSeconds.
+	//so the two deltaTime = T1 + RTT/2 - CurrentClientTime
+	float RoundTripTime = GetWorld()->GetTimeSeconds() - TimeOfClientRequest;
+	float CurrentServerTime = TimeServerReceivedClientRequest + (0.5f * RoundTripTime);
+	ClientServerDelta = CurrentServerTime - GetWorld()->GetTimeSeconds();
+}
+
+void ABlasterPlayerController::ServerRequestServerTime_Implementation(float TimeOfClientRequest)
+{
+	//TimeOfClientRequest is the Client Time T0
+	float ServerTimeOfReceipt = GetWorld()->GetTimeSeconds();	//ServerTime of T1
+	ClientReportServerTime(TimeOfClientRequest, ServerTimeOfReceipt);
 }
