@@ -394,6 +394,12 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 	}
 }
 
+ECombatState ABlasterCharacter::GetCombatState() const
+{
+	if (!Combat)	return ECombatState::ECS_MAX;
+	return Combat->CombatState;
+}
+
 void ABlasterCharacter::OnRep_OverlappedWeapon(AWeapon* LastWeapon)
 {
 	if (LastWeapon)

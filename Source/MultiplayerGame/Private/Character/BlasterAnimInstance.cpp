@@ -42,6 +42,7 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bIsAiming = BlasterCharacter->IsAiming();
 	TurningInPlace = BlasterCharacter->GetTurningInPlace();
 	bIsElimed = BlasterCharacter->GetIsElimed();
+	bUseFABRIK = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied;
 
 	//Character's base aiming rotation, generally aligned with the controller's rotation.
 	FRotator AimRotation = BlasterCharacter->GetBaseAimRotation();

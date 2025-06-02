@@ -67,6 +67,9 @@ private:
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	bool bIsElimed;
 
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	bool bUseFABRIK;
+
 	AWeapon* EquippedWeapon;
 	FRotator CharacterRotationLastFrame;
 	FRotator CharacterRotation;

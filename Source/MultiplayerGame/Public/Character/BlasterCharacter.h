@@ -8,6 +8,7 @@
 #include "Components/TimelineComponent.h"
 #include "Interface/ICombatUIProvider.h"
 #include "Interface/InteractWithCrosshairsInterface.h"
+#include "MultiplayerGame/BlasterTypes/CombatState.h"
 #include "MultiplayerGame/BlasterTypes/TurnInPlace.h"
 #include "BlasterCharacter.generated.h"
 
@@ -43,6 +44,7 @@ public:
 	virtual void Destroyed() override;
 
 	virtual UCombatComponent* GetCombatComponentForUI() override;
+	ECombatState GetCombatState() const;
 protected:
 	virtual void BeginPlay() override;
 
@@ -57,7 +59,6 @@ protected:
 	void FireButtonPressed();
 	void FireButtonReleased();
 	void ReloadButtonPressed();
-
 	
 	void PlayHitReactMontage();
 	void PlayElimMontage();
@@ -114,7 +115,7 @@ private:
 	UFUNCTION()
 	void OnRep_OverlappedWeapon(AWeapon* LastWeapon);
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	UCombatComponent* Combat;
 
 	UFUNCTION(Server, Reliable)
