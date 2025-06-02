@@ -83,6 +83,12 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	{
 		PlayerController->UpdateHUDCarriedAmmo(CarriedAmmo);
 	}
+
+	// Reload ammo when weapon ammo is empty
+	if (EquippedWeapon->IsEmpty())
+	{
+		Reload();
+	}
 	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 	Character->bUseControllerRotationYaw = true;
 }
@@ -305,6 +311,11 @@ void UCombatComponent::FireTimerFinished()
 	{
 		Fire();
 	}
+
+	if (EquippedWeapon->IsEmpty())
+	{
+		Reload();
+	}
 }
 
 void UCombatComponent::OnWeaponAmmoChanged(int32 NewAmmo)
@@ -451,7 +462,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty
 
 void UCombatComponent::Reload()
 {
-	if (!EquippedWeapon)	return;
+	if (!EquippedWeapon || !EquippedWeapon->IsNeedReload())	return;
 	
 	if (CarriedAmmo > 0 && CombatState != ECombatState::ECS_Reloading)
 	{

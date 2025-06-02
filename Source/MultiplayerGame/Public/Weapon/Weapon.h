@@ -115,6 +115,8 @@ public:
 	FORCEINLINE int32 GetWeaponAmmo() const {return Ammo;}
 	FORCEINLINE int32 GetMagCapacity() const {return MagCapcity;}
 	FORCEINLINE EWeaponType GetWeaponType() const {return WeaponType;}
+	FORCEINLINE bool IsNeedReload() const {return Ammo < MagCapcity;}
+	FORCEINLINE bool IsEmpty() const {return Ammo <= 0;}
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnAmmoChanged OnAmmoChanged;
