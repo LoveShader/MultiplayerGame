@@ -15,6 +15,7 @@ class MULTIPLAYERGAME_API ABlasterPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 public:
+	virtual void Tick(float DeltaSeconds) override;
 	void SetHUDHealth(float Health, float MaxHealth);
 	UFUNCTION()
 	void UpdateHUDScore(float Score);
@@ -25,13 +26,20 @@ public:
 	UFUNCTION()
 	void UpdateHUDCarriedAmmo(int32 CarriedAmmo);
 
+	void UpdateHUDMatchCountdown(float CountdownTime);
 	
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnRep_PlayerState() override;
 	void ClearWeaponAmmoHUD();
 protected:
 	virtual void BeginPlay() override;
+	void SetHUDTime();
 private:
 	UPROPERTY()
 	ABlasterHUD* BlasterHUD;
+
+	UPROPERTY(EditAnywhere)
+	float MatchTime = 120.f;
+
+	uint32 CountdownInt = 0;
 };

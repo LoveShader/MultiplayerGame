@@ -13,6 +13,15 @@
 #include "PlayerState/BlasterPlayerState.h"
 #include "Weapon/Weapon.h"
 
+
+
+void ABlasterPlayerController::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	SetHUDTime();
+}
+
 void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 {
 	/**
@@ -94,6 +103,23 @@ void ABlasterPlayerController::UpdateHUDCarriedAmmo(int32 CarriedAmmo)
 	}
 }
 
+void ABlasterPlayerController::UpdateHUDMatchCountdown(float CountdownTime)
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+	int32 Minutes = FMath::FloorToInt(CountdownTime / 60.0f);
+	int32 Seconds = CountdownTime - Minutes * 60;
+	
+	bool bHudValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->MatchCountdownText;
+	if (bHudValid)
+	{
+		FString MatchCountdownText = FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
+		BlasterHUD->CharacterOverlay->MatchCountdownText->SetText(FText::FromString(MatchCountdownText));
+	}
+}
+
 void ABlasterPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
@@ -141,4 +167,14 @@ void ABlasterPlayerController::BeginPlay()
 			BlasterPlayerState->OnDefeatsChanged.AddDynamic(this, &ABlasterPlayerController::UpdateHUDDefeats);
 		}
 	}
+}
+
+void ABlasterPlayerController::SetHUDTime()
+{
+	int32 SecondsLeft = FMath::FloorToInt(MatchTime - GetWorld()->GetTimeSeconds());
+	if (SecondsLeft != CountdownInt)
+	{
+		UpdateHUDMatchCountdown(SecondsLeft);
+	}
+	CountdownInt = SecondsLeft;
 }
