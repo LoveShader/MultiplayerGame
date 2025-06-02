@@ -68,6 +68,9 @@ protected:
 	void ServerReload();
 
 	void HandleReload();
+	void UpdateAmmoValues();
+	void UpdateCarriedAmmoUI();
+
 private:
 	ABlasterCharacter* Character;
 
@@ -139,6 +142,8 @@ private:
 
 	UFUNCTION()
 	void OnRep_CombatState();
+
+	int32 AmountToReload();
 public:
 	/**
 	 * Getter and Setter Function

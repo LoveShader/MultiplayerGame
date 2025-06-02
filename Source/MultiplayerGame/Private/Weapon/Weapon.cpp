@@ -191,3 +191,9 @@ void AWeapon::BroadcastCurrentAmmo() const
 	OnAmmoChanged.Broadcast(Ammo);
 }
 
+void AWeapon::AddAmmo(int AmmoToReload)
+{
+	Ammo = FMath::Clamp(Ammo + AmmoToReload, 0, MagCapcity);
+	OnAmmoChanged.Broadcast(Ammo);
+}
+

@@ -33,6 +33,7 @@ public:
 	void ShowPickupWidget(bool bShowWidget);
 	virtual void Fire(const FVector& HitTarget);
 	void BroadcastCurrentAmmo() const;
+	void AddAmmo(int AmmoToReload);
 protected:
 	virtual void BeginPlay() override;
 
@@ -112,6 +113,7 @@ public:
 	FORCEINLINE float GetZoomedFOV() const {return ZoomedFOV;}
 	FORCEINLINE float GetZoomInterpSpeed() const {return ZoomInterpSpeed;}
 	FORCEINLINE int32 GetWeaponAmmo() const {return Ammo;}
+	FORCEINLINE int32 GetMagCapacity() const {return MagCapcity;}
 	FORCEINLINE EWeaponType GetWeaponType() const {return WeaponType;}
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")

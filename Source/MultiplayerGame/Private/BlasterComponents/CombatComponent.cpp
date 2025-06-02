@@ -327,9 +327,48 @@ void UCombatComponent::HandleReload()
 	}
 }
 
+void UCombatComponent::UpdateAmmoValues()
+{
+	if (Character == nullptr || EquippedWeapon == nullptr)	return;
+	int32 AmmoToReload = AmountToReload();
+
+	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
+	{
+		CarriedAmmoMap[EquippedWeapon->GetWeaponType()] -= AmmoToReload;
+		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
+		UpdateCarriedAmmoUI();
+	}
+	EquippedWeapon->AddAmmo(AmmoToReload);
+}
+
+void UCombatComponent::UpdateCarriedAmmoUI()
+{
+	PlayerController = PlayerController == nullptr ? Cast<ABlasterPlayerController>(Character->GetController()) : PlayerController;
+	if (PlayerController)
+	{
+		PlayerController->UpdateHUDCarriedAmmo(CarriedAmmo);
+	}
+}
+
+int32 UCombatComponent::AmountToReload()
+{
+	if (EquippedWeapon == nullptr) return 0;
+	
+	int32 RoomInMag = EquippedWeapon->GetMagCapacity() - EquippedWeapon->GetWeaponAmmo();
+	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
+	{
+		int32 AmountCarried  = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
+		int32 Least = FMath::Min(AmountCarried, RoomInMag);
+		return FMath::Clamp(RoomInMag, 0, Least);
+	}
+	return 0;
+}
+
 void UCombatComponent::ServerReload_Implementation()
 {
+	if (!Character || !EquippedWeapon)	return;
 	CombatState = ECombatState::ECS_Reloading;
+	
 	HandleReload();
 }
 
@@ -427,6 +466,7 @@ void UCombatComponent::FinishReloading()
 	if (Character->HasAuthority())
 	{
 		CombatState = ECombatState::ECS_Unoccupied;
+		UpdateAmmoValues();
 	}
 
 	if (bFireButtonPressed)
