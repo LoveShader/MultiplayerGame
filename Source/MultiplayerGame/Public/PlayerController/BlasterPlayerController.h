@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "BlasterPlayerController.generated.h"
 
+class UCharacterOverlay;
 class ABlasterHUD;
 /**
  * 
@@ -18,6 +19,7 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void ReceivedPlayer() override; // Sync with server clock as soon as possible
 	virtual float GetServerTime() const;
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	void SetHUDHealth(float Health, float MaxHealth);
 	UFUNCTION()
 	void UpdateHUDScore(float Score);
@@ -33,6 +35,7 @@ public:
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnRep_PlayerState() override;
 	void ClearWeaponAmmoHUD();
+	void OnMatchStateSet(FName State);
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
@@ -43,9 +46,13 @@ protected:
 	UFUNCTION(Client, Reliable)
 	void ClientReportServerTime(float TimeOfClientRequest, float TimeServerReceivedClientRequest);
 
+	void PollInit();
 private:
 	UPROPERTY()
 	ABlasterHUD* BlasterHUD;
+
+	UPROPERTY()
+	UCharacterOverlay* BlasterOverlay;
 
 	UPROPERTY(EditAnywhere)
 	float MatchTime = 120.f;
@@ -59,4 +66,15 @@ private:
 
 	float TimeSyncRunningTime = 0.f;
 	void CheckTimeSync(float DeltaTime);
+
+	UPROPERTY(ReplicatedUsing=OnRep_MatchState)
+	FName MatchState;
+
+	UFUNCTION()
+	void OnRep_MatchState();
+
+	float HUDHealth;
+	float HUDMaxHealth;
+	float HUDScore;
+	int32 HUDDefeats;
 };

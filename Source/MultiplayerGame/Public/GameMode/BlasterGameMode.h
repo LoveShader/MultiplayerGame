@@ -16,6 +16,7 @@ class MULTIPLAYERGAME_API ABlasterGameMode : public AGameMode
 public:
 	ABlasterGameMode();
 	virtual void Tick(float DeltaTime) override;
+	virtual void OnMatchStateSet() override;
 	void PlayerEliminated(class ABlasterCharacter* ElimmedCharacter, class ABlasterPlayerController* VictimController, ABlasterPlayerController* AttackerController);
 	void RequestRespawn(ACharacter* ElimmedCharacter, AController* ElimmedController);
 
