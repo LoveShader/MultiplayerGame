@@ -97,15 +97,7 @@ void ABlasterCharacter::BeginPlay()
 	}
 	
 	//Setup Input Mapping Context, add it to Subsystem
-	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
-	{
-		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
-		if (Subsystem)
-		{
-			Subsystem->AddMappingContext(InputContext, 0);
-		}
-	}
-	
+	PollInitInput();
 }
 
 void ABlasterCharacter::Move(const FInputActionValue& Value)
@@ -514,6 +506,19 @@ void ABlasterCharacter::PollInit()
 	}
 }
 
+void ABlasterCharacter::PollInitInput()
+{
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+		if (Subsystem)
+		{
+			Subsystem->AddMappingContext(InputContext, 0);
+		}
+		bInputsSet = true;
+	}
+}
+
 void ABlasterCharacter::SetOverlappedWeapon(AWeapon* Weapon)
 {
 	if (OverlappedWeapon)
@@ -556,6 +561,8 @@ void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	PollInit();
+	if (!bInputsSet && HasAuthority())
+		PollInitInput();
 	AimOffset(DeltaTime);
 	HideCameraIfCharacterClose();
 }

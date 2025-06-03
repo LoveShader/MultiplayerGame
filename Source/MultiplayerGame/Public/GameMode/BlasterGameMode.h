@@ -14,6 +14,17 @@ class MULTIPLAYERGAME_API ABlasterGameMode : public AGameMode
 {
 	GENERATED_BODY()
 public:
+	ABlasterGameMode();
+	virtual void Tick(float DeltaTime) override;
 	void PlayerEliminated(class ABlasterCharacter* ElimmedCharacter, class ABlasterPlayerController* VictimController, ABlasterPlayerController* AttackerController);
 	void RequestRespawn(ACharacter* ElimmedCharacter, AController* ElimmedController);
+
+	UPROPERTY(EditDefaultsOnly)
+	float WarmupTime = 10.0f;
+
+	float LevelStartingTime = 0.0f;
+protected:
+	virtual void BeginPlay() override;
+private:
+	float CountdownTime = 0.0f;
 };

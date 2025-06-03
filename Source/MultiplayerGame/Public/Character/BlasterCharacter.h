@@ -204,6 +204,9 @@ private:
 	ABlasterPlayerState* BlasterPlayerState;
 	//for init playerState and update score for the player first time spawn
 	void PollInit();
+	void PollInitInput();
+
+	bool bInputsSet; 
 public:
 	void SetOverlappedWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped() const;
