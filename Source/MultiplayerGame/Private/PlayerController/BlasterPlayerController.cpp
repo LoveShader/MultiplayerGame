@@ -9,6 +9,7 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "GameFramework/GameMode.h"
+#include "HUD/Announcement.h"
 #include "HUD/BlasterHUD.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -163,7 +164,6 @@ void ABlasterPlayerController::OnPossess(APawn* InPawn)
 			ClearWeaponAmmoHUD();
 		}
 	}
-	
 }
 
 void ABlasterPlayerController::OnRep_PlayerState()
@@ -182,17 +182,26 @@ void ABlasterPlayerController::ClearWeaponAmmoHUD()
 	UpdateHUDWeaponAmmo(0);
 }
 
+void ABlasterPlayerController::HandleMatchHasStarted()
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	if (BlasterHUD)
+	{
+		BlasterHUD->AddCharacterOverlay();
+		if (BlasterHUD->Announcement)
+		{
+			BlasterHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+}
+
 void ABlasterPlayerController::OnMatchStateSet(FName State)
 {
 	MatchState = State;
 
 	if (MatchState == MatchState::InProgress)
 	{
-		BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
-		if (BlasterHUD)
-		{
-			BlasterHUD->AddCharacterOverlay();
-		}
+		HandleMatchHasStarted();
 	}
 }
 
@@ -206,6 +215,14 @@ void ABlasterPlayerController::BeginPlay()
 		{
 			BlasterPlayerState->OnScoreChanged.AddDynamic(this, &ABlasterPlayerController::UpdateHUDScore);
 			BlasterPlayerState->OnDefeatsChanged.AddDynamic(this, &ABlasterPlayerController::UpdateHUDDefeats);
+		}
+	}
+	if (BlasterAnnouncement == nullptr && BlasterHUD)
+	{
+		BlasterHUD->AddAnnouncement();
+		if (BlasterHUD->Announcement)
+		{
+			BlasterAnnouncement = BlasterHUD->Announcement;
 		}
 	}
 }
@@ -222,6 +239,19 @@ void ABlasterPlayerController::SetHUDTime()
 
 void ABlasterPlayerController::PollInit()
 {
+	if (BlasterAnnouncement == nullptr)
+	{
+		BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+		if (BlasterHUD)
+		{
+			BlasterHUD->AddAnnouncement();
+			if (BlasterHUD->Announcement)
+			{
+				BlasterAnnouncement = BlasterHUD->Announcement;
+			}
+		}
+	}
+	
 	if (BlasterOverlay == nullptr)
 	{
 		BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
@@ -233,6 +263,7 @@ void ABlasterPlayerController::PollInit()
 			UpdateHUDDefeats(HUDDefeats);
 		}
 	}
+	
 }
 
 void ABlasterPlayerController::CheckTimeSync(float DeltaTime)
@@ -245,15 +276,12 @@ void ABlasterPlayerController::CheckTimeSync(float DeltaTime)
 	}
 }
 
+
 void ABlasterPlayerController::OnRep_MatchState()
 {
-	if (MatchState == MatchState::InProgress)
+	if (MatchState == ::MatchState::InProgress)
 	{
-		BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
-		if (BlasterHUD)
-		{
-			BlasterHUD->AddCharacterOverlay();
-		}
+		HandleMatchHasStarted();
 	}
 }
 

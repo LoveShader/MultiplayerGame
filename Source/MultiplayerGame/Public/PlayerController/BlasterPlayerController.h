@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "BlasterPlayerController.generated.h"
 
+class UAnnouncement;
 class UCharacterOverlay;
 class ABlasterHUD;
 /**
@@ -35,6 +36,7 @@ public:
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnRep_PlayerState() override;
 	void ClearWeaponAmmoHUD();
+	void HandleMatchHasStarted();
 	void OnMatchStateSet(FName State);
 protected:
 	virtual void BeginPlay() override;
@@ -54,6 +56,9 @@ private:
 	UPROPERTY()
 	UCharacterOverlay* BlasterOverlay;
 
+	UPROPERTY()
+	UAnnouncement* BlasterAnnouncement;
+
 	UPROPERTY(EditAnywhere)
 	float MatchTime = 120.f;
 
@@ -66,6 +71,7 @@ private:
 
 	float TimeSyncRunningTime = 0.f;
 	void CheckTimeSync(float DeltaTime);
+	void HandleMatchStateChanged();
 
 	UPROPERTY(ReplicatedUsing=OnRep_MatchState)
 	FName MatchState;

@@ -6,6 +6,8 @@
 #include "GameFramework/HUD.h"
 #include "BlasterHUD.generated.h"
 
+class UAnnouncement;
+
 USTRUCT(BlueprintType)
 struct FHUDPackage
 {
@@ -32,6 +34,7 @@ class MULTIPLAYERGAME_API ABlasterHUD : public AHUD
 public:
 	virtual void DrawHUD() override;
 	void AddCharacterOverlay();
+	void AddAnnouncement();
 protected:
 	virtual void BeginPlay() override;
 private:
@@ -43,6 +46,9 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	TSubclassOf<class UUserWidget> CharacterOverlayClass;
+
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	TSubclassOf<class UUserWidget> AnnouncementClass;
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
 	/**
@@ -50,5 +56,6 @@ public:
 	 */
 	UCharacterOverlay* CharacterOverlay;
 
+	UAnnouncement* Announcement;
 };	
 
