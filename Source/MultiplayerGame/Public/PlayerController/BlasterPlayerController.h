@@ -38,8 +38,6 @@ public:
 	void ClearWeaponAmmoHUD();
 	void HandleMatchHasStarted();
 	void OnMatchStateSet(FName State);
-
-	
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
@@ -54,7 +52,7 @@ protected:
 	void ServerCheckMatchState();
 	
 	UFUNCTION(Client, Reliable)
-	void ClientJoinMidgame(FName MatchOfState, float Warm, float Match, float LevelStartTime);
+	void ClientJoinMidgame(FName MatchOfState, float Warm, float Match, float CoolDown, float LevelStartTime);
 
 	void UpdateHUDWarmupCountdown(float CountdownTime);
 
@@ -71,6 +69,7 @@ private:
 
 	float MatchTime = 0.0f;
 	float WarmupTime = 0.0f;
+	float CoolDownTime = 0.0f;
 	float LevelStartingTime = 0.0f;
 
 	uint32 CountdownInt = 0;
@@ -82,7 +81,7 @@ private:
 
 	float TimeSyncRunningTime = 0.f;
 	void CheckTimeSync(float DeltaTime);
-	void HandleMatchStateChanged();
+	void HandleCoolDown();
 
 	UPROPERTY(ReplicatedUsing=OnRep_MatchState)
 	FName MatchState;

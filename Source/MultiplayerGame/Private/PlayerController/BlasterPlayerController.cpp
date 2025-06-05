@@ -204,6 +204,10 @@ void ABlasterPlayerController::OnMatchStateSet(FName State)
 	{
 		HandleMatchHasStarted();
 	}
+	else if (MatchState == MatchState::Cooldown)
+	{
+		HandleCoolDown();
+	}
 }
 
 void ABlasterPlayerController::BeginPlay()
@@ -227,7 +231,7 @@ void ABlasterPlayerController::SetHUDTime()
 	float TimeLeft = 0.0f;
 	if (MatchState == MatchState::WaitingToStart) TimeLeft = WarmupTime - GetServerTime() + LevelStartingTime;
 	else if (MatchState == MatchState::InProgress)	TimeLeft = WarmupTime + MatchTime - GetServerTime() + LevelStartingTime;
-
+	
 	uint32 SecondsLeft = FMath::CeilToInt(TimeLeft);
 	if (SecondsLeft != CountdownInt)
 	{
@@ -247,22 +251,25 @@ void ABlasterPlayerController::ServerCheckMatchState_Implementation()
 		WarmupTime = GameMode->WarmupTime;
 		MatchTime = GameMode->MatchTime;
 		MatchState = GameMode->GetMatchState();
+		CoolDownTime = GameMode->CooldownTime;
 		LevelStartingTime = GameMode->LevelStartingTime;
 
-		ClientJoinMidgame(MatchState, WarmupTime, MatchTime, LevelStartingTime);	
+		ClientJoinMidgame(MatchState, WarmupTime, MatchTime, CoolDownTime, LevelStartingTime);	
 	}
 }
 
-void ABlasterPlayerController::ClientJoinMidgame_Implementation(FName MatchOfState, float Warm, float Match,
+void ABlasterPlayerController::ClientJoinMidgame_Implementation(FName MatchOfState, float Warm, float Match, float CoolDown,
 	float LevelStartTime)
 {
 	MatchState = MatchOfState;
 	WarmupTime = Warm;
 	MatchTime = Match;
+	CoolDownTime = CoolDown;
 	LevelStartingTime = LevelStartTime;
 
 	OnMatchStateSet(MatchState);
 
+	//Add BlasterHUD in Listen Server Controller
 	if (HasAuthority())
 	{
 		BlasterHUD = (BlasterHUD == nullptr) ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
@@ -317,12 +324,29 @@ void ABlasterPlayerController::CheckTimeSync(float DeltaTime)
 	}
 }
 
+void ABlasterPlayerController::HandleCoolDown()
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	if (BlasterHUD)
+	{
+		BlasterHUD->CharacterOverlay->RemoveFromParent();
+		if (BlasterHUD->Announcement)
+		{
+			BlasterHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
+		}
+	}
+}
+
 
 void ABlasterPlayerController::OnRep_MatchState()
 {
 	if (MatchState == ::MatchState::InProgress)
 	{
 		HandleMatchHasStarted();
+	}
+	else if (MatchState == MatchState::Cooldown)
+	{
+		HandleCoolDown();
 	}
 }
 

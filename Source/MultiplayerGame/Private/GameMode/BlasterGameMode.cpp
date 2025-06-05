@@ -10,6 +10,11 @@
 #include "PlayerController/BlasterPlayerController.h"
 #include "PlayerState/BlasterPlayerState.h"
 
+namespace MatchState
+{
+	const FName Cooldown = FName("Cooldown"); // Match duration has been reached. Display winner and begin cooldown timer.
+}
+
 ABlasterGameMode::ABlasterGameMode()
 {
 	bDelayedStart = true;
@@ -31,6 +36,13 @@ void ABlasterGameMode::Tick(float DeltaTime)
 		if (CountdownTime <= 0.0f)
 		{
 			StartMatch();
+		}
+	} else if (MatchState == MatchState::InProgress)
+	{
+		CountdownTime = WarmupTime + MatchTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		if (CountdownTime <= 0.0f)
+		{
+			SetMatchState(MatchState::Cooldown);
 		}
 	}
 }
