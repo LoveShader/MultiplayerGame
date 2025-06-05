@@ -38,6 +38,8 @@ public:
 	void ClearWeaponAmmoHUD();
 	void HandleMatchHasStarted();
 	void OnMatchStateSet(FName State);
+
+	
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
@@ -47,6 +49,14 @@ protected:
 
 	UFUNCTION(Client, Reliable)
 	void ClientReportServerTime(float TimeOfClientRequest, float TimeServerReceivedClientRequest);
+
+	UFUNCTION(Server, Reliable)
+	void ServerCheckMatchState();
+	
+	UFUNCTION(Client, Reliable)
+	void ClientJoinMidgame(FName MatchOfState, float Warm, float Match, float LevelStartTime);
+
+	void UpdateHUDWarmupCountdown(float CountdownTime);
 
 	void PollInit();
 private:
@@ -59,8 +69,9 @@ private:
 	UPROPERTY()
 	UAnnouncement* BlasterAnnouncement;
 
-	UPROPERTY(EditAnywhere)
-	float MatchTime = 120.f;
+	float MatchTime = 0.0f;
+	float WarmupTime = 0.0f;
+	float LevelStartingTime = 0.0f;
 
 	uint32 CountdownInt = 0;
 

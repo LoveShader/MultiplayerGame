@@ -23,6 +23,9 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	float WarmupTime = 10.0f;
 
+	UPROPERTY(EditDefaultsOnly)
+	float MatchTime = 120.f;
+
 	float LevelStartingTime = 0.0f;
 protected:
 	virtual void BeginPlay() override;
