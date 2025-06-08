@@ -87,6 +87,15 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
+
+	/** 
+	* Automatic fire
+	*/
+	UPROPERTY(EditAnywhere, Category = Combat)
+	float FireDelay = 0.15f;
+	
+	UPROPERTY(EditAnywhere, Category = Combat)
+	bool bAutomatic = true;
 public:
 	/**
 	 * Blaster CrossHair HUD Textures
@@ -117,6 +126,8 @@ public:
 	FORCEINLINE EWeaponType GetWeaponType() const {return WeaponType;}
 	FORCEINLINE bool IsNeedReload() const {return Ammo < MagCapcity;}
 	FORCEINLINE bool IsEmpty() const {return Ammo <= 0;}
+	FORCEINLINE float GetFireDelay() const {return FireDelay;}
+	FORCEINLINE bool GetAutomatic() const {return bAutomatic;}
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnAmmoChanged OnAmmoChanged;

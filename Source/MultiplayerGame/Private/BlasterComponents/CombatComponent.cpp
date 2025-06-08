@@ -25,6 +25,7 @@ UCombatComponent::UCombatComponent()
 void UCombatComponent::InitializeCarriedAmmo()
 {
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, StartingARAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_RocketLauncher, StartingRocketAmmo);
 }
 
 void UCombatComponent::OnRep_CombatState()
@@ -39,6 +40,7 @@ void UCombatComponent::OnRep_CombatState()
 		{
 			Fire();
 		}
+		break;
 	}
 }
 
@@ -299,7 +301,7 @@ void UCombatComponent::StartFireTimer()
 	Character->GetWorldTimerManager().SetTimer(FireTimerHandle,
 		this,
 		&UCombatComponent::FireTimerFinished,
-		0.15f);
+		EquippedWeapon->GetFireDelay());
 }
 
 void UCombatComponent::FireTimerFinished()
@@ -307,7 +309,7 @@ void UCombatComponent::FireTimerFinished()
 	if (EquippedWeapon == nullptr) return;
 	
 	bCanFire = true;
-	if (bFireButtonPressed)
+	if (bFireButtonPressed && EquippedWeapon->GetAutomatic())
 	{
 		Fire();
 	}

@@ -369,6 +369,7 @@ void ABlasterCharacter::NetMulticastElim_Implementation()
 
 	//Disable character Movement
 	bDisableGameplay = true;
+	GetCharacterMovement()->DisableMovement();
 
 	//Disable Colliison
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
