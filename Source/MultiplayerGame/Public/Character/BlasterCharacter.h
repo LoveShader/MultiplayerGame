@@ -206,7 +206,10 @@ private:
 	void PollInit();
 	void PollInitInput();
 
-	bool bInputsSet; 
+	bool bInputsSet;
+public:
+	UPROPERTY(Replicated)
+	bool bDisableGameplay = false;
 public:
 	void SetOverlappedWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped() const;
@@ -220,4 +223,5 @@ public:
 	FORCEINLINE bool GetIsElimed() const { return bIsElimed; }
 	FORCEINLINE	float GetHealth() const { return Health; }
 	FORCEINLINE	float GetMaxHealth() const { return MaxHealth; }
+	FORCEINLINE UCombatComponent* GetCombat() const {return Combat;}
 };
