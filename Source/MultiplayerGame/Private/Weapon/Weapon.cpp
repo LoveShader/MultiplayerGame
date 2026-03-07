@@ -34,6 +34,8 @@ AWeapon::AWeapon()
 	//Create User Widget Object
 	PickupWidget = CreateDefaultSubobject<UWidgetComponent>("PickupWidget");
 	PickupWidget->SetupAttachment(GetRootComponent());
+
+	SetReplicatingMovement(true);
 }
 
 void AWeapon::BeginPlay()

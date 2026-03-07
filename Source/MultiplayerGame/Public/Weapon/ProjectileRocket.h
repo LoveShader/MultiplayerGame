@@ -63,4 +63,7 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float DestroyTime = 3.0f;
+
+	UPROPERTY(VisibleAnywhere)
+	class URocketMovementComponent* RocketMovementComponent;
 };
