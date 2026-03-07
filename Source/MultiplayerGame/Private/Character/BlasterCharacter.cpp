@@ -18,6 +18,7 @@
 #include "PlayerController/BlasterPlayerController.h"
 #include "Weapon/Weapon.h"
 #include "GameMode/BlasterGameMode.h"
+#include "HUD/OverheadWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "PlayerState/BlasterPlayerState.h"
@@ -374,6 +375,10 @@ void ABlasterCharacter::NetMulticastElim_Implementation()
 	//Disable Colliison
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	//Construct the Overhead Widget
+	/*OverheadWidget = CreateDefaultSubobject<UWidgetComponent>("Overhead");
+	OverheadWidget->SetupAttachment(GetRootComponent());*/
 }
 
 void ABlasterCharacter::PlayHitReactMontage()
@@ -422,6 +427,42 @@ ECombatState ABlasterCharacter::GetCombatState() const
 {
 	if (!Combat)	return ECombatState::ECS_MAX;
 	return Combat->CombatState;
+}
+
+void ABlasterCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	if (!OverheadWidget) return;
+	
+	if (UUserWidget* UserWidget = OverheadWidget->GetUserWidgetObject())
+	{
+		if (APlayerState* PS = GetPlayerState())
+		{
+			if (UOverheadWidget* Overhead = Cast<UOverheadWidget>(UserWidget))
+			{
+				Overhead->SetDisplayText(PS->GetPlayerName());
+			}
+		}
+	}
+}
+
+void ABlasterCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (!OverheadWidget) return;
+	
+	if (UUserWidget* UserWidget = OverheadWidget->GetUserWidgetObject())
+	{
+		if (APlayerState* PS = GetPlayerState())
+		{
+			if (UOverheadWidget* Overhead = Cast<UOverheadWidget>(UserWidget))
+			{
+				Overhead->SetDisplayText(PS->GetPlayerName());
+			}
+		}
+	}
 }
 
 void ABlasterCharacter::OnRep_OverlappedWeapon(AWeapon* LastWeapon)

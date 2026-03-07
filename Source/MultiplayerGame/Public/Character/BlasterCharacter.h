@@ -45,6 +45,9 @@ public:
 
 	virtual UCombatComponent* GetCombatComponentForUI() override;
 	ECombatState GetCombatState() const;
+
+	void OnRep_PlayerState() override;
+	void PossessedBy(AController* NewController) override;
 protected:
 	virtual void BeginPlay() override;
 
@@ -118,6 +121,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	UCombatComponent* Combat;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
+	class UWidgetComponent* OverheadWidget;
+	
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
 	
