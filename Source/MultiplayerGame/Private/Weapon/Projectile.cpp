@@ -59,17 +59,22 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 	Destroy();
 }
 
-void AProjectile::NetMulticastHitEffects_Implementation()
+void AProjectile::PlayHitEffects()
 {
 	if (ImpactParticle)
-    {
-    	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, GetActorTransform());
-    }
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, GetActorTransform());
+	}
 
-    if (ImpactSound)
-    {
-    	UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
-    }
+	if (ImpactSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+	}
+}
+
+void AProjectile::NetMulticastHitEffects_Implementation()
+{
+	PlayHitEffects();
 }
 
 void AProjectile::ServerHitEffects_Implementation()
