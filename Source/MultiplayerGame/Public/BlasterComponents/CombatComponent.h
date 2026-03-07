@@ -134,6 +134,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = CarriedAmmos)
 	int32 StartingPistolAmmo = 15;
+
+	UPROPERTY(EditAnywhere, Category = CarriedAmmos)
+	int32 StartSMGAmmo = 20;
 	
 	UFUNCTION()
 	void OnRep_CarriedAmmo();
