@@ -126,11 +126,14 @@ private:
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_CarriedAmmo)
 	int32 CarriedAmmo;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = CarriedAmmos)
 	int32 StartingARAmmo = 30;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = CarriedAmmos)
 	int32 StartingRocketAmmo = 4;
+
+	UPROPERTY(EditAnywhere, Category = CarriedAmmos)
+	int32 StartingPistolAmmo = 15;
 	
 	UFUNCTION()
 	void OnRep_CarriedAmmo();
