@@ -327,6 +327,9 @@ void ABlasterCharacter::PlayReloadMontage()
 		case EWeaponType::EWT_Shotgun:
 				SectionName = FName("Rifle");
 				break;
+		case EWeaponType::EWT_SniperRifle:
+			SectionName = FName("Rifle");
+			break;
 		}
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
@@ -395,9 +398,16 @@ void ABlasterCharacter::NetMulticastElim_Implementation()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	//Construct the Overhead Widget
-	/*OverheadWidget = CreateDefaultSubobject<UWidgetComponent>("Overhead");
-	OverheadWidget->SetupAttachment(GetRootComponent());*/
+	bool bHideSniperScope = IsLocallyControlled() &&
+		Combat &&
+			IsAiming() &&
+			Combat->EquippedWeapon &&
+				Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
+
+	if (bHideSniperScope)
+	{
+		ShowSniperScopeWidget(false);
+	}
 }
 
 void ABlasterCharacter::PlayHitReactMontage()

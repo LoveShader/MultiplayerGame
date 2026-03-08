@@ -48,6 +48,9 @@ public:
 
 	void OnRep_PlayerState() override;
 	void PossessedBy(AController* NewController) override;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShowSniperScopeWidget(bool bShowScope);
 protected:
 	virtual void BeginPlay() override;
 
