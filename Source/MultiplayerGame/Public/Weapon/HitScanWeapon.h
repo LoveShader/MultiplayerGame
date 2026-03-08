@@ -21,7 +21,7 @@ protected:
 	void PlayVFXWhenFire(const FTransform& SocketTransform) const;
 	void PlayBeamEffect(const FVector& Start, const FVector& End) const;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "WeaponDamage")
 	float Damage = 20.0f;
 private:
 	UPROPERTY(EditAnywhere)

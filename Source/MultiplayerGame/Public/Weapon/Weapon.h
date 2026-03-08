@@ -67,34 +67,34 @@ private:
 	/** 
 	* Zoomed FOV while aiming
 	*/
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "ZoomParameters")
 	float ZoomedFOV = 30.f;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "ZoomParameters")
 	float ZoomInterpSpeed = 20.f;
 
 	//Ammo
-	UPROPERTY(EditAnywhere, ReplicatedUsing=OnRep_Ammo)
+	UPROPERTY(EditAnywhere, ReplicatedUsing=OnRep_Ammo, Category = "AmmoParameters")
 	int32 Ammo;
 
 	UFUNCTION()
 	void OnRep_Ammo();
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "AmmoParameters")
 	int MagCapcity;
 
 	void SpendRound();
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "WeaponTypeParameters")
 	EWeaponType WeaponType;
 
 	/** 
 	* Automatic fire
 	*/
-	UPROPERTY(EditAnywhere, Category = Combat)
+	UPROPERTY(EditAnywhere, Category = "Combat|AutoFire")
 	float FireDelay = 0.15f;
 	
-	UPROPERTY(EditAnywhere, Category = Combat)
+	UPROPERTY(EditAnywhere, Category = "Combat|AutoFire")
 	bool bAutomatic = true;
 public:
 	/**
