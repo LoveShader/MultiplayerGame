@@ -9,7 +9,7 @@
 #include "Weapon/WeaponTypes.h"
 #include "CombatComponent.generated.h"
 
-#define LINETRACE_LENGTH 80000.0f
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCarriedAmmoChanged, int32, NewAmmo);
 
 class UCameraComponent;
@@ -136,7 +136,10 @@ private:
 	int32 StartingPistolAmmo = 15;
 
 	UPROPERTY(EditAnywhere, Category = CarriedAmmos)
-	int32 StartSMGAmmo = 20;
+	int32 StartingSMGAmmo = 20;
+
+	UPROPERTY(EditAnywhere, Category = CarriedAmmos)
+	int32 StartingShotgunAmmo = 0;
 	
 	UFUNCTION()
 	void OnRep_CarriedAmmo();
