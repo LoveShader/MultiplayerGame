@@ -198,15 +198,34 @@ void ABlasterCharacter::AimButtonReleased()
 	} 
 }
 
+void ABlasterCharacter::CalculateAO_Pitch()
+{
+	AO_Pitch = GetBaseAimRotation().Pitch;
+	
+	//because Pitch is compress to [0, 360), there need convert this to [-90,0)
+	if (AO_Pitch > 90.0f && !IsLocallyControlled())
+	{
+		FVector2D InRange = FVector2D(270.0f,360.0f);
+		FVector2D OutRange = FVector2D(-90.0f, 0.0f);
+		AO_Pitch =  FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
+	}
+}
+
+float ABlasterCharacter::CalculateSpeed() const
+{
+	FVector Velocity = GetVelocity();
+	Velocity.Z = 0.0f;
+	return Velocity.Size();
+}
+
 void ABlasterCharacter::AimOffset(float DeltaTime)
 {
 	//if don't equip weapon, then just return
 	if (Combat && Combat->EquippedWeapon == nullptr)	return;
+	bRotateRootBone = true;
 
 	//Get Character Velocity
-	FVector Velocity = GetVelocity();
-	Velocity.Z = 0.0f;
-	float Speed = Velocity.Size();
+	float Speed = CalculateSpeed();
 	bool bIsInAir = GetCharacterMovement()->IsFalling();
 	
 	if (Speed == 0.0f && !bIsInAir)	// stand, not running and jumping
@@ -229,15 +248,54 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		TurningInPlace = ETurningInPlace::ETIP_NoTurning;
 		bUseControllerRotationYaw = true;
 	}
-	AO_Pitch = GetBaseAimRotation().Pitch;
+	CalculateAO_Pitch();
+}
 
-	//because Pitch is compress to [0, 360), there need convert this to [-90,0)
-	if (AO_Pitch > 90.0f && !IsLocallyControlled())
+void ABlasterCharacter::OnRep_ReplicateMovement()
+{
+	Super::OnRep_ReplicateMovement();
+	
+	SimProxiesTurn();
+	TimeSinceLastMovementReplication = 0.0f;
+}
+
+void ABlasterCharacter::SimProxiesTurn()
+{
+	if (Combat && Combat->EquippedWeapon == nullptr)	return;
+	bRotateRootBone = true;
+
+	float Speed = CalculateSpeed();
+	if (Speed > 0.0f)
 	{
-		FVector2D InRange = FVector2D(270.0f,360.0f);
-		FVector2D OutRange = FVector2D(-90.0f, 0.0f);
-		AO_Pitch =  FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
+		TurningInPlace = ETurningInPlace::ETIP_NoTurning;
+		return;
 	}
+
+	
+	ProxyRotationLastFrame = ProxyRotation;
+	ProxyRotation = GetActorRotation();
+	ProxyYaw = UKismetMathLibrary::NormalizedDeltaRotator(ProxyRotation, ProxyRotationLastFrame).Yaw;
+
+	UE_LOG(LogTemp, Warning, TEXT("ProxyYaw: %f"), ProxyYaw);
+	if (FMath::Abs(ProxyYaw) > TurnThreshold) {
+		if (ProxyYaw > TurnThreshold)
+		{
+			TurningInPlace = ETurningInPlace::ETIP_Right;
+			UE_LOG(LogTemp, Warning, TEXT("TurningInPlace is Right"));
+		}
+		else if (ProxyYaw < -TurnThreshold)
+		{
+			TurningInPlace = ETurningInPlace::ETIP_Left;
+			UE_LOG(LogTemp, Warning, TEXT("TurningInPlace is Left"));
+		}
+		else
+		{
+			TurningInPlace = ETurningInPlace::ETIP_NoTurning;
+		}
+		return;
+	}
+
+	TurningInPlace = ETurningInPlace::ETIP_NoTurning;
 }
 
 void ABlasterCharacter::Jump()
@@ -621,6 +679,7 @@ void ABlasterCharacter::PollInitInput()
 	}
 }
 
+
 void ABlasterCharacter::SetOverlappedWeapon(AWeapon* Weapon)
 {
 	if (OverlappedWeapon)
@@ -665,7 +724,20 @@ void ABlasterCharacter::Tick(float DeltaTime)
 	PollInit();
 	if (!bInputsSet && HasAuthority())
 		PollInitInput();
-	AimOffset(DeltaTime);
+
+	if (GetLocalRole() > ROLE_SimulatedProxy && IsLocallyControlled())
+	{
+		AimOffset(DeltaTime);
+	}
+	else
+	{
+		TimeSinceLastMovementReplication += DeltaTime;
+		if (TimeSinceLastMovementReplication > 0.25f)
+		{
+			OnRep_ReplicateMovement();
+		}
+		CalculateAO_Pitch();
+	}
 	HideCameraIfCharacterClose();
 }
 

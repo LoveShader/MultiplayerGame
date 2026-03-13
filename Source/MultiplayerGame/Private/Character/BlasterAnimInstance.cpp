@@ -62,6 +62,7 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	//get AO_Yaw and AO_Pitch from BlasterCharacter
 	AO_Yaw = BlasterCharacter->GetAO_Yaw();
 	AO_Pitch = BlasterCharacter->GetAO_Pitch();
+	bRotateRootBone = BlasterCharacter->GetRotateRootBone();
 
 	//tweak Weapon Socket Translation
 	if (bWeaponEquipped && EquippedWeapon && BlasterCharacter->GetMesh())

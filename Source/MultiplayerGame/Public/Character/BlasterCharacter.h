@@ -51,6 +51,8 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowSniperScopeWidget(bool bShowScope);
+
+	virtual void OnRep_ReplicateMovement() override;
 protected:
 	virtual void BeginPlay() override;
 
@@ -60,7 +62,10 @@ protected:
 	void CrouchButtonPressed();
 	void AimButtonPressed();
 	void AimButtonReleased();
+	void CalculateAO_Pitch();
+	float CalculateSpeed() const;
 	void AimOffset(float DeltaTime);
+	void SimProxiesTurn();
 	virtual void Jump() override;
 	void FireButtonPressed();
 	void FireButtonReleased();
@@ -135,6 +140,15 @@ private:
 	float InterpAO_Yaw;
 	float AO_Pitch;
 	FRotator StartingAimRotation;
+
+	/* Simulate Proxy Rotation */
+	UPROPERTY(EditAnywhere)
+	float TurnThreshold = 0.5f;
+
+	FRotator ProxyRotationLastFrame;
+	FRotator ProxyRotation;
+	float ProxyYaw;
+	float TimeSinceLastMovementReplication;
 
 	/* Turning In Place State */
 	ETurningInPlace TurningInPlace;
@@ -216,6 +230,9 @@ private:
 	void PollInitInput();
 
 	bool bInputsSet;
+
+	bool bRotateRootBone = false;
+	
 public:
 	UPROPERTY(Replicated)
 	bool bDisableGameplay = false;
@@ -233,4 +250,5 @@ public:
 	FORCEINLINE	float GetHealth() const { return Health; }
 	FORCEINLINE	float GetMaxHealth() const { return MaxHealth; }
 	FORCEINLINE UCombatComponent* GetCombat() const {return Combat;}
+	FORCEINLINE bool GetRotateRootBone() const { return bRotateRootBone; }
 };
