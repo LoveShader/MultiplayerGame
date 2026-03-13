@@ -263,8 +263,9 @@ void ABlasterCharacter::SimProxiesTurn()
 {
 	if (Combat && Combat->EquippedWeapon == nullptr)	return;
 	bRotateRootBone = true;
-
+	UE_LOG(LogTemp, Warning, TEXT("TurningInPlace is Not Turning"));
 	float Speed = CalculateSpeed();
+
 	if (Speed > 0.0f)
 	{
 		TurningInPlace = ETurningInPlace::ETIP_NoTurning;
@@ -403,9 +404,21 @@ void ABlasterCharacter::Elim()
 		ElimDelay);
 }
 
+void ABlasterCharacter::ShowElimTextOnLocalPawn()
+{
+	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(GetController()) : BlasterPlayerController;
+	if (IsLocallyControlled() && BlasterPlayerController)
+	{
+		BlasterPlayerController->HideElimText(false);
+	}
+}
+
 void ABlasterCharacter::NetMulticastElim_Implementation()
 {
 	bIsElimed = true;
+	//Show Elim Text On Current Machine
+	ShowElimTextOnLocalPawn();
+	
 	PlayElimMontage();
 	// add dissolve material
 	if (DissolveMaterialInstance)

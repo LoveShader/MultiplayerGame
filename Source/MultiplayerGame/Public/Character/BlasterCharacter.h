@@ -232,7 +232,8 @@ private:
 	bool bInputsSet;
 
 	bool bRotateRootBone = false;
-	
+
+	void ShowElimTextOnLocalPawn();
 public:
 	UPROPERTY(Replicated)
 	bool bDisableGameplay = false;

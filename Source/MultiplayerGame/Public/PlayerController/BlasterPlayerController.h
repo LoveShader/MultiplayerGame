@@ -21,6 +21,7 @@ public:
 	virtual void ReceivedPlayer() override; // Sync with server clock as soon as possible
 	virtual float GetServerTime() const;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void OnRep_Pawn() override;
 	void SetHUDHealth(float Health, float MaxHealth);
 	UFUNCTION()
 	void UpdateHUDScore(float Score);
@@ -32,6 +33,8 @@ public:
 	void UpdateHUDCarriedAmmo(int32 CarriedAmmo);
 
 	void UpdateHUDMatchCountdown(float CountdownTime);
+
+	void HideElimText(bool bHideText);
 	
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnRep_PlayerState() override;

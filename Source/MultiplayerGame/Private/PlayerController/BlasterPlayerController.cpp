@@ -154,6 +154,21 @@ void ABlasterPlayerController::UpdateHUDMatchCountdown(float CountdownTime)
 	}
 }
 
+void ABlasterPlayerController::HideElimText(bool bHideText)
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+	bool bHudValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+			BlasterHUD->CharacterOverlay->ElimText;
+
+	if (bHudValid)
+	{
+		ESlateVisibility Visibility = bHideText ? ESlateVisibility::Hidden : ESlateVisibility::Visible;
+		BlasterHUD->CharacterOverlay->ElimText->SetVisibility(Visibility);
+	}
+}
+
 void ABlasterPlayerController::UpdateHUDWarmupCountdown(float CountdownTime)
 {
 	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
@@ -192,6 +207,8 @@ void ABlasterPlayerController::OnPossess(APawn* InPawn)
 			ClearWeaponAmmoHUD();
 		}
 	}
+
+	HideElimText(true);
 }
 
 void ABlasterPlayerController::OnRep_PlayerState()
@@ -321,6 +338,7 @@ void ABlasterPlayerController::PollInit()
 			SetHUDHealth(HUDHealth,HUDMaxHealth);
 			UpdateHUDScore(HUDScore);
 			UpdateHUDDefeats(HUDDefeats);
+			HideElimText(true);
 		}
 	}
 	
@@ -385,6 +403,13 @@ void ABlasterPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetime
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ABlasterPlayerController, MatchState);
+}
+
+void ABlasterPlayerController::OnRep_Pawn()
+{
+	Super::OnRep_Pawn();
+
+	HideElimText(true);
 }
 
 void ABlasterPlayerController::ClientReportServerTime_Implementation(float TimeOfClientRequest,
