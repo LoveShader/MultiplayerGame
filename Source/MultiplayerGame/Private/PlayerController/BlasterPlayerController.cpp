@@ -154,7 +154,7 @@ void ABlasterPlayerController::UpdateHUDMatchCountdown(float CountdownTime)
 	}
 }
 
-void ABlasterPlayerController::HideElimText(bool bHideText)
+void ABlasterPlayerController::SetElimTextVisibility(bool bVisibility)
 {
 	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 
@@ -164,7 +164,7 @@ void ABlasterPlayerController::HideElimText(bool bHideText)
 
 	if (bHudValid)
 	{
-		ESlateVisibility Visibility = bHideText ? ESlateVisibility::Hidden : ESlateVisibility::Visible;
+		ESlateVisibility Visibility = bVisibility ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
 		BlasterHUD->CharacterOverlay->ElimText->SetVisibility(Visibility);
 	}
 }
@@ -207,8 +207,6 @@ void ABlasterPlayerController::OnPossess(APawn* InPawn)
 			ClearWeaponAmmoHUD();
 		}
 	}
-
-	HideElimText(true);
 }
 
 void ABlasterPlayerController::OnRep_PlayerState()
@@ -253,6 +251,22 @@ void ABlasterPlayerController::OnMatchStateSet(FName State)
 	{
 		HandleCoolDown();
 	}
+}
+
+void ABlasterPlayerController::StartShowElimTextTimer()
+{
+	SetElimTextVisibility(true);
+	GetWorldTimerManager().SetTimer(
+		ElimTextTimer,
+		this,
+		&ThisClass::ElimTextTimerFinished,
+		ShowElimTextTime
+	);
+}
+
+void ABlasterPlayerController::ElimTextTimerFinished()
+{
+	SetElimTextVisibility(false);
 }
 
 void ABlasterPlayerController::BeginPlay()
@@ -338,7 +352,7 @@ void ABlasterPlayerController::PollInit()
 			SetHUDHealth(HUDHealth,HUDMaxHealth);
 			UpdateHUDScore(HUDScore);
 			UpdateHUDDefeats(HUDDefeats);
-			HideElimText(true);
+			SetElimTextVisibility(false);
 		}
 	}
 	
@@ -408,8 +422,6 @@ void ABlasterPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetime
 void ABlasterPlayerController::OnRep_Pawn()
 {
 	Super::OnRep_Pawn();
-
-	HideElimText(true);
 }
 
 void ABlasterPlayerController::ClientReportServerTime_Implementation(float TimeOfClientRequest,

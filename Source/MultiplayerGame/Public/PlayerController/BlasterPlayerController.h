@@ -33,14 +33,14 @@ public:
 	void UpdateHUDCarriedAmmo(int32 CarriedAmmo);
 
 	void UpdateHUDMatchCountdown(float CountdownTime);
-
-	void HideElimText(bool bHideText);
 	
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnRep_PlayerState() override;
 	void ClearWeaponAmmoHUD();
 	void HandleMatchHasStarted();
 	void OnMatchStateSet(FName State);
+
+	void StartShowElimTextTimer();
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
@@ -96,4 +96,10 @@ private:
 	float HUDMaxHealth;
 	float HUDScore;
 	int32 HUDDefeats;
+
+	FTimerHandle ElimTextTimer;
+	UPROPERTY(EditAnywhere)
+	float ShowElimTextTime = 1.0f;
+	void ElimTextTimerFinished();
+	void SetElimTextVisibility(bool bVisibility);
 };

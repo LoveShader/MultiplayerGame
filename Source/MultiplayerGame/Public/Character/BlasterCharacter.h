@@ -233,7 +233,7 @@ private:
 
 	bool bRotateRootBone = false;
 
-	void ShowElimTextOnLocalPawn();
+	void ShowElimTextIfLocallyControlled();
 public:
 	UPROPERTY(Replicated)
 	bool bDisableGameplay = false;

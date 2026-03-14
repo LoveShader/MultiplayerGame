@@ -404,12 +404,12 @@ void ABlasterCharacter::Elim()
 		ElimDelay);
 }
 
-void ABlasterCharacter::ShowElimTextOnLocalPawn()
+void ABlasterCharacter::ShowElimTextIfLocallyControlled()
 {
 	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(GetController()) : BlasterPlayerController;
 	if (IsLocallyControlled() && BlasterPlayerController)
 	{
-		BlasterPlayerController->HideElimText(false);
+		BlasterPlayerController->StartShowElimTextTimer();
 	}
 }
 
@@ -417,7 +417,7 @@ void ABlasterCharacter::NetMulticastElim_Implementation()
 {
 	bIsElimed = true;
 	//Show Elim Text On Current Machine
-	ShowElimTextOnLocalPawn();
+	ShowElimTextIfLocallyControlled();
 	
 	PlayElimMontage();
 	// add dissolve material
