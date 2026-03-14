@@ -41,6 +41,7 @@ public:
 	void OnMatchStateSet(FName State);
 
 	void StartShowElimTextTimer();
+	void UpdateHUDWeaponType(const FString& WeaponType);
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();

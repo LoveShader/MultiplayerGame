@@ -73,6 +73,14 @@ void UCombatComponent::PlayEquipWeaponSound()
 	}
 }
 
+FString UCombatComponent::GetWeaponTypeDisplayName(EWeaponType WeaponType)
+{
+	const UEnum* EnumPtr = StaticEnum<EWeaponType>();
+	if (!EnumPtr || WeaponType == EWeaponType::EWT_MAX) return FString("");
+
+	return EnumPtr->GetDisplayNameTextByValue(static_cast<int64>(WeaponType)).ToString();
+}
+
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
 	if (!Character || !WeaponToEquip)	return;
@@ -101,6 +109,7 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	if (PlayerController)
 	{
 		PlayerController->UpdateHUDCarriedAmmo(CarriedAmmo);
+		PlayerController->UpdateHUDWeaponType(GetWeaponTypeDisplayName(EquippedWeapon->GetWeaponType()));
 	}
 
 	//Play Equipped Sound
@@ -160,6 +169,12 @@ void UCombatComponent::OnRep_EquippedWeapon(AWeapon* LastWeapon)
 		PlayEquipWeaponSound();
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
+
+		PlayerController = PlayerController == nullptr ? Cast<ABlasterPlayerController>(Character->GetController()) : PlayerController;
+		if (PlayerController)
+		{
+			PlayerController->UpdateHUDWeaponType(GetWeaponTypeDisplayName(EquippedWeapon->GetWeaponType()));
+		}
 	}
 }
 
@@ -443,7 +458,7 @@ bool UCombatComponent::CanFire() const
 void UCombatComponent::OnRep_CarriedAmmo()
 {
 	PlayerController = PlayerController == nullptr ? Cast<ABlasterPlayerController>(Character->GetController()) : PlayerController;
-	if (PlayerController)
+	if (PlayerController && Character->IsLocallyControlled())
 	{
 		PlayerController->UpdateHUDCarriedAmmo(CarriedAmmo);
 	}

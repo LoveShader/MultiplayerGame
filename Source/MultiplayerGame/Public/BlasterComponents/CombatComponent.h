@@ -160,6 +160,8 @@ private:
 	int32 AmountToReload();
 
 	void PlayEquipWeaponSound();
+
+	FString GetWeaponTypeDisplayName(EWeaponType WeaponType);
 public:
 	/**
 	 * Getter and Setter Function

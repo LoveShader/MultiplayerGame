@@ -264,6 +264,20 @@ void ABlasterPlayerController::StartShowElimTextTimer()
 	);
 }
 
+void ABlasterPlayerController::UpdateHUDWeaponType(const FString& WeaponType)
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+	bool bHudValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+			BlasterHUD->CharacterOverlay->WeaponType;
+
+	if (bHudValid)
+	{
+		BlasterHUD->CharacterOverlay->WeaponType->SetText(FText::FromString(WeaponType));
+	}
+}
+
 void ABlasterPlayerController::ElimTextTimerFinished()
 {
 	SetElimTextVisibility(false);
@@ -353,6 +367,7 @@ void ABlasterPlayerController::PollInit()
 			UpdateHUDScore(HUDScore);
 			UpdateHUDDefeats(HUDDefeats);
 			SetElimTextVisibility(false);
+			UpdateHUDWeaponType("");
 		}
 	}
 	

@@ -234,6 +234,7 @@ private:
 	bool bRotateRootBone = false;
 
 	void ShowElimTextIfLocallyControlled();
+	void ClearWeaponTypeText();
 public:
 	UPROPERTY(Replicated)
 	bool bDisableGameplay = false;

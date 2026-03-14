@@ -413,11 +413,21 @@ void ABlasterCharacter::ShowElimTextIfLocallyControlled()
 	}
 }
 
+void ABlasterCharacter::ClearWeaponTypeText()
+{
+	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(GetController()) : BlasterPlayerController;
+	if (IsLocallyControlled() && BlasterPlayerController)
+	{
+		BlasterPlayerController->UpdateHUDWeaponType("");
+	}
+}
+
 void ABlasterCharacter::NetMulticastElim_Implementation()
 {
 	bIsElimed = true;
 	//Show Elim Text On Current Machine
 	ShowElimTextIfLocallyControlled();
+	ClearWeaponTypeText();
 	
 	PlayElimMontage();
 	// add dissolve material
