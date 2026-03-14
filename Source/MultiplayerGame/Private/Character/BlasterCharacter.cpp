@@ -340,7 +340,7 @@ void ABlasterCharacter::ReloadButtonPressed()
 	if (bDisableGameplay)
 		return;
 	
-	if (Combat)
+	if (Combat && Combat->EquippedWeapon)
 	{
 		Combat->Reload();
 	}

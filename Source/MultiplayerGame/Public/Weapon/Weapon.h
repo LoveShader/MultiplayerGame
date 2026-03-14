@@ -96,6 +96,9 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = "Combat|AutoFire")
 	bool bAutomatic = true;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	class USoundCue* EquipSound;
 public:
 	/**
 	 * Blaster CrossHair HUD Textures
@@ -128,6 +131,7 @@ public:
 	FORCEINLINE bool IsEmpty() const {return Ammo <= 0;}
 	FORCEINLINE float GetFireDelay() const {return FireDelay;}
 	FORCEINLINE bool GetAutomatic() const {return bAutomatic;}
+	FORCEINLINE USoundCue* GetEquipSound() const {return EquipSound;}
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnAmmoChanged OnAmmoChanged;

@@ -158,6 +158,8 @@ private:
 	void OnRep_CombatState();
 
 	int32 AmountToReload();
+
+	void PlayEquipWeaponSound();
 public:
 	/**
 	 * Getter and Setter Function

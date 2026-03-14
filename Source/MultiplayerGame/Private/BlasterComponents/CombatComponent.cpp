@@ -12,6 +12,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "PlayerController/BlasterPlayerController.h"
+#include "Sound/SoundCue.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -60,6 +61,18 @@ void UCombatComponent::BeginPlay()
 	InitializeCarriedAmmo();
 }
 
+void UCombatComponent::PlayEquipWeaponSound()
+{
+	if (EquippedWeapon->GetEquipSound())
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			EquippedWeapon->GetEquipSound(),
+			Character->GetActorLocation()
+		);
+	}
+}
+
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
 	if (!Character || !WeaponToEquip)	return;
@@ -90,6 +103,9 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 		PlayerController->UpdateHUDCarriedAmmo(CarriedAmmo);
 	}
 
+	//Play Equipped Sound
+	PlayEquipWeaponSound();
+	
 	// Reload ammo when weapon ammo is empty
 	if (EquippedWeapon->IsEmpty())
 	{
@@ -140,6 +156,8 @@ void UCombatComponent::OnRep_EquippedWeapon(AWeapon* LastWeapon)
 		if (!RightHandSocket)	return;
 		RightHandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
 		EquippedWeapon->BroadcastCurrentAmmo();
+		
+		PlayEquipWeaponSound();
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
 	}
