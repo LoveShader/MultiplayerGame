@@ -9,6 +9,8 @@
 class USoundCue;
 class UProjectileMovementComponent;
 class UBoxComponent;
+class UNiagaraSystem;
+class UNiagaraComponent;
 
 UCLASS()
 class MULTIPLAYERGAME_API AProjectile : public AActor
@@ -25,6 +27,10 @@ protected:
 	UFUNCTION()
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 	void PlayHitEffects();
+	void ExplodeDamage();
+	void SpawnTrailSystem();
+	void StartDestroyTimer();
+	void DestroyTimerFinished();
 
 	UFUNCTION(Server, Reliable)
 	void ServerHitEffects();
@@ -37,6 +43,16 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* CollisionBox;
+	
+	//Smoke Trail  
+	UPROPERTY()
+	UNiagaraComponent* TrailComponent;
+
+	UPROPERTY(VisibleDefaultsOnly)
+	UStaticMeshComponent* ProjectileMesh;
+
+	UPROPERTY(VisibleAnywhere)
+	UProjectileMovementComponent* ProjectileMovement;
 private:
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* Tracer;
@@ -49,4 +65,25 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	USoundCue* ImpactSound;
+
+	UPROPERTY(EditDefaultsOnly)
+	float MinDamage = 10.0f;
+
+	UPROPERTY(EditDefaultsOnly)
+	float MinInnerRadius = 200.0f;
+
+	UPROPERTY(EditDefaultsOnly)
+	float MaxOuterRadius = 500.0f;
+
+	//Smoke Trail 
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* TrailSystem;
+
+	/**
+	 * Delay Destory Timer
+	 */
+	FTimerHandle DestroyTimer;
+
+	UPROPERTY(EditAnywhere)
+	float DestroyTime = 3.0f;
 };

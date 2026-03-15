@@ -6,8 +6,7 @@
 #include "Weapon/Projectile.h"
 #include "ProjectileRocket.generated.h"
 
-class UNiagaraSystem;
-class UNiagaraComponent;
+
 /**
  * 
  */
@@ -21,30 +20,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
-
-	//DestoryTimer Callback 
-	void DestroyTimerFinished();
 private:
-	UPROPERTY(VisibleDefaultsOnly)
-	UStaticMeshComponent* RocketMesh;
-	
-	UPROPERTY(EditDefaultsOnly)
-	float MinDamage = 10.0f;
-
-	UPROPERTY(EditDefaultsOnly)
-	float MinInnerRadius = 200.0f;
-
-	UPROPERTY(EditDefaultsOnly)
-	float MaxOuterRadius = 500.0f;
-	/**
-	 * Smoke Trail 
-	 */
-	UPROPERTY(EditAnywhere)
-	UNiagaraSystem* TrailSystem;
-
-	UPROPERTY()
-	UNiagaraComponent* TrailComponent;
-	
 	/**
 	 * Smoke Trail Sound Effect
 	 */
@@ -56,14 +32,7 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	USoundAttenuation* LoopingSoundAttenuation;
-	/**
-	 * Delay Destory Timer
-	 */
-	FTimerHandle DestroyTimer;
-
-	UPROPERTY(EditAnywhere)
-	float DestroyTime = 3.0f;
-
+	
 	UPROPERTY(VisibleAnywhere)
 	class URocketMovementComponent* RocketMovementComponent;
 };

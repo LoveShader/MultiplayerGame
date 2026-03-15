@@ -3,6 +3,7 @@
 
 #include "Weapon/Projectile.h"
 
+#include "NiagaraFunctionLibrary.h"
 #include "Character/BlasterCharacter.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
@@ -24,7 +25,6 @@ AProjectile::AProjectile()
 	CollisionBox->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 	CollisionBox->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
 	CollisionBox->SetCollisionResponseToChannel(ECC_SkeletalMesh, ECR_Block);
-
 	
 }
 
@@ -70,6 +70,58 @@ void AProjectile::PlayHitEffects()
 	}
 }
 
+void AProjectile::ExplodeDamage()
+{
+	if (HasAuthority())
+	{
+		if (APawn* FirePawn = GetInstigator())
+		{
+			if (AController* FireController = FirePawn->GetController())
+			{
+				UGameplayStatics::ApplyRadialDamageWithFalloff(
+					this,
+					Damage,
+					MinDamage,
+					GetActorLocation(),
+					MinInnerRadius,
+					MaxOuterRadius,
+					1.0f,
+					UDamageType::StaticClass(),
+					TArray<AActor*>(),
+					this,
+					FireController
+					);
+			}
+		}
+	}
+}
+
+void AProjectile::SpawnTrailSystem()
+{
+	if (TrailSystem)
+	{
+		TrailComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			TrailSystem,
+			GetRootComponent(),
+			FName(),
+			GetActorLocation(),
+			GetActorRotation(),
+			EAttachLocation::KeepWorldPosition,
+			false
+		);
+	}
+}
+
+void AProjectile::StartDestroyTimer()
+{
+	GetWorldTimerManager().SetTimer(DestroyTimer, this, &AProjectile::DestroyTimerFinished, DestroyTime);
+}
+
+void AProjectile::DestroyTimerFinished()
+{
+	Destroy();
+}
+
 void AProjectile::NetMulticastHitEffects_Implementation()
 {
 	PlayHitEffects();
@@ -82,9 +134,16 @@ void AProjectile::ServerHitEffects_Implementation()
 
 void AProjectile::Destroyed()
 {
+	if (ImpactParticle)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, GetActorTransform());
+	}
+
+	if (ImpactSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+	}
 	Super::Destroyed();
-	
-	
 }
 
 void AProjectile::Tick(float DeltaTime)
