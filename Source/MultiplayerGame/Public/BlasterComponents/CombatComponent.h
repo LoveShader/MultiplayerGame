@@ -143,6 +143,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = CarriedAmmos)
 	int32 StartingSniperRifle = 10;
+
+	UPROPERTY(EditAnywhere, Category = CarriedAmmos)
+	int32 StartingGrenadeLauncherAmmo = 4;
 	
 	UFUNCTION()
 	void OnRep_CarriedAmmo();
