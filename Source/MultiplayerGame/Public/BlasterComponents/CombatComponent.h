@@ -32,6 +32,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();
 	void FireButtonPressed(bool bPressed);
+
+	UFUNCTION(BlueprintCallable)
+	void ShotgunShellReload();
 protected:
 	virtual void BeginPlay() override;
 	void EquipWeapon(AWeapon* WeaponToEquip);
@@ -165,6 +168,10 @@ private:
 	void PlayEquipWeaponSound();
 
 	FString GetWeaponTypeDisplayName(EWeaponType WeaponType);
+
+	void UpdateShotgunAmmoValues();
+
+	void JumpToShotgunEnd();
 public:
 	/**
 	 * Getter and Setter Function

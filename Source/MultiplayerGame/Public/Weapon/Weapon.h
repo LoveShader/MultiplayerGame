@@ -136,6 +136,7 @@ public:
 	FORCEINLINE bool GetAutomatic() const {return bAutomatic;}
 	FORCEINLINE USoundCue* GetEquipSound() const {return EquipSound;}
 	FORCEINLINE FName GetReloadMontageName() const {return ReloadMontageName;}
+	FORCEINLINE bool IsFull() const {return Ammo == MagCapcity;}
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnAmmoChanged OnAmmoChanged;

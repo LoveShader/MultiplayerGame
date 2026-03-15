@@ -190,6 +190,49 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 	}
 }
 
+void UCombatComponent::ShotgunShellReload()
+{
+	if (Character && Character->HasAuthority())
+	{
+		UpdateShotgunAmmoValues();
+	}
+}
+
+void UCombatComponent::UpdateShotgunAmmoValues()
+{
+	if (Character == nullptr || EquippedWeapon == nullptr)	return;
+	
+	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
+	{
+		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
+		//If Shotgun's Ammo is Full, Or Carried Ammo is 0, Jump To End Section
+		if (CarriedAmmo <= 0 || EquippedWeapon->IsFull())
+		{
+			JumpToShotgunEnd();
+			return;
+		}
+		
+		CarriedAmmoMap[EquippedWeapon->GetWeaponType()] -= 1;
+		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
+		EquippedWeapon->AddAmmo(1);
+		UpdateCarriedAmmoUI();
+	}
+}
+
+void UCombatComponent::JumpToShotgunEnd()
+{
+	if (!Character || !Character->GetMesh())
+		return;
+
+	UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
+	
+	if (AnimInstance && Character->GetReloadMontage())
+	{
+		AnimInstance->Montage_Play(Character->GetReloadMontage());
+		AnimInstance->Montage_JumpToSection(FName("ShotgunEnd"));
+	}
+}
+
 void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	NetMulticastFire(TraceHitTarget);
@@ -375,6 +418,12 @@ void UCombatComponent::OnWeaponAmmoChanged(int32 NewAmmo)
 	{
 		PlayerController->UpdateHUDWeaponAmmo(NewAmmo);
 	}
+
+	//When the EquippedWepaon's Ammo is full and the WeaponType is Shotgun, then call JumpToShotgunEnd on Client
+	if (!Character->HasAuthority() && EquippedWeapon->IsFull() && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
+	{
+		JumpToShotgunEnd();
+	}
 }
 
 void UCombatComponent::HandleReload()
@@ -389,6 +438,8 @@ void UCombatComponent::UpdateAmmoValues()
 {
 	if (Character == nullptr || EquippedWeapon == nullptr)	return;
 	int32 AmmoToReload = AmountToReload();
+	if (AmmoToReload <= 0)
+		return;
 
 	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
 	{
@@ -462,6 +513,12 @@ void UCombatComponent::OnRep_CarriedAmmo()
 	if (PlayerController && Character->IsLocallyControlled())
 	{
 		PlayerController->UpdateHUDCarriedAmmo(CarriedAmmo);
+	}
+
+	//When CarriedAmmo is equal to 0, and WeaponType is Shotgun,then Call the JumpToShotgunEnd in Client
+	if (CarriedAmmo == 0 && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
+	{
+		JumpToShotgunEnd();
 	}
 }
 
