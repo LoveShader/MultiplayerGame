@@ -99,6 +99,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	class USoundCue* EquipSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Montage")
+	FName ReloadMontageName;
 public:
 	/**
 	 * Blaster CrossHair HUD Textures
@@ -132,6 +135,7 @@ public:
 	FORCEINLINE float GetFireDelay() const {return FireDelay;}
 	FORCEINLINE bool GetAutomatic() const {return bAutomatic;}
 	FORCEINLINE USoundCue* GetEquipSound() const {return EquipSound;}
+	FORCEINLINE FName GetReloadMontageName() const {return ReloadMontageName;}
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnAmmoChanged OnAmmoChanged;

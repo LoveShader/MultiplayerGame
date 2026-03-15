@@ -368,31 +368,7 @@ void ABlasterCharacter::PlayReloadMontage()
 	if (AnimInstance && ReloadMontage)
 	{
 		AnimInstance->Montage_Play(ReloadMontage);
-		FName SectionName;
-		switch (Combat->EquippedWeapon->GetWeaponType())
-		{
-			case EWeaponType::EWT_AssaultRifle:
-				SectionName = FName("Rifle");
-				break;
-			case EWeaponType::EWT_RocketLauncher:
-				SectionName = FName("Rifle");
-				break;
-			case EWeaponType::EWT_Pistol:
-				SectionName = FName("Rifle");
-				break;
-		case EWeaponType::EWT_SubmachineGun:
-				SectionName = FName("Rifle");
-				break;
-		case EWeaponType::EWT_Shotgun:
-				SectionName = FName("Rifle");
-				break;
-		case EWeaponType::EWT_SniperRifle:
-			SectionName = FName("Rifle");
-			break;
-		case EWeaponType::EWT_GrenadeLauncher:
-			SectionName = FName("Rifle");
-			break;
-		}
+		FName SectionName = Combat->EquippedWeapon->GetReloadMontageName();
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
 }
