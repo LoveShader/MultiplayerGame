@@ -205,17 +205,17 @@ void UCombatComponent::UpdateShotgunAmmoValues()
 	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
 	{
 		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
-		//If Shotgun's Ammo is Full, Or Carried Ammo is 0, Jump To End Section
-		if (CarriedAmmo <= 0 || EquippedWeapon->IsFull())
-		{
-			JumpToShotgunEnd();
-			return;
-		}
 		
 		CarriedAmmoMap[EquippedWeapon->GetWeaponType()] -= 1;
 		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
 		EquippedWeapon->AddAmmo(1);
 		UpdateCarriedAmmoUI();
+	}
+
+	//If Shotgun's Ammo is Full, Or Carried Ammo is 0, Jump To End Section
+	if (CarriedAmmo <= 0 || EquippedWeapon->IsFull())
+	{
+		JumpToShotgunEnd();
 	}
 }
 
@@ -228,7 +228,6 @@ void UCombatComponent::JumpToShotgunEnd()
 	
 	if (AnimInstance && Character->GetReloadMontage())
 	{
-		AnimInstance->Montage_Play(Character->GetReloadMontage());
 		AnimInstance->Montage_JumpToSection(FName("ShotgunEnd"));
 	}
 }

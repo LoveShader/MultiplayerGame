@@ -263,7 +263,7 @@ void ABlasterCharacter::SimProxiesTurn()
 {
 	if (Combat && Combat->EquippedWeapon == nullptr)	return;
 	bRotateRootBone = true;
-	UE_LOG(LogTemp, Warning, TEXT("TurningInPlace is Not Turning"));
+	//UE_LOG(LogTemp, Warning, TEXT("TurningInPlace is Not Turning"));
 	float Speed = CalculateSpeed();
 
 	if (Speed > 0.0f)
@@ -277,17 +277,17 @@ void ABlasterCharacter::SimProxiesTurn()
 	ProxyRotation = GetActorRotation();
 	ProxyYaw = UKismetMathLibrary::NormalizedDeltaRotator(ProxyRotation, ProxyRotationLastFrame).Yaw;
 
-	UE_LOG(LogTemp, Warning, TEXT("ProxyYaw: %f"), ProxyYaw);
+	//UE_LOG(LogTemp, Warning, TEXT("ProxyYaw: %f"), ProxyYaw);
 	if (FMath::Abs(ProxyYaw) > TurnThreshold) {
 		if (ProxyYaw > TurnThreshold)
 		{
 			TurningInPlace = ETurningInPlace::ETIP_Right;
-			UE_LOG(LogTemp, Warning, TEXT("TurningInPlace is Right"));
+			//UE_LOG(LogTemp, Warning, TEXT("TurningInPlace is Right"));
 		}
 		else if (ProxyYaw < -TurnThreshold)
 		{
 			TurningInPlace = ETurningInPlace::ETIP_Left;
-			UE_LOG(LogTemp, Warning, TEXT("TurningInPlace is Left"));
+			//UE_LOG(LogTemp, Warning, TEXT("TurningInPlace is Left"));
 		}
 		else
 		{
