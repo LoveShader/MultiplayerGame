@@ -42,12 +42,18 @@ void UCombatComponent::OnRep_CombatState()
 		HandleReload();
 		break;
 	case ECombatState::ECS_Unoccupied:
+		ResetShotgunReloadTracking();
 		if (bFireButtonPressed)
 		{
 			Fire();
 		}
 		break;
 	}
+}
+
+void UCombatComponent::OnRep_ShotgunEndShellCount()
+{
+	TryJumpToShotgunEnd();
 }
 
 void UCombatComponent::BeginPlay()
@@ -192,6 +198,9 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 
 void UCombatComponent::ShotgunShellReload()
 {
+	++LocalShotgunShellCount;
+	TryJumpToShotgunEnd();
+	
 	if (Character && Character->HasAuthority())
 	{
 		UpdateShotgunAmmoValues();
@@ -209,12 +218,15 @@ void UCombatComponent::UpdateShotgunAmmoValues()
 		CarriedAmmoMap[EquippedWeapon->GetWeaponType()] -= 1;
 		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
 		EquippedWeapon->AddAmmo(1);
+		bCanFire = true;
 		UpdateCarriedAmmoUI();
 	}
 
 	//If Shotgun's Ammo is Full, Or Carried Ammo is 0, Jump To End Section
 	if (CarriedAmmo <= 0 || EquippedWeapon->IsFull())
 	{
+		ShotgunEndShellCount = LocalShotgunShellCount;
+		bShotgunEndConsumed = true;
 		JumpToShotgunEnd();
 	}
 }
@@ -230,6 +242,34 @@ void UCombatComponent::JumpToShotgunEnd()
 	{
 		AnimInstance->Montage_JumpToSection(FName("ShotgunEnd"));
 	}
+}
+
+void UCombatComponent::ResetShotgunReloadTracking()
+{
+	LocalShotgunShellCount = 0;
+	bShotgunEndConsumed = false;
+}
+
+void UCombatComponent::TryJumpToShotgunEnd()
+{
+	if (bShotgunEndConsumed)
+	{
+		return;
+	}
+
+	if (ShotgunEndShellCount == 0)
+	{
+		return;
+	}
+
+	if (LocalShotgunShellCount < ShotgunEndShellCount)
+	{
+		return;
+	}
+
+	bShotgunEndConsumed = true;
+	UE_LOG(LogTemp, Warning, TEXT("Shotgun end consumed at shell %d"), LocalShotgunShellCount);
+	JumpToShotgunEnd();
 }
 
 void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
@@ -417,16 +457,12 @@ void UCombatComponent::OnWeaponAmmoChanged(int32 NewAmmo)
 	{
 		PlayerController->UpdateHUDWeaponAmmo(NewAmmo);
 	}
-
-	//When the EquippedWepaon's Ammo is full and the WeaponType is Shotgun, then call JumpToShotgunEnd on Client
-	if (!Character->HasAuthority() && EquippedWeapon->IsFull() && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
-	{
-		JumpToShotgunEnd();
-	}
 }
 
 void UCombatComponent::HandleReload()
 {
+	ShotgunEndShellCount = 0;
+	ResetShotgunReloadTracking();
 	if (Character)
 	{
 		Character->PlayReloadMontage();
@@ -501,6 +537,14 @@ void UCombatComponent::InterpFOV(float DeltaTime)
 bool UCombatComponent::CanFire() const
 {
 	if (!EquippedWeapon)	return false;
+	
+	if (!EquippedWeapon->IsEmpty() &&
+		EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun &&
+		CombatState == ECombatState::ECS_Reloading &&
+		bCanFire
+		)
+		return true;
+	
 	return EquippedWeapon->GetWeaponAmmo() > 0 &&
 		    bCanFire &&
 		   	CombatState == ECombatState::ECS_Unoccupied;
@@ -513,16 +557,19 @@ void UCombatComponent::OnRep_CarriedAmmo()
 	{
 		PlayerController->UpdateHUDCarriedAmmo(CarriedAmmo);
 	}
-
-	//When CarriedAmmo is equal to 0, and WeaponType is Shotgun,then Call the JumpToShotgunEnd in Client
-	if (CarriedAmmo == 0 && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
-	{
-		JumpToShotgunEnd();
-	}
 }
 
 void UCombatComponent::NetMulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
+	if (EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun &&
+		CombatState == ECombatState::ECS_Reloading)
+	{
+		Character->PlayFireMontage(bIsAiming);
+		EquippedWeapon->Fire(TraceHitTarget);
+		CombatState = ECombatState::ECS_Unoccupied;
+		return;
+	}
+	
 	if (Character && CombatState == ECombatState::ECS_Unoccupied)
 	{
 		Character->PlayFireMontage(bIsAiming);
@@ -561,6 +608,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty
 	DOREPLIFETIME(UCombatComponent, bIsAiming);
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
 	DOREPLIFETIME(UCombatComponent, CombatState);
+	DOREPLIFETIME(UCombatComponent, ShotgunEndShellCount);
 }
 
 void UCombatComponent::Reload()

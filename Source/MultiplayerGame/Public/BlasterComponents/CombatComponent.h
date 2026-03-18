@@ -163,6 +163,9 @@ private:
 	UFUNCTION()
 	void OnRep_CombatState();
 
+	UFUNCTION()
+	void OnRep_ShotgunEndShellCount();
+
 	int32 AmountToReload();
 
 	void PlayEquipWeaponSound();
@@ -170,8 +173,16 @@ private:
 	FString GetWeaponTypeDisplayName(EWeaponType WeaponType);
 
 	void UpdateShotgunAmmoValues();
+	void ResetShotgunReloadTracking();
+	void TryJumpToShotgunEnd();
 
 	void JumpToShotgunEnd();
+
+	UPROPERTY(ReplicatedUsing = OnRep_ShotgunEndShellCount)
+	int32 ShotgunEndShellCount = 0;
+
+	int32 LocalShotgunShellCount = 0;
+	bool bShotgunEndConsumed = false;
 public:
 	/**
 	 * Getter and Setter Function
