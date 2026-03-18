@@ -27,6 +27,9 @@ AWeapon::AWeapon()
 	WeaponMesh->SetCollisionResponseToAllChannels(ECR_Block);
 	WeaponMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	WeaponMesh->SetCustomDepthStencilValue(static_cast<int32>(OutlineStencil));
+	WeaponMesh->SetRenderCustomDepth(true);
+	WeaponMesh->MarkRenderStateDirty();
 
 	AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -50,6 +53,7 @@ void AWeapon::BeginPlay()
 		AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AWeapon::OnSphereEndOverlap);
 	}
 	ShowPickupWidget(false);
+	ApplyWeaponState();
 }
 
 void AWeapon::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -74,20 +78,48 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 
 void AWeapon::OnRep_WeaponState()
 {
+	ApplyWeaponState();
+}
+
+void AWeapon::ApplyWeaponState()
+{
 	switch (WeaponState)
 	{
+	case EWeaponState::EWS_Initial:
+		ShowPickupWidget(false);
+		WeaponMesh->SetSimulatePhysics(false);
+		WeaponMesh->SetEnableGravity(false);
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SetWeaponOutlineEnabled(true);
+		break;
 	case EWeaponState::EWS_Equipped:
 		ShowPickupWidget(false);
 		WeaponMesh->SetSimulatePhysics(false);
 		WeaponMesh->SetEnableGravity(false);
 		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SetWeaponOutlineEnabled(false);
 		break;
 	case EWeaponState::EWS_Dropped:
 		WeaponMesh->SetSimulatePhysics(true);
 		WeaponMesh->SetEnableGravity(true);
 		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		SetWeaponOutlineEnabled(true);
+		WeaponMesh->MarkRenderStateDirty();
+		break;
+	default:
 		break;
 	}
+}
+
+void AWeapon::SetWeaponOutlineEnabled(bool bEnabled) const
+{
+	if (WeaponMesh == nullptr)
+	{
+		return;
+	}
+
+	WeaponMesh->SetCustomDepthStencilValue(static_cast<int32>(OutlineStencil));
+	WeaponMesh->SetRenderCustomDepth(bEnabled);
 }
 
 void AWeapon::OnRep_Ammo()
@@ -104,29 +136,15 @@ void AWeapon::SpendRound()
 void AWeapon::SetWeaponState(EWeaponState State)
 {
 	WeaponState = State;
-	
-	switch (WeaponState)
+
+	if (HasAuthority())
 	{
-	case EWeaponState::EWS_Equipped:
-		ShowPickupWidget(false);
-		if (HasAuthority())
-		{
-			AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		}
-		WeaponMesh->SetSimulatePhysics(false);
-		WeaponMesh->SetEnableGravity(false);
-		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		break;
-	case EWeaponState::EWS_Dropped:
-		if (HasAuthority())
-		{
-			AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly); 
-		}
-		WeaponMesh->SetSimulatePhysics(true);
-		WeaponMesh->SetEnableGravity(true);
-		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		break;
+		const ECollisionEnabled::Type SphereCollisionEnabled =
+			WeaponState == EWeaponState::EWS_Equipped ? ECollisionEnabled::NoCollision : ECollisionEnabled::QueryOnly;
+		AreaSphere->SetCollisionEnabled(SphereCollisionEnabled);
 	}
+
+	ApplyWeaponState();
 }
 
 void AWeapon::DroppedWeapon()

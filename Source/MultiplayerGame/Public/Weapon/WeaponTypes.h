@@ -14,3 +14,12 @@ enum class EWeaponType : uint8
 	EWT_GrenadeLauncher UMETA(DisplayName = "Grenade Launcher"),
 	EWT_MAX UMETA(DisplayName = "DefaultMax")
 };
+
+UENUM(BlueprintType)
+enum class EWeaponOutlineStencil : uint8
+{
+	EWOS_None = 0 UMETA(Hidden),
+	EWOS_Purple = 250 UMETA(DisplayName = "Purple"),
+	EWOS_Blue = 251 UMETA(DisplayName = "Blue"),
+	EWOS_TAN = 252 UMETA(DisplayName = "Black")
+};

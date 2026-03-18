@@ -42,6 +42,9 @@ protected:
 
 	UFUNCTION()
 	virtual void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	void ApplyWeaponState();
+	void SetWeaponOutlineEnabled(bool bEnabled) const;
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	USkeletalMeshComponent* WeaponMesh;
@@ -87,6 +90,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "WeaponTypeParameters")
 	EWeaponType WeaponType;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Outline")
+	EWeaponOutlineStencil OutlineStencil = EWeaponOutlineStencil::EWOS_Blue;
 
 	/** 
 	* Automatic fire
