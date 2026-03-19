@@ -29,8 +29,11 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	void Reload();
+	void ThrowGrenade();
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();
+	UFUNCTION(BlueprintCallable)
+	void FinishThrowGrenade();
 	void FireButtonPressed(bool bPressed);
 
 	UFUNCTION(BlueprintCallable)
@@ -69,9 +72,14 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void ServerReload();
 
+	UFUNCTION(Server, Reliable)
+	void ServerThrowGrenade();
+
 	void HandleReload();
+	void HandleThrowGrenade();
 	void UpdateAmmoValues();
 	void UpdateCarriedAmmoUI();
+	bool CanThrowGrenade() const;
 
 private:
 	ABlasterCharacter* Character;
@@ -188,4 +196,5 @@ public:
 	 * Getter and Setter Function
 	 */
 	FORCEINLINE int32 GetCarriedAmmo() const {return CarriedAmmo;};
+	FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
 };

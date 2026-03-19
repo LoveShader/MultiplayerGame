@@ -6,6 +6,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "InputAction.h"
+#include "InputMappingContext.h"
 #include "NetworkReplayStreaming.h"
 #include "BlasterComponents/CombatComponent.h"
 #include "Components/WidgetComponent.h"
@@ -60,6 +62,12 @@ ABlasterCharacter::ABlasterCharacter()
 	MinNetUpdateFrequency = 33.0f;
 
 	DissolveTimeLine = CreateDefaultSubobject<UTimelineComponent>("DissolveTimeLineComponent");
+
+	ThrowGrenadeAction = CreateDefaultSubobject<UInputAction>(TEXT("ThrowGrenadeAction"));
+	if (ThrowGrenadeAction)
+	{
+		ThrowGrenadeAction->ValueType = EInputActionValueType::Boolean;
+	}
 }
 
 void ABlasterCharacter::UpdateHUDHealth()
@@ -151,6 +159,11 @@ void ABlasterCharacter::EquipButtonPressed()
 	
 	if (Combat)
 	{
+		if (Combat->GetCombatState() != ECombatState::ECS_Unoccupied)
+		{
+			return;
+		}
+		
 		if (HasAuthority())
 		{
 			Combat->EquipWeapon(OverlappedWeapon);
@@ -346,6 +359,19 @@ void ABlasterCharacter::ReloadButtonPressed()
 	}
 }
 
+void ABlasterCharacter::ThrowGrenadeButtonPressed()
+{
+	if (bDisableGameplay)
+	{
+		return;
+	}
+
+	if (Combat)
+	{
+		Combat->ThrowGrenade();
+	}
+}
+
 void ABlasterCharacter::PlayFireMontage(bool bIsAiming)
 {
 	if (Combat == nullptr || Combat->EquippedWeapon == nullptr)	return;
@@ -370,6 +396,16 @@ void ABlasterCharacter::PlayReloadMontage()
 		AnimInstance->Montage_Play(ReloadMontage);
 		FName SectionName = Combat->EquippedWeapon->GetReloadMontageName();
 		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
+void ABlasterCharacter::PlayThrowGrenadeMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if (AnimInstance && ThrowGrenadeMontage)
+	{
+		AnimInstance->Montage_Play(ThrowGrenadeMontage);
 	}
 }
 
@@ -681,7 +717,6 @@ void ABlasterCharacter::PollInitInput()
 	}
 }
 
-
 void ABlasterCharacter::SetOverlappedWeapon(AWeapon* Weapon)
 {
 	if (OverlappedWeapon)
@@ -759,6 +794,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInput->BindAction(FireAction, ETriggerEvent::Started, this, &ABlasterCharacter::FireButtonPressed);
 		EnhancedInput->BindAction(FireAction, ETriggerEvent::Completed, this, &ABlasterCharacter::FireButtonReleased);
 		EnhancedInput->BindAction(ReloadAction, ETriggerEvent::Started, this, &ABlasterCharacter::ReloadButtonPressed);
+		EnhancedInput->BindAction(ThrowGrenadeAction, ETriggerEvent::Started, this, &ABlasterCharacter::ThrowGrenadeButtonPressed);
 	}
 }
 

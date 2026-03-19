@@ -41,12 +41,20 @@ void UCombatComponent::OnRep_CombatState()
 	case ECombatState::ECS_Reloading:
 		HandleReload();
 		break;
+	case ECombatState::ECS_ThrowGrenade:
+		if (Character && !Character->IsLocallyControlled())
+		{
+			HandleThrowGrenade();
+		}
+		break;
 	case ECombatState::ECS_Unoccupied:
 		ResetShotgunReloadTracking();
 		if (bFireButtonPressed)
 		{
 			Fire();
 		}
+		break;
+	default:
 		break;
 	}
 }
@@ -91,6 +99,7 @@ FString UCombatComponent::GetWeaponTypeDisplayName(EWeaponType WeaponType)
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
 	if (!Character || !WeaponToEquip)	return;
+	if (CombatState != ECombatState::ECS_Unoccupied) return;
 
 	if (EquippedWeapon)
 	{
@@ -469,6 +478,14 @@ void UCombatComponent::HandleReload()
 	}
 }
 
+void UCombatComponent::HandleThrowGrenade()
+{
+	if (Character)
+	{
+		Character->PlayThrowGrenadeMontage();
+	}
+}
+
 void UCombatComponent::UpdateAmmoValues()
 {
 	if (Character == nullptr || EquippedWeapon == nullptr)	return;
@@ -511,9 +528,17 @@ int32 UCombatComponent::AmountToReload()
 void UCombatComponent::ServerReload_Implementation()
 {
 	if (!Character || !EquippedWeapon)	return;
+	if (CombatState != ECombatState::ECS_Unoccupied) return;
+	if (!EquippedWeapon->IsNeedReload() || CarriedAmmo <= 0) return;
 	CombatState = ECombatState::ECS_Reloading;
 	
 	HandleReload();
+}
+
+void UCombatComponent::ServerThrowGrenade_Implementation()
+{
+	CombatState = ECombatState::ECS_ThrowGrenade;
+	HandleThrowGrenade();
 }
 
 void UCombatComponent::InterpFOV(float DeltaTime)
@@ -548,6 +573,11 @@ bool UCombatComponent::CanFire() const
 	return EquippedWeapon->GetWeaponAmmo() > 0 &&
 		    bCanFire &&
 		   	CombatState == ECombatState::ECS_Unoccupied;
+}
+
+bool UCombatComponent::CanThrowGrenade() const
+{
+	return Character && CombatState == ECombatState::ECS_Unoccupied;
 }
 
 void UCombatComponent::OnRep_CarriedAmmo()
@@ -614,10 +644,31 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty
 void UCombatComponent::Reload()
 {
 	if (!EquippedWeapon || !EquippedWeapon->IsNeedReload())	return;
-	
-	if (CarriedAmmo > 0 && CombatState != ECombatState::ECS_Reloading)
+
+	if (CombatState != ECombatState::ECS_Unoccupied)
+	{
+		return;
+	}
+
+	if (CarriedAmmo > 0)
 	{
 		ServerReload();
+	}
+}
+
+void UCombatComponent::ThrowGrenade()
+{
+	if (!CanThrowGrenade())
+	{
+		return;
+	}
+
+	CombatState = ECombatState::ECS_ThrowGrenade;
+	HandleThrowGrenade();
+
+	if (Character && !Character->HasAuthority())
+	{
+		ServerThrowGrenade();
 	}
 }
 
@@ -635,4 +686,9 @@ void UCombatComponent::FinishReloading()
 	{
 		Fire();
 	}
+}
+
+void UCombatComponent::FinishThrowGrenade()
+{
+	CombatState = ECombatState::ECS_Unoccupied;
 }

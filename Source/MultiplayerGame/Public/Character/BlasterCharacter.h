@@ -36,6 +36,7 @@ public:
 	virtual void PostInitializeComponents() override;
 	void PlayFireMontage(bool bIsAiming);
 	void PlayReloadMontage();
+	void PlayThrowGrenadeMontage();
 	
 	void Elim();
 	UFUNCTION(NetMulticast, Reliable)
@@ -70,6 +71,7 @@ protected:
 	void FireButtonPressed();
 	void FireButtonReleased();
 	void ReloadButtonPressed();
+	void ThrowGrenadeButtonPressed();
 	
 	void PlayHitReactMontage();
 	void PlayElimMontage();
@@ -106,6 +108,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputAction* ReloadAction;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* ThrowGrenadeAction;
 	
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputMappingContext* InputContext;
@@ -116,6 +121,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = Montage)
 	UAnimMontage* ReloadMontage;
+
+	UPROPERTY(EditAnywhere, Category = Montage)
+	UAnimMontage* ThrowGrenadeMontage;
 
 	UPROPERTY(EditAnywhere, Category = Montage)
 	UAnimMontage* ElimMontage;
@@ -230,6 +238,7 @@ private:
 	void PollInitInput();
 
 	bool bInputsSet;
+	bool bThrowGrenadeInputMapped = false;
 
 	bool bRotateRootBone = false;
 
