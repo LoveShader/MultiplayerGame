@@ -46,6 +46,7 @@ void UCombatComponent::OnRep_CombatState()
 		{
 			HandleThrowGrenade();
 			AttachActorToLeftHand(EquippedWeapon);
+			ShowAttachedGrenade(true);
 		}
 		break;
 	case ECombatState::ECS_Unoccupied:
@@ -319,6 +320,14 @@ void UCombatComponent::AttachActorToSocket(AActor* ActorToAttach, FName SocketNa
 	if (const USkeletalMeshSocket* Socket = Character->GetMesh()->GetSocketByName(SocketName))
 	{
 		Socket->AttachActor(ActorToAttach, Character->GetMesh());
+	}
+}
+
+void UCombatComponent::ShowAttachedGrenade(bool bShowGrenade)
+{
+	if (Character && Character->GetAttachedGrenade())
+	{
+		Character->GetAttachedGrenade()->SetVisibility(bShowGrenade);
 	}
 }
 
@@ -609,6 +618,7 @@ void UCombatComponent::ServerThrowGrenade_Implementation()
 	CombatState = ECombatState::ECS_ThrowGrenade;
 	HandleThrowGrenade();
 	AttachActorToLeftHand(EquippedWeapon);
+	ShowAttachedGrenade(true);
 }
 
 void UCombatComponent::InterpFOV(float DeltaTime)
@@ -733,7 +743,8 @@ void UCombatComponent::ThrowGrenade()
 	CombatState = ECombatState::ECS_ThrowGrenade;
 	HandleThrowGrenade();
 	AttachActorToLeftHand(EquippedWeapon);
-
+	ShowAttachedGrenade(true);
+	
 	if (Character && !Character->HasAuthority())
 	{
 		ServerThrowGrenade();
@@ -763,4 +774,9 @@ void UCombatComponent::FinishThrowGrenade()
 		CombatState = ECombatState::ECS_Unoccupied;
 	}
 	AttachActorToRightHand(EquippedWeapon);
+}
+
+void UCombatComponent::LaunchGrenade()
+{
+	ShowAttachedGrenade(false);
 }

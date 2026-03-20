@@ -115,6 +115,9 @@ void ABlasterCharacter::BeginPlay()
 	
 	//Setup Input Mapping Context, add it to Subsystem
 	PollInitInput();
+
+	//Hide The ThrowGrenade In BeginPlay
+	AttachedGrenade->SetVisibility(false);
 }
 
 void ABlasterCharacter::Move(const FInputActionValue& Value)

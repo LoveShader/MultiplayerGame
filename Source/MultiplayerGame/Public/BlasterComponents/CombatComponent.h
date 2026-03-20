@@ -34,6 +34,8 @@ public:
 	void FinishReloading();
 	UFUNCTION(BlueprintCallable)
 	void FinishThrowGrenade();
+	UFUNCTION(BlueprintCallable)
+	void LaunchGrenade();
 	void FireButtonPressed(bool bPressed);
 
 	UFUNCTION(BlueprintCallable)
@@ -202,6 +204,8 @@ private:
 	void AttachActorToLeftHand(AActor* ActorToAttach);
 
 	void AttachActorToSocket(AActor* ActorToAttach, FName SocketName);
+
+	void ShowAttachedGrenade(bool bShowGrenade);
 public:
 	/**
 	 * Getter and Setter Function
