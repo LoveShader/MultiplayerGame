@@ -242,6 +242,12 @@ private:
 
 	void ShowElimTextIfLocallyControlled();
 	void ClearWeaponTypeText();
+
+	/**
+	 * Grenade
+	 */
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* AttachedGrenade;
 public:
 	UPROPERTY(Replicated)
 	bool bDisableGameplay = false;

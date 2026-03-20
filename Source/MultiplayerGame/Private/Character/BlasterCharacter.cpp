@@ -63,11 +63,10 @@ ABlasterCharacter::ABlasterCharacter()
 
 	DissolveTimeLine = CreateDefaultSubobject<UTimelineComponent>("DissolveTimeLineComponent");
 
-	ThrowGrenadeAction = CreateDefaultSubobject<UInputAction>(TEXT("ThrowGrenadeAction"));
-	if (ThrowGrenadeAction)
-	{
-		ThrowGrenadeAction->ValueType = EInputActionValueType::Boolean;
-	}
+	AttachedGrenade = CreateDefaultSubobject<UStaticMeshComponent>("AttachedGrenade");
+	AttachedGrenade->SetupAttachment(GetMesh(), FName("GrenadeSocket"));
+	AttachedGrenade->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
 }
 
 void ABlasterCharacter::UpdateHUDHealth()
