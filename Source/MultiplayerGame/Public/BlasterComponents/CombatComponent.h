@@ -206,6 +206,9 @@ private:
 	void AttachActorToSocket(AActor* ActorToAttach, FName SocketName);
 
 	void ShowAttachedGrenade(bool bShowGrenade);
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AProjectile> GrenadeClass;
 public:
 	/**
 	 * Getter and Setter Function

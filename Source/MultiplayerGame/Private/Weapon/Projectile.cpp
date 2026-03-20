@@ -44,10 +44,41 @@ void AProjectile::BeginPlay()
 		);
 	}
 
+	IgnoreOwnerCollision(true);
+	GetWorldTimerManager().SetTimer(
+		OwnerCollisionTimer,
+		this,
+		&AProjectile::ReEnableOwnerCollision,
+		OwnerIgnoreTime
+	);
+
 	if (HasAuthority())
 	{
 		CollisionBox->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
 	}
+}
+
+void AProjectile::IgnoreOwnerCollision(bool bShouldIgnore)
+{
+	if (!CollisionBox)
+	{
+		return;
+	}
+
+	if (AActor* ProjectileOwner = GetOwner())
+	{
+		CollisionBox->IgnoreActorWhenMoving(ProjectileOwner, bShouldIgnore);
+	}
+
+	if (APawn* ProjectileInstigator = GetInstigator())
+	{
+		CollisionBox->IgnoreActorWhenMoving(ProjectileInstigator, bShouldIgnore);
+	}
+}
+
+void AProjectile::ReEnableOwnerCollision()
+{
+	IgnoreOwnerCollision(false);
 }
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
@@ -134,6 +165,8 @@ void AProjectile::ServerHitEffects_Implementation()
 
 void AProjectile::Destroyed()
 {
+	GetWorldTimerManager().ClearTimer(OwnerCollisionTimer);
+
 	if (ImpactParticle)
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, GetActorTransform());

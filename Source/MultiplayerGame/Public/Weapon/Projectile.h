@@ -31,6 +31,8 @@ protected:
 	void SpawnTrailSystem();
 	void StartDestroyTimer();
 	void DestroyTimerFinished();
+	void IgnoreOwnerCollision(bool bShouldIgnore);
+	void ReEnableOwnerCollision();
 
 	UFUNCTION(Server, Reliable)
 	void ServerHitEffects();
@@ -84,6 +86,11 @@ private:
 	 */
 	FTimerHandle DestroyTimer;
 
+	FTimerHandle OwnerCollisionTimer;
+
 	UPROPERTY(EditAnywhere)
 	float DestroyTime = 3.0f;
+
+	UPROPERTY(EditDefaultsOnly)
+	float OwnerIgnoreTime = 0.15f;
 };
