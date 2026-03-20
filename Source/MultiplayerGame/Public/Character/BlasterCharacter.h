@@ -238,8 +238,6 @@ private:
 	void PollInitInput();
 
 	bool bInputsSet;
-	bool bThrowGrenadeInputMapped = false;
-
 	bool bRotateRootBone = false;
 
 	void ShowElimTextIfLocallyControlled();

@@ -43,6 +43,9 @@ protected:
 	void EquipWeapon(AWeapon* WeaponToEquip);
 	void DroppedWeapon();
 	void SetAiming(bool bAiming);
+	ABlasterPlayerController* GetBlasterPlayerController();
+	void UpdateCurrentWeaponTypeInHUD();
+	void UpdateCurrentCarriedAmmoInHUD();
 
 	UFUNCTION(Server, Reliable)
 	void ServerSetAiming(bool bAiming);
@@ -179,6 +182,9 @@ private:
 	void PlayEquipWeaponSound();
 
 	FString GetWeaponTypeDisplayName(EWeaponType WeaponType);
+	void DropWeaponIfEquiped();
+	void SetCarriedAmmoFromCarriedAmmoMap();
+	void ReloadEmptyWeapon();
 
 	void UpdateShotgunAmmoValues();
 	void ResetShotgunReloadTracking();
@@ -191,6 +197,11 @@ private:
 
 	int32 LocalShotgunShellCount = 0;
 	bool bShotgunEndConsumed = false;
+
+	void AttachActorToRightHand(AActor* ActorToAttach);
+	void AttachActorToLeftHand(AActor* ActorToAttach);
+
+	void AttachActorToSocket(AActor* ActorToAttach, FName SocketName);
 public:
 	/**
 	 * Getter and Setter Function
