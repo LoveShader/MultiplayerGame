@@ -9,7 +9,6 @@
 #include "Weapon/WeaponTypes.h"
 #include "CombatComponent.generated.h"
 
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCarriedAmmoChanged, int32, NewAmmo);
 
 class UCameraComponent;
@@ -87,10 +86,13 @@ protected:
 	bool CanThrowGrenade() const;
 
 private:
+	UPROPERTY()
 	ABlasterCharacter* Character;
 
+	UPROPERTY()
 	ABlasterPlayerController* PlayerController;
 
+	UPROPERTY()
 	ABlasterHUD* HUD;
 
 	UPROPERTY(ReplicatedUsing=OnRep_EquippedWeapon, VisibleAnywhere)
@@ -212,10 +214,20 @@ private:
 
 	UFUNCTION(Server, Reliable)
 	void ServerSpawnGrenade(const FVector_NetQuantize& HitLocation);
+
+	UPROPERTY(EditAnywhere, ReplicatedUsing=OnRep_Grenades)
+	int32 Grenades = 4;
+
+	UPROPERTY(EditAnywhere)
+	int32 MaxGrenades = 4;
+
+	UFUNCTION()
+	void OnRep_Grenades();
 public:
 	/**
 	 * Getter and Setter Function
 	 */
 	FORCEINLINE int32 GetCarriedAmmo() const {return CarriedAmmo;};
 	FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
+	FORCEINLINE int32 GetGrenades() const { return Grenades; }
 };

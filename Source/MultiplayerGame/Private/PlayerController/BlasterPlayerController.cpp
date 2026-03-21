@@ -198,6 +198,10 @@ void ABlasterPlayerController::OnPossess(APawn* InPawn)
 	if (ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(InPawn))
 	{
 		SetHUDHealth(BlasterCharacter->GetHealth(), BlasterCharacter->GetMaxHealth());
+		if (BlasterCharacter->GetCombat())
+		{
+			UpdateGrenadeAmount(BlasterCharacter->GetCombat()->GetGrenades());
+		}
 		if (BlasterCharacter->GetEquippedWeapon())
 		{
 			UpdateHUDWeaponAmmo(BlasterCharacter->GetEquippedWeapon()->GetWeaponAmmo());
@@ -275,6 +279,23 @@ void ABlasterPlayerController::UpdateHUDWeaponType(const FString& WeaponType)
 	if (bHudValid)
 	{
 		BlasterHUD->CharacterOverlay->WeaponType->SetText(FText::FromString(WeaponType));
+	}
+}
+
+void ABlasterPlayerController::UpdateGrenadeAmount(int32 GrenadeAmount)
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+	bool bHudValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+			BlasterHUD->CharacterOverlay->GrenadeAmount;
+
+	if (bHudValid)
+	{
+		BlasterHUD->CharacterOverlay->GrenadeAmount->SetText(FText::AsNumber(GrenadeAmount));
+	} else
+	{
+		HUDGrenadeAmount = GrenadeAmount;
 	}
 }
 
@@ -368,9 +389,14 @@ void ABlasterPlayerController::PollInit()
 			UpdateHUDDefeats(HUDDefeats);
 			SetElimTextVisibility(false);
 			UpdateHUDWeaponType("");
+
+			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(GetPawn());
+			if (BlasterCharacter && BlasterCharacter->GetCombat())
+			{
+				UpdateGrenadeAmount(BlasterCharacter->GetCombat()->GetGrenades());
+			}
 		}
 	}
-	
 }
 
 void ABlasterPlayerController::CheckTimeSync(float DeltaTime)
@@ -437,6 +463,14 @@ void ABlasterPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetime
 void ABlasterPlayerController::OnRep_Pawn()
 {
 	Super::OnRep_Pawn();
+	//Update GrenadeAmount In Clients
+	if (ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(GetPawn()))
+	{
+		if (BlasterCharacter->GetCombat())
+		{
+			UpdateGrenadeAmount(BlasterCharacter->GetCombat()->GetGrenades());
+		}
+	}
 }
 
 void ABlasterPlayerController::ClientReportServerTime_Implementation(float TimeOfClientRequest,

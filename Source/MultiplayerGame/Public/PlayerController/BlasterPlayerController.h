@@ -42,6 +42,7 @@ public:
 
 	void StartShowElimTextTimer();
 	void UpdateHUDWeaponType(const FString& WeaponType);
+	void UpdateGrenadeAmount(int32 GrenadeAmount);
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
@@ -97,6 +98,7 @@ private:
 	float HUDMaxHealth;
 	float HUDScore;
 	int32 HUDDefeats;
+	int32 HUDGrenadeAmount;
 
 	FTimerHandle ElimTextTimer;
 	UPROPERTY(EditAnywhere)
