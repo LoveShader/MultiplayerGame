@@ -332,6 +332,30 @@ void UCombatComponent::ShowAttachedGrenade(bool bShowGrenade)
 	}
 }
 
+void UCombatComponent::ServerSpawnGrenade_Implementation(const FVector_NetQuantize& HitLocation)
+{
+	if (Character && GrenadeClass && Character->GetAttachedGrenade())
+	{
+		const FVector StartingLocation = Character->GetAttachedGrenade()->GetComponentLocation();
+		FVector ToTarget = HitLocation - StartingLocation;
+		const FVector LaunchDirection = ToTarget.IsNearlyZero() ? Character->GetActorForwardVector() : ToTarget.GetSafeNormal();
+		const FVector SpawnLocation = StartingLocation + LaunchDirection * 100.f;
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = Character;
+		SpawnParams.Instigator = Character;
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			World->SpawnActor<AProjectile>(
+				GrenadeClass,
+				SpawnLocation,
+				ToTarget.Rotation(),
+				SpawnParams
+				);
+		}
+	}
+}
+
 void UCombatComponent::ResetShotgunReloadTracking()
 {
 	LocalShotgunShellCount = 0;
@@ -781,24 +805,8 @@ void UCombatComponent::LaunchGrenade()
 {
 	ShowAttachedGrenade(false);
 
-	if (Character && Character->HasAuthority() && GrenadeClass && Character->GetAttachedGrenade())
+	if (Character && Character->IsLocallyControlled())
 	{
-		const FVector StartingLocation = Character->GetAttachedGrenade()->GetComponentLocation();
-		FVector ToTarget = HitTarget - StartingLocation;
-		const FVector LaunchDirection = ToTarget.IsNearlyZero() ? Character->GetActorForwardVector() : ToTarget.GetSafeNormal();
-		const FVector SpawnLocation = StartingLocation + LaunchDirection * 100.f;
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = Character;
-		SpawnParams.Instigator = Character;
-		UWorld* World = GetWorld();
-		if (World)
-		{
-			World->SpawnActor<AProjectile>(
-				GrenadeClass,
-				SpawnLocation,
-				ToTarget.Rotation(),
-				SpawnParams
-				);
-		}
+		ServerSpawnGrenade(HitTarget);
 	}
 }

@@ -209,6 +209,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AProjectile> GrenadeClass;
+
+	UFUNCTION(Server, Reliable)
+	void ServerSpawnGrenade(const FVector_NetQuantize& HitLocation);
 public:
 	/**
 	 * Getter and Setter Function
