@@ -13,6 +13,8 @@ class MULTIPLAYERGAME_API UBuffComponent : public UActorComponent
 
 public:
 	UBuffComponent();
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void Heal(float HealAmount, float HealingTime);
 
 protected:
 	virtual void BeginPlay() override;
@@ -22,4 +24,12 @@ private:
 
 	UPROPERTY()
 	ABlasterCharacter* Character;
+
+	bool bHeal = false;
+
+	float AmountToHeal = 0.0f;
+
+	float HealingRate = 0.0f;
+
+	void HealRampup(float DeltaTime);
 };

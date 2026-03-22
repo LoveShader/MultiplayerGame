@@ -31,6 +31,7 @@ class MULTIPLAYERGAME_API ABlasterCharacter : public ACharacter, public IInterac
 
 public:
 	ABlasterCharacter();
+	friend class UBuffComponent;
 	void UpdateHUDHealth();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -191,7 +192,7 @@ private:
 	float Health = 100.0f;
 	
 	UFUNCTION()
-	void OnRep_Health();
+	void OnRep_Health(float LastHealth);
 
 	/**
 	 * Add PlayerController, Use it to controll the character's health
