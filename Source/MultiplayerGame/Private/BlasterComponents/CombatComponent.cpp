@@ -288,7 +288,7 @@ void UCombatComponent::PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount)
 		CarriedAmmo = CarriedAmmoMap[WeaponType];
 		UpdateCarriedAmmoUI();
 		//Reload when the weapon has no ammo
-		if (EquippedWeapon && CarriedAmmo > 0)
+		if (EquippedWeapon && CarriedAmmo > 0 && EquippedWeapon->IsEmpty())
 		{
 			Reload();
 		}
