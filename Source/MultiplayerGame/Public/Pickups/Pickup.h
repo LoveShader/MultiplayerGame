@@ -32,6 +32,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	USoundCue* PickupSound;
+
+	UPROPERTY(EditDefaultsOnly)
+	float BaseRotationRate = 45.0f;
 public:	
 
 };

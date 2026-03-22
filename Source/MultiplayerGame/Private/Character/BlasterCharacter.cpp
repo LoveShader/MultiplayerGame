@@ -411,6 +411,17 @@ void ABlasterCharacter::PlayThrowGrenadeMontage()
 	}
 }
 
+bool ABlasterCharacter::CanReceiveAmmo(EWeaponType WeaponType) const
+{
+	return Combat && Combat->CanPickupAmmo(WeaponType);
+}
+
+void ABlasterCharacter::ReceiveAmmo(EWeaponType WeaponType, int32 AmmoAmount)
+{
+	if (Combat == nullptr)	return;
+	Combat->PickupAmmo(WeaponType, AmmoAmount);
+}
+
 void ABlasterCharacter::Elim()
 {
 	NetMulticastElim();

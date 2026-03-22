@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "Components/TimelineComponent.h"
+#include "Interface/AmmoReceiverInterface.h"
 #include "Interface/ICombatUIProvider.h"
 #include "Interface/InteractWithCrosshairsInterface.h"
 #include "MultiplayerGame/BlasterTypes/CombatState.h"
@@ -23,7 +24,7 @@ class UInputAction;
 class UInputMappingContext;
 
 UCLASS()
-class MULTIPLAYERGAME_API ABlasterCharacter : public ACharacter, public IInteractWithCrosshairsInterface, public IICombatUIProvider
+class MULTIPLAYERGAME_API ABlasterCharacter : public ACharacter, public IInteractWithCrosshairsInterface, public IICombatUIProvider, public IAmmoReceiverInterface
 {
 	GENERATED_BODY()
 
@@ -37,6 +38,12 @@ public:
 	void PlayFireMontage(bool bIsAiming);
 	void PlayReloadMontage();
 	void PlayThrowGrenadeMontage();
+
+	/**
+	 * Implement Pickup Interface
+	 */
+	virtual bool CanReceiveAmmo(EWeaponType WeaponType) const override;
+	virtual void ReceiveAmmo(EWeaponType WeaponType, int32 AmmoAmount) override;
 	
 	void Elim();
 	UFUNCTION(NetMulticast, Reliable)

@@ -11,6 +11,21 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCarriedAmmoChanged, int32, NewAmmo);
 
+USTRUCT(BlueprintType)
+struct FCarriedAmmoConfig
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	EWeaponType WeaponType;
+
+	UPROPERTY(EditAnywhere)
+	int32 InitialCarriedAmmo;
+
+	UPROPERTY(EditAnywhere)
+	int32 MaxCarriedAmmo = 0;
+};
+
 class UCameraComponent;
 class ABlasterHUD;
 class ABlasterPlayerController;
@@ -39,6 +54,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ShotgunShellReload();
+
+	/**
+	 * Pickup Ammo implementation
+	 */
+	bool CanPickupAmmo(EWeaponType WeaponType) const;
+	void PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount);
 protected:
 	virtual void BeginPlay() override;
 	void EquipWeapon(AWeapon* WeaponToEquip);
@@ -143,27 +164,9 @@ private:
 	// Carried Ammo for Current Weapon Type
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_CarriedAmmo)
 	int32 CarriedAmmo;
-
-	UPROPERTY(EditAnywhere, Category = CarriedAmmos)
-	int32 StartingARAmmo = 30;
-
-	UPROPERTY(EditAnywhere, Category = CarriedAmmos)
-	int32 StartingRocketAmmo = 4;
-
-	UPROPERTY(EditAnywhere, Category = CarriedAmmos)
-	int32 StartingPistolAmmo = 15;
-
-	UPROPERTY(EditAnywhere, Category = CarriedAmmos)
-	int32 StartingSMGAmmo = 20;
-
-	UPROPERTY(EditAnywhere, Category = CarriedAmmos)
-	int32 StartingShotgunAmmo = 0;
-
-	UPROPERTY(EditAnywhere, Category = CarriedAmmos)
-	int32 StartingSniperRifle = 10;
-
-	UPROPERTY(EditAnywhere, Category = CarriedAmmos)
-	int32 StartingGrenadeLauncherAmmo = 4;
+	
+	UPROPERTY(EditDefaultsOnly, Category = CarriedAmmos)
+	TArray<FCarriedAmmoConfig> CarriedAmmoConfigs;
 	
 	UFUNCTION()
 	void OnRep_CarriedAmmo();
@@ -223,6 +226,8 @@ private:
 
 	UFUNCTION()
 	void OnRep_Grenades();
+
+	int32 GetWeaponMaxCarriedAmmo(EWeaponType WeaponType) const;
 public:
 	/**
 	 * Getter and Setter Function

@@ -3,6 +3,7 @@
 
 #include "Pickups/Pickup.h"
 
+#include "MaterialHLSLTree.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
@@ -17,6 +18,7 @@ APickup::APickup()
 	//Create Sphere Component and Static Mesh Component
 	OverlapSphere = CreateDefaultSubobject<USphereComponent>("OverlapSphere");
 	OverlapSphere->SetupAttachment(RootComponent);
+	OverlapSphere->AddLocalOffset(FVector(0.f, 0.f, 85.f));
 
 	PickupMesh = CreateDefaultSubobject<UStaticMeshComponent>("PickupMesh");
 	PickupMesh->SetupAttachment(OverlapSphere);
@@ -29,6 +31,9 @@ APickup::APickup()
 	//Set Static Mesh Collision Settings
 	PickupMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	PickupMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
+	PickupMesh->SetRelativeScale3D(FVector(5.f, 5.f, 5.f));
+	PickupMesh->SetRenderCustomDepth(true);
+	PickupMesh->SetCustomDepthStencilValue(250);
 }
 
 void APickup::BeginPlay()
@@ -45,6 +50,11 @@ void APickup::BeginPlay()
 void APickup::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (PickupMesh)
+	{
+		PickupMesh->AddWorldRotation(FRotator(0.0f, BaseRotationRate * DeltaTime, 0.0f));
+	}
 }
 
 void APickup::Destroyed()
@@ -64,5 +74,6 @@ void APickup::Destroyed()
 void APickup::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                               UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	
 }
 

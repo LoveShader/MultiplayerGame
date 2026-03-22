@@ -26,13 +26,10 @@ UCombatComponent::UCombatComponent()
 
 void UCombatComponent::InitializeCarriedAmmo()
 {
-	CarriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, StartingARAmmo);
-	CarriedAmmoMap.Emplace(EWeaponType::EWT_RocketLauncher, StartingRocketAmmo);
-	CarriedAmmoMap.Emplace(EWeaponType::EWT_Pistol, StartingPistolAmmo);
-	CarriedAmmoMap.Emplace(EWeaponType::EWT_SubmachineGun, StartingSMGAmmo);
-	CarriedAmmoMap.Emplace(EWeaponType::EWT_Shotgun, StartingShotgunAmmo);
-	CarriedAmmoMap.Emplace(EWeaponType::EWT_SniperRifle, StartingSniperRifle);
-	CarriedAmmoMap.Emplace(EWeaponType::EWT_GrenadeLauncher, StartingGrenadeLauncherAmmo);
+	for (const FCarriedAmmoConfig& CarriedAmmoData : CarriedAmmoConfigs)
+	{
+		CarriedAmmoMap.Emplace(CarriedAmmoData.WeaponType, CarriedAmmoData.InitialCarriedAmmo);
+	}
 }
 
 void UCombatComponent::OnRep_CombatState()
@@ -261,6 +258,43 @@ void UCombatComponent::ShotgunShellReload()
 	}
 }
 
+bool UCombatComponent::CanPickupAmmo(EWeaponType WeaponType) const
+{
+	if (CarriedAmmoMap.Contains(WeaponType))
+	{
+		int32 CurrentMaxCarriedAmmo = GetWeaponMaxCarriedAmmo(WeaponType);
+		
+		//When CurrentCarried Ammo less than the MaxCarriedAmmo that the Current Weapon has, return true
+		if (CarriedAmmoMap[WeaponType] < CurrentMaxCarriedAmmo)
+			return true;
+	}
+	return false;
+}
+
+void UCombatComponent::PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount)
+{
+	if (CarriedAmmoMap.Contains(WeaponType))
+	{
+		int32 CurrentMaxCarriedAmmo = GetWeaponMaxCarriedAmmo(WeaponType);
+		int32 AmmoSpace = FMath::Clamp(CurrentMaxCarriedAmmo - CarriedAmmoMap[WeaponType], 0, CurrentMaxCarriedAmmo);
+
+		int32 CarriedAmmoToReload = AmmoAmount < AmmoSpace ? AmmoAmount : AmmoSpace;
+		CarriedAmmoMap[WeaponType] = FMath::Clamp(CarriedAmmoMap[WeaponType] + CarriedAmmoToReload, 0, CurrentMaxCarriedAmmo);
+	}
+
+	//Server Controlled Character Update CarriedAmmo In HUD
+	if (EquippedWeapon && EquippedWeapon->GetWeaponType() == WeaponType)
+	{
+		CarriedAmmo = CarriedAmmoMap[WeaponType];
+		UpdateCarriedAmmoUI();
+		//Reload when the weapon has no ammo
+		if (EquippedWeapon && CarriedAmmo > 0)
+		{
+			Reload();
+		}
+	}
+}
+
 void UCombatComponent::UpdateShotgunAmmoValues()
 {
 	if (Character == nullptr || EquippedWeapon == nullptr)	return;
@@ -340,6 +374,17 @@ void UCombatComponent::OnRep_Grenades()
 	{
 		Controller->UpdateGrenadeAmount(Grenades);
 	}
+}
+
+int32 UCombatComponent::GetWeaponMaxCarriedAmmo(EWeaponType WeaponType) const
+{
+	for (const FCarriedAmmoConfig& CarriedAmmoData : CarriedAmmoConfigs)
+	{
+		if (CarriedAmmoData.WeaponType == WeaponType)
+			return CarriedAmmoData.MaxCarriedAmmo;
+	}
+	//If Character don't have this weapon, return 0
+	return 0;
 }
 
 void UCombatComponent::ServerSpawnGrenade_Implementation(const FVector_NetQuantize& HitLocation)
