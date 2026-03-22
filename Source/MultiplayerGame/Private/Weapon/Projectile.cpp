@@ -44,6 +44,16 @@ void AProjectile::BeginPlay()
 		);
 	}
 
+	StartOwnerCollisionIgnoreWindow();
+
+	if (HasAuthority())
+	{
+		CollisionBox->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+	}
+}
+
+void AProjectile::StartOwnerCollisionIgnoreWindow()
+{
 	IgnoreOwnerCollision(true);
 	GetWorldTimerManager().SetTimer(
 		OwnerCollisionTimer,
@@ -51,11 +61,6 @@ void AProjectile::BeginPlay()
 		&AProjectile::ReEnableOwnerCollision,
 		OwnerIgnoreTime
 	);
-
-	if (HasAuthority())
-	{
-		CollisionBox->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
-	}
 }
 
 void AProjectile::IgnoreOwnerCollision(bool bShouldIgnore)

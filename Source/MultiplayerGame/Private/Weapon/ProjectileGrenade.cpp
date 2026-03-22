@@ -32,6 +32,8 @@ void AProjectileGrenade::BeginPlay()
 {
 	AActor::BeginPlay();
 
+	StartOwnerCollisionIgnoreWindow();
+
 	//Start Destory Timer
 	StartDestroyTimer();
 
