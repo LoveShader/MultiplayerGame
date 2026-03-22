@@ -9,6 +9,7 @@
 #include "InputAction.h"
 #include "InputMappingContext.h"
 #include "NetworkReplayStreaming.h"
+#include "BlasterComponents/BuffComponent.h"
 #include "BlasterComponents/CombatComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -46,6 +47,9 @@ ABlasterCharacter::ABlasterCharacter()
 	//Create Combat Component
 	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("Combat"));
 	Combat->SetIsReplicated(true);
+
+	Buff = CreateDefaultSubobject<UBuffComponent>(TEXT("Buff"));
+	Buff->SetIsReplicated(true);
 
 	//Set Crouch Enabled
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
@@ -826,5 +830,10 @@ void ABlasterCharacter::PostInitializeComponents()
 	if (Combat)
 	{
 		Combat->Character = this;
+	}
+
+	if (Buff)
+	{
+		Buff->Character = this;
 	}
 }

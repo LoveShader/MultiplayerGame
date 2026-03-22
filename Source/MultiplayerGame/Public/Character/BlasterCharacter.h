@@ -16,6 +16,7 @@
 class ABlasterPlayerState;
 class ABlasterPlayerController;
 class UCombatComponent;
+class UBuffComponent;
 class AWeapon;
 class UWidgetComponent;
 class UCameraComponent;
@@ -145,6 +146,9 @@ private:
 	UCombatComponent* Combat;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
+	UBuffComponent* Buff;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	class UWidgetComponent* OverheadWidget;
 	
 	UFUNCTION(Server, Reliable)
@@ -272,6 +276,7 @@ public:
 	FORCEINLINE	float GetHealth() const { return Health; }
 	FORCEINLINE	float GetMaxHealth() const { return MaxHealth; }
 	FORCEINLINE UCombatComponent* GetCombat() const {return Combat;}
+	FORCEINLINE UBuffComponent* GetBuff() const { return Buff; }
 	FORCEINLINE bool GetRotateRootBone() const { return bRotateRootBone; }
 	FORCEINLINE UAnimMontage* GetReloadMontage() const { return ReloadMontage; }
 	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const {return AttachedGrenade;}
