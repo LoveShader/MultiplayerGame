@@ -3,9 +3,10 @@
 
 #include "Pickups/Pickup.h"
 
-#include "MaterialHLSLTree.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Sound/SoundCue.h"
 
 APickup::APickup()
@@ -22,6 +23,9 @@ APickup::APickup()
 
 	PickupMesh = CreateDefaultSubobject<UStaticMeshComponent>("PickupMesh");
 	PickupMesh->SetupAttachment(OverlapSphere);
+
+	PickupEffectComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("PickupEffectComponent"));
+	PickupEffectComponent->SetupAttachment(GetRootComponent());
 
 	//Set Overlap Collsion Settings
 	OverlapSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -59,8 +63,16 @@ void APickup::Tick(float DeltaTime)
 
 void APickup::Destroyed()
 {
-	Super::Destroyed();
-	
+	if (PickupEffect)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			this,
+			PickupEffect,
+			GetActorLocation(),
+			GetActorRotation()
+		);
+	}
+
 	if (PickupSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(
@@ -69,6 +81,8 @@ void APickup::Destroyed()
 			GetActorLocation()
 		);
 	}
+
+	Super::Destroyed();
 }
 
 void APickup::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

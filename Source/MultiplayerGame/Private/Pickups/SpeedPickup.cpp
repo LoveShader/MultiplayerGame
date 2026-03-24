@@ -1,23 +1,21 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Pickups/HealthPickup.h"
+#include "Pickups/SpeedPickup.h"
 
 #include "BlasterComponents/BuffComponent.h"
 #include "Character/BlasterCharacter.h"
 
-
-AHealthPickup::AHealthPickup()
+ASpeedPickup::ASpeedPickup()
 {
 }
 
-void AHealthPickup::BeginPlay()
+void ASpeedPickup::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
-void AHealthPickup::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+void ASpeedPickup::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	Super::OnSphereOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
@@ -26,10 +24,8 @@ void AHealthPickup::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	{
 		if (UBuffComponent* Buff = BlasterCharacter->GetBuff())
 		{
-			Buff->Heal(HealAmount, HealingTime);
+			Buff->BuffSpeed(BaseSpeedBuff, CrouchSpeedBuff, SpeedBuffTime);
 			Destroy();
 		}
 	}
 }
-
-

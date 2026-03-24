@@ -8,6 +8,8 @@
 
 class USphereComponent;
 class USoundCue;
+class UNiagaraComponent;
+class UNiagaraSystem;
 
 UCLASS()
 class MULTIPLAYERGAME_API APickup : public AActor
@@ -23,6 +25,11 @@ public:
 	virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 protected:
 	virtual void BeginPlay() override;
+	UPROPERTY(VisibleAnywhere)
+	UNiagaraComponent* PickupEffectComponent;
+
+	UPROPERTY(EditAnywhere, Category = Particles)
+	UNiagaraSystem* PickupEffect;
 private:
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* OverlapSphere;
