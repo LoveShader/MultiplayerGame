@@ -47,6 +47,7 @@ void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 	 */
 
 	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	
 
 	bool bHudValid = BlasterHUD &&
 		BlasterHUD->CharacterOverlay &&
@@ -59,18 +60,18 @@ void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 		BlasterHUD->CharacterOverlay->HealthBar->SetPercent(Percent);
 		FString HealthText = FString::Printf(TEXT("%d/%d"), FMath::CeilToInt(Health), FMath::CeilToInt(MaxHealth));
 		BlasterHUD->CharacterOverlay->HealthText->SetText(FText::FromString(HealthText));
-	}
-	else
+	} else
 	{
 		HUDHealth = Health;
 		HUDMaxHealth = MaxHealth;
+		bInitializeHealth = true;
 	}
 }
 
 void ABlasterPlayerController::UpdateHUDShield(float Shield, float MaxShield)
 {
 	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
-
+	
 	bool bHudValid = BlasterHUD &&
 		BlasterHUD->CharacterOverlay &&
 		BlasterHUD->CharacterOverlay->ShieldBar &&
@@ -82,18 +83,18 @@ void ABlasterPlayerController::UpdateHUDShield(float Shield, float MaxShield)
 		BlasterHUD->CharacterOverlay->ShieldBar->SetPercent(Percent);
 		FString ShieldText = FString::Printf(TEXT("%d/%d"), FMath::CeilToInt(Shield), FMath::CeilToInt(MaxShield));
 		BlasterHUD->CharacterOverlay->ShieldText->SetText(FText::FromString(ShieldText));
-	}
-	else
+	} else
 	{
 		HUDShield = Shield;
 		HUDMaxShield = MaxShield;
+		bInitializeShield = true;
 	}
 }
 
 void ABlasterPlayerController::UpdateHUDScore(float Score)
 {
 	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
-
+	
 	bool bHudValid = BlasterHUD &&
 		BlasterHUD->CharacterOverlay &&
 		BlasterHUD->CharacterOverlay->ScoreAmount;
@@ -101,17 +102,17 @@ void ABlasterPlayerController::UpdateHUDScore(float Score)
 	{
 		FString ScoreText = FString::Printf(TEXT("%d"), FMath::FloorToInt(Score));
 		BlasterHUD->CharacterOverlay->ScoreAmount->SetText(FText::FromString(ScoreText));
-	}
-	else
+	} else
 	{
 		HUDScore = Score;
+		bInitializeScore = true;
 	}
 }
 
 void ABlasterPlayerController::UpdateHUDDefeats(int32 Defeats)
 {
 	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
-
+	
 	bool bHudValid = BlasterHUD &&
 		BlasterHUD->CharacterOverlay &&
 		BlasterHUD->CharacterOverlay->DefeatsAmount;
@@ -119,10 +120,10 @@ void ABlasterPlayerController::UpdateHUDDefeats(int32 Defeats)
 	{
 		FString DefeatsText = FString::Printf(TEXT("%d"), Defeats);
 		BlasterHUD->CharacterOverlay->DefeatsAmount->SetText(FText::FromString(DefeatsText));
-	}
-	else
+	} else
 	{
 		HUDDefeats = Defeats;
+		bInitializeDefeats = true;
 	}
 }
 
@@ -309,7 +310,7 @@ void ABlasterPlayerController::UpdateHUDWeaponType(const FString& WeaponType)
 void ABlasterPlayerController::UpdateGrenadeAmount(int32 GrenadeAmount)
 {
 	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
-
+	
 	bool bHudValid = BlasterHUD &&
 		BlasterHUD->CharacterOverlay &&
 			BlasterHUD->CharacterOverlay->GrenadeAmount;
@@ -320,6 +321,7 @@ void ABlasterPlayerController::UpdateGrenadeAmount(int32 GrenadeAmount)
 	} else
 	{
 		HUDGrenadeAmount = GrenadeAmount;
+		bInitializeGrenadeAmount = true;
 	}
 }
 
@@ -408,15 +410,15 @@ void ABlasterPlayerController::PollInit()
 		if (BlasterHUD && BlasterHUD->CharacterOverlay)
 		{
 			BlasterOverlay = BlasterHUD->CharacterOverlay;
-			SetHUDHealth(HUDHealth,HUDMaxHealth);
-			UpdateHUDShield(HUDShield, HUDMaxShield);
-			UpdateHUDScore(HUDScore);
-			UpdateHUDDefeats(HUDDefeats);
+			if (bInitializeHealth) SetHUDHealth(HUDHealth, HUDMaxHealth);
+			if (bInitializeShield) UpdateHUDShield(HUDShield, HUDMaxShield);
+			if (bInitializeScore) UpdateHUDScore(HUDScore);
+			if (bInitializeDefeats) UpdateHUDDefeats(HUDDefeats);
 			SetElimTextVisibility(false);
 			UpdateHUDWeaponType("");
 
 			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(GetPawn());
-			if (BlasterCharacter && BlasterCharacter->GetCombat())
+			if (BlasterCharacter && BlasterCharacter->GetCombat() && bInitializeGrenadeAmount)
 			{
 				UpdateGrenadeAmount(BlasterCharacter->GetCombat()->GetGrenades());
 			}

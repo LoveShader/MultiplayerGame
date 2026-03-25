@@ -103,6 +103,12 @@ private:
 	int32 HUDDefeats;
 	int32 HUDGrenadeAmount;
 
+	bool bInitializeHealth = false;
+	bool bInitializeShield = false;
+	bool bInitializeScore = false;
+	bool bInitializeDefeats = false;
+	bool bInitializeGrenadeAmount = false;
+
 	FTimerHandle ElimTextTimer;
 	UPROPERTY(EditAnywhere)
 	float ShowElimTextTime = 1.0f;

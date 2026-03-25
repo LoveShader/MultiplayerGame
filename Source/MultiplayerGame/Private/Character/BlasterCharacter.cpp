@@ -558,9 +558,24 @@ void ABlasterCharacter::PlayElimMontage()
 void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
                                       AController* InstigatedBy, AActor* DamageCauser)
 {
-	Health = FMath::Clamp(Health - Damage, 0.0f, MaxHealth);
+	float DamageToHealth = Damage;
+	if (Shield <= DamageToHealth)
+	{
+		DamageToHealth = FMath::Clamp(DamageToHealth - Shield, 0.0f, Damage);
+		Shield = 0.0f;
+	}
+	else
+	{
+		Shield = FMath::Clamp(Shield - DamageToHealth, 0.0f, MaxShield);
+		DamageToHealth = 0.0f;
+	}
+
+	Health = FMath::Clamp(Health - DamageToHealth, 0.0f, MaxHealth);
 	if (IsLocallyControlled())
+	{
+		UpdateHUDShield();
 		UpdateHUDHealth();
+	}
 	PlayHitReactMontage();
 
 	if (Health == 0.0f)
