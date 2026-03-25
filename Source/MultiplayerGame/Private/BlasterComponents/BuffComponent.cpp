@@ -20,6 +20,7 @@ void UBuffComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	if (Character && Character->HasAuthority())
 	{
 		HealRampup(DeltaTime);
+		ShieldRampup(DeltaTime);
 	}
 }
 
@@ -65,6 +66,51 @@ void UBuffComponent::HealRampup(float DeltaTime)
 		bHeal = false;
 		AmountToHeal = 0.0f;
 		HealingRate = 0.0f;
+	}
+}
+
+void UBuffComponent::ReplenishShield(float ShieldAmount, float ReplenishTime)
+{
+	if (Character == nullptr || ShieldAmount <= 0.0f)
+	{
+		return;
+	}
+
+	if (Character->Shield >= Character->MaxShield)
+	{
+		bReplenishShield = false;
+		ShieldReplenishAmount = 0.0f;
+		ShieldReplenishRate = 0.0f;
+		return;
+	}
+
+	bReplenishShield = true;
+	ShieldReplenishAmount += ShieldAmount;
+	ShieldReplenishRate = ShieldReplenishAmount / FMath::Max(ReplenishTime, KINDA_SMALL_NUMBER);
+}
+
+void UBuffComponent::ShieldRampup(float DeltaTime)
+{
+	if (!bReplenishShield || Character == nullptr)
+	{
+		return;
+	}
+
+	const float ShieldBeforeReplenish = Character->Shield;
+	Character->Shield = FMath::Clamp(Character->Shield + ShieldReplenishRate * DeltaTime, 0.0f, Character->MaxShield);
+	const float ShieldThisFrame = Character->Shield - ShieldBeforeReplenish;
+	ShieldReplenishAmount -= ShieldThisFrame;
+
+	if (Character->IsLocallyControlled())
+	{
+		Character->UpdateHUDShield();
+	}
+
+	if (ShieldReplenishAmount <= 0.0f || Character->Shield >= Character->MaxShield)
+	{
+		bReplenishShield = false;
+		ShieldReplenishAmount = 0.0f;
+		ShieldReplenishRate = 0.0f;
 	}
 }
 

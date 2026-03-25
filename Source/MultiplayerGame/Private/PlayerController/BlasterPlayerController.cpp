@@ -81,7 +81,7 @@ void ABlasterPlayerController::UpdateHUDShield(float Shield, float MaxShield)
 	{
 		const float Percent = Shield / MaxShield;
 		BlasterHUD->CharacterOverlay->ShieldBar->SetPercent(Percent);
-		FString ShieldText = FString::Printf(TEXT("%d/%d"), FMath::CeilToInt(Shield), FMath::CeilToInt(MaxShield));
+		FString ShieldText = FString::Printf(TEXT("%d/%d"), FMath::RoundToInt(Shield), FMath::RoundToInt(MaxShield));
 		BlasterHUD->CharacterOverlay->ShieldText->SetText(FText::FromString(ShieldText));
 	} else
 	{

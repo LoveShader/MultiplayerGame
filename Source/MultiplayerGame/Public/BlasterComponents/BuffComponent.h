@@ -15,6 +15,7 @@ public:
 	UBuffComponent();
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void Heal(float HealAmount, float HealingTime);
+	void ReplenishShield(float ShieldAmount, float ReplenishTime);
 	void BuffSpeed(float BaseSpeed, float CrouchSpeed, float BuffTime);
 	void SetInitialSpeeds(float BaseSpeed, float CrouchSpeed);
 	void BuffJump(float JumpVelocity, float BuffTime);
@@ -36,6 +37,14 @@ private:
 	float HealingRate = 0.0f;
 
 	void HealRampup(float DeltaTime);
+
+	bool bReplenishShield = false;
+
+	float ShieldReplenishAmount = 0.0f;
+
+	float ShieldReplenishRate = 0.0f;
+
+	void ShieldRampup(float DeltaTime);
 
 	float InitialBaseSpeed = 0.0f;
 
