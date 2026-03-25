@@ -23,6 +23,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void OnRep_Pawn() override;
 	void SetHUDHealth(float Health, float MaxHealth);
+	void UpdateHUDShield(float Shield, float MaxShield);
 	UFUNCTION()
 	void UpdateHUDScore(float Score);
 	UFUNCTION()
@@ -96,6 +97,8 @@ private:
 
 	float HUDHealth;
 	float HUDMaxHealth;
+	float HUDShield;
+	float HUDMaxShield;
 	float HUDScore;
 	int32 HUDDefeats;
 	int32 HUDGrenadeAmount;

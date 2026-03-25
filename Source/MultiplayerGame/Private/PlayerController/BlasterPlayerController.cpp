@@ -67,6 +67,29 @@ void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 	}
 }
 
+void ABlasterPlayerController::UpdateHUDShield(float Shield, float MaxShield)
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+	bool bHudValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->ShieldBar &&
+		BlasterHUD->CharacterOverlay->ShieldText;
+
+	if (bHudValid)
+	{
+		const float Percent = Shield / MaxShield;
+		BlasterHUD->CharacterOverlay->ShieldBar->SetPercent(Percent);
+		FString ShieldText = FString::Printf(TEXT("%d/%d"), FMath::CeilToInt(Shield), FMath::CeilToInt(MaxShield));
+		BlasterHUD->CharacterOverlay->ShieldText->SetText(FText::FromString(ShieldText));
+	}
+	else
+	{
+		HUDShield = Shield;
+		HUDMaxShield = MaxShield;
+	}
+}
+
 void ABlasterPlayerController::UpdateHUDScore(float Score)
 {
 	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
@@ -198,6 +221,7 @@ void ABlasterPlayerController::OnPossess(APawn* InPawn)
 	if (ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(InPawn))
 	{
 		SetHUDHealth(BlasterCharacter->GetHealth(), BlasterCharacter->GetMaxHealth());
+		UpdateHUDShield(BlasterCharacter->GetShield(), BlasterCharacter->GetMaxShield());
 		if (BlasterCharacter->GetCombat())
 		{
 			UpdateGrenadeAmount(BlasterCharacter->GetCombat()->GetGrenades());
@@ -385,6 +409,7 @@ void ABlasterPlayerController::PollInit()
 		{
 			BlasterOverlay = BlasterHUD->CharacterOverlay;
 			SetHUDHealth(HUDHealth,HUDMaxHealth);
+			UpdateHUDShield(HUDShield, HUDMaxShield);
 			UpdateHUDScore(HUDScore);
 			UpdateHUDDefeats(HUDDefeats);
 			SetElimTextVisibility(false);
@@ -466,6 +491,7 @@ void ABlasterPlayerController::OnRep_Pawn()
 	//Update GrenadeAmount In Clients
 	if (ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(GetPawn()))
 	{
+		UpdateHUDShield(BlasterCharacter->GetShield(), BlasterCharacter->GetMaxShield());
 		if (BlasterCharacter->GetCombat())
 		{
 			UpdateGrenadeAmount(BlasterCharacter->GetCombat()->GetGrenades());

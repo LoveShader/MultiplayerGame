@@ -33,6 +33,7 @@ public:
 	ABlasterCharacter();
 	friend class UBuffComponent;
 	void UpdateHUDHealth();
+	void UpdateHUDShield();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
@@ -194,6 +195,15 @@ private:
 	UFUNCTION()
 	void OnRep_Health(float LastHealth);
 
+	UPROPERTY(EditAnywhere, ReplicatedUsing=OnRep_Shield, Category = "Player Stats")
+	float Shield = 0.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	float MaxShield = 100.0f;
+
+	UFUNCTION()
+	void OnRep_Shield(float LastShield);
+
 	/**
 	 * Add PlayerController, Use it to controll the character's health
 	 */
@@ -276,6 +286,8 @@ public:
 	FORCEINLINE bool GetIsElimed() const { return bIsElimed; }
 	FORCEINLINE	float GetHealth() const { return Health; }
 	FORCEINLINE	float GetMaxHealth() const { return MaxHealth; }
+	FORCEINLINE float GetShield() const { return Shield; }
+	FORCEINLINE float GetMaxShield() const { return MaxShield; }
 	FORCEINLINE UCombatComponent* GetCombat() const {return Combat;}
 	FORCEINLINE UBuffComponent* GetBuff() const { return Buff; }
 	FORCEINLINE bool GetRotateRootBone() const { return bRotateRootBone; }
