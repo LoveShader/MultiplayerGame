@@ -31,6 +31,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Particles)
 	UNiagaraSystem* PickupEffect;
 private:
+	void BindOverlapTimerFinished();
+
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* OverlapSphere;
 
@@ -42,6 +44,11 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	float BaseRotationRate = 45.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = Pickup)
+	float BindOverlapTime = 0.25f;
+
+	FTimerHandle BindOverlapTimer;
 public:	
 
 };

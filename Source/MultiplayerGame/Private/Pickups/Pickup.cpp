@@ -8,6 +8,7 @@
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Sound/SoundCue.h"
+#include "TimerManager.h"
 
 APickup::APickup()
 {
@@ -47,7 +48,17 @@ void APickup::BeginPlay()
 	//Bind Overlap Sphere‘s Overlap Event Only On The Server
 	if (HasAuthority())
 	{
-		OverlapSphere->OnComponentBeginOverlap.AddDynamic(this, &APickup::OnSphereOverlap);
+		OverlapSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		GetWorldTimerManager().SetTimer(BindOverlapTimer, this, &APickup::BindOverlapTimerFinished, BindOverlapTime);
+	}
+}
+
+void APickup::BindOverlapTimerFinished()
+{
+	if (OverlapSphere)
+	{
+		OverlapSphere->OnComponentBeginOverlap.AddUniqueDynamic(this, &APickup::OnSphereOverlap);
+		OverlapSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
 }
 
