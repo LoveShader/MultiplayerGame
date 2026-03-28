@@ -34,6 +34,8 @@ public:
 	virtual void Fire(const FVector& HitTarget);
 	void BroadcastCurrentAmmo() const;
 	void AddAmmo(int AmmoToReload);
+	void SetWeaponOutlineStencil(EWeaponOutlineStencil NewOutlineStencil);
+	void EnableWeaponOutline(bool bEnabled);
 protected:
 	virtual void BeginPlay() override;
 
@@ -147,6 +149,7 @@ public:
 	FORCEINLINE bool IsFull() const {return Ammo == MagCapcity;}
 	FORCEINLINE bool IsDestroyWeapon() const {return bDestroyWeapon;}
 	FORCEINLINE void SetWeaponoDestroyed(bool bDestroyed) { bDestroyWeapon = bDestroyed;}
+	FORCEINLINE EWeaponOutlineStencil GetWeaponOutlineStencil() const { return OutlineStencil; }
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnAmmoChanged OnAmmoChanged;

@@ -75,6 +75,9 @@ protected:
 	UFUNCTION()
 	void OnRep_EquippedWeapon(AWeapon* LastWeapon);
 
+	UFUNCTION()
+	void OnRep_SecondaryWeapon();
+
 	UFUNCTION(Server, Reliable)
 	void ServerFire(const FVector_NetQuantize& TraceHitTarget);
 
@@ -118,6 +121,9 @@ private:
 
 	UPROPERTY(ReplicatedUsing=OnRep_EquippedWeapon, VisibleAnywhere)
 	AWeapon* EquippedWeapon;
+
+	UPROPERTY(ReplicatedUsing=OnRep_SecondaryWeapon, VisibleAnywhere)
+	AWeapon* SecondaryWeapon;
 
 	UPROPERTY(Replicated, VisibleAnywhere)
 	bool bIsAiming;
@@ -186,12 +192,14 @@ private:
 
 	int32 AmountToReload();
 
-	void PlayEquipWeaponSound();
+	void PlayEquipWeaponSound(AWeapon* WeaponToPlay);
 
 	FString GetWeaponTypeDisplayName(EWeaponType WeaponType);
 	void DropWeaponIfEquiped();
 	void SetCarriedAmmoFromCarriedAmmoMap();
 	void ReloadEmptyWeapon();
+	void EquipPrimaryWeapon(AWeapon* WeaponToEquip);
+	void EquipSecondaryWeapon(AWeapon* WeaponToEquip);
 
 	void UpdateShotgunAmmoValues();
 	void ResetShotgunReloadTracking();
@@ -207,6 +215,7 @@ private:
 
 	void AttachActorToRightHand(AActor* ActorToAttach);
 	void AttachActorToLeftHand(AActor* ActorToAttach);
+	void AttachActorToBackpack(AActor* ActorToAttach);
 
 	void AttachActorToSocket(AActor* ActorToAttach, FName SocketName);
 
@@ -235,5 +244,6 @@ public:
 	FORCEINLINE int32 GetCarriedAmmo() const {return CarriedAmmo;};
 	FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
 	FORCEINLINE int32 GetGrenades() const { return Grenades; }
+	FORCEINLINE AWeapon* GetSecondaryWeapon() const { return SecondaryWeapon; }
 	FString GetWeaponTypeText();
 };

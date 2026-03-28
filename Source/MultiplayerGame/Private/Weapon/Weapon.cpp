@@ -217,3 +217,14 @@ void AWeapon::AddAmmo(int AmmoToReload)
 	OnAmmoChanged.Broadcast(Ammo);
 }
 
+void AWeapon::SetWeaponOutlineStencil(EWeaponOutlineStencil NewOutlineStencil)
+{
+	OutlineStencil = NewOutlineStencil;
+	SetWeaponOutlineEnabled(WeaponMesh && WeaponMesh->bRenderCustomDepth);
+}
+
+void AWeapon::EnableWeaponOutline(bool bEnabled)
+{
+	SetWeaponOutlineEnabled(bEnabled);
+}
+
