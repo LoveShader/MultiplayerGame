@@ -138,6 +138,10 @@ void ABlasterPlayerController::UpdateHUDWeaponAmmo(int32 WeaponAmmo)
 	{
 		FString WeaponAmmoText = FString::Printf(TEXT("%d"), WeaponAmmo);
 		BlasterHUD->CharacterOverlay->WeaponAmmoAmount->SetText(FText::FromString(WeaponAmmoText));
+	} else
+	{
+		bInitializeAmmo = true;
+		HUDAmmo = WeaponAmmo;
 	}
 }
 
@@ -153,6 +157,10 @@ void ABlasterPlayerController::UpdateHUDCarriedAmmo(int32 CarriedAmmo)
 	{
 		FString CarriedAmmoText = FString::Printf(TEXT("%d"), CarriedAmmo);
 		BlasterHUD->CharacterOverlay->CarriedAmmoAmount->SetText(FText::FromString(CarriedAmmoText));
+	} else
+	{
+		bInitializeCarriedAmmo = true;
+		HUDCarriedAmmo = CarriedAmmo;
 	}
 }
 
@@ -229,7 +237,10 @@ void ABlasterPlayerController::OnPossess(APawn* InPawn)
 		}
 		if (BlasterCharacter->GetEquippedWeapon())
 		{
+			//When Pawn is restart, it will execute after character BeginPlay, so use this update Ammo, CarriedAmmo and WeaponType
 			UpdateHUDWeaponAmmo(BlasterCharacter->GetEquippedWeapon()->GetWeaponAmmo());
+			UpdateHUDCarriedAmmo(BlasterCharacter->GetCombat()->GetCarriedAmmo());
+			UpdateHUDWeaponType(BlasterCharacter->GetCombat()->GetWeaponTypeText());
 		}
 		else
 		{
@@ -251,7 +262,16 @@ void ABlasterPlayerController::OnRep_PlayerState()
 
 void ABlasterPlayerController::ClearWeaponAmmoHUD()
 {
-	UpdateHUDWeaponAmmo(0);
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+	bool bHudValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->WeaponAmmoAmount;
+	if (bHudValid)
+	{
+		FString WeaponAmmoText = FString::Printf(TEXT("%d"), 0);
+		BlasterHUD->CharacterOverlay->WeaponAmmoAmount->SetText(FText::FromString(WeaponAmmoText));
+	} 
 }
 
 void ABlasterPlayerController::HandleMatchHasStarted()
@@ -304,6 +324,10 @@ void ABlasterPlayerController::UpdateHUDWeaponType(const FString& WeaponType)
 	if (bHudValid)
 	{
 		BlasterHUD->CharacterOverlay->WeaponType->SetText(FText::FromString(WeaponType));
+	} else
+	{
+		bInitializeWeaponType = true;
+		HUDWeaponType = WeaponType;
 	}
 }
 
@@ -415,7 +439,9 @@ void ABlasterPlayerController::PollInit()
 			if (bInitializeScore) UpdateHUDScore(HUDScore);
 			if (bInitializeDefeats) UpdateHUDDefeats(HUDDefeats);
 			SetElimTextVisibility(false);
-			UpdateHUDWeaponType("");
+			if (bInitializeWeaponType) UpdateHUDWeaponType(HUDWeaponType);
+			if (bInitializeAmmo)  UpdateHUDWeaponAmmo(HUDAmmo);
+			if (bInitializeCarriedAmmo) UpdateHUDCarriedAmmo(HUDCarriedAmmo);
 
 			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(GetPawn());
 			if (BlasterCharacter && BlasterCharacter->GetCombat() && bInitializeGrenadeAmount)

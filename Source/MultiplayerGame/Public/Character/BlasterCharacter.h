@@ -264,12 +264,18 @@ private:
 
 	void ShowElimTextIfLocallyControlled();
 	void ClearWeaponTypeText();
+	void ClearCarriedAmmoText();
 
 	/**
 	 * Grenade
 	 */
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* AttachedGrenade;
+	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AWeapon> DefaultWeaponClass;
+
+	void SpawnDefaultWeapon() const;
 public:
 	UPROPERTY(Replicated)
 	bool bDisableGameplay = false;

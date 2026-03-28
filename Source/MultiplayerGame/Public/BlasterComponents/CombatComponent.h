@@ -235,4 +235,5 @@ public:
 	FORCEINLINE int32 GetCarriedAmmo() const {return CarriedAmmo;};
 	FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
 	FORCEINLINE int32 GetGrenades() const { return Grenades; }
+	FString GetWeaponTypeText();
 };

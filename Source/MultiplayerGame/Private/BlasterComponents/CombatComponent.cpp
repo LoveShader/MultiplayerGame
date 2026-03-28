@@ -387,6 +387,16 @@ int32 UCombatComponent::GetWeaponMaxCarriedAmmo(EWeaponType WeaponType) const
 	return 0;
 }
 
+FString UCombatComponent::GetWeaponTypeText()
+{
+	if (!EquippedWeapon)
+	{
+		return "";
+	}
+
+	return GetWeaponTypeDisplayName(EquippedWeapon->GetWeaponType());
+}
+
 void UCombatComponent::ServerSpawnGrenade_Implementation(const FVector_NetQuantize& HitLocation)
 {
 	if (!Character || !GrenadeClass || !Character->GetAttachedGrenade())

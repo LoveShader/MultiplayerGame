@@ -102,12 +102,18 @@ private:
 	float HUDScore;
 	int32 HUDDefeats;
 	int32 HUDGrenadeAmount;
+	FString HUDWeaponType;
+	float HUDAmmo;
+	float HUDCarriedAmmo;
 
 	bool bInitializeHealth = false;
 	bool bInitializeShield = false;
 	bool bInitializeScore = false;
 	bool bInitializeDefeats = false;
 	bool bInitializeGrenadeAmount = false;
+	bool bInitializeWeaponType = false;
+	bool bInitializeAmmo = false;
+	bool bInitializeCarriedAmmo = false;
 
 	FTimerHandle ElimTextTimer;
 	UPROPERTY(EditAnywhere)

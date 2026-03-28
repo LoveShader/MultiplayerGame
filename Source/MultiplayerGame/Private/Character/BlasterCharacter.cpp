@@ -121,6 +121,7 @@ void ABlasterCharacter::BeginPlay()
 	
 	UpdateHUDHealth();
 	UpdateHUDShield();
+	SpawnDefaultWeapon();
 
 	if (HasAuthority())
 	{
@@ -464,12 +465,22 @@ void ABlasterCharacter::ClearWeaponTypeText()
 	}
 }
 
+void ABlasterCharacter::ClearCarriedAmmoText()
+{
+	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(GetController()) : BlasterPlayerController;
+	if (IsLocallyControlled() && BlasterPlayerController)
+	{
+		BlasterPlayerController->UpdateHUDCarriedAmmo(0);
+	}
+}
+
 void ABlasterCharacter::NetMulticastElim_Implementation()
 {
 	bIsElimed = true;
 	//Show Elim Text On Current Machine
 	ShowElimTextIfLocallyControlled();
 	ClearWeaponTypeText();
+	ClearCarriedAmmoText();
 	
 	PlayElimMontage();
 	// add dissolve material
@@ -503,9 +514,15 @@ void ABlasterCharacter::NetMulticastElim_Implementation()
 		);
 	}
 	
-	if (Combat)
+	if (Combat && Combat->EquippedWeapon)
 	{
-		Combat->DroppedWeapon();
+		if (Combat->EquippedWeapon->IsDestroyWeapon())
+		{
+			Combat->EquippedWeapon->Destroy();
+		} else
+		{
+			Combat->DroppedWeapon();
+		}
 		BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(GetController()) : BlasterPlayerController;
 		if (BlasterPlayerController)
 		{
@@ -770,6 +787,23 @@ void ABlasterCharacter::PollInitInput()
 			Subsystem->AddMappingContext(InputContext, 0);
 		}
 		bInputsSet = true;
+	}
+}
+
+void ABlasterCharacter::SpawnDefaultWeapon() const
+{
+	if (HasAuthority() && DefaultWeaponClass && !bIsElimed)
+	{
+		if (UWorld* World = GetWorld())
+		{
+			AWeapon* DefaultWeapon = World->SpawnActor<AWeapon>(DefaultWeaponClass);
+
+			if (Combat && DefaultWeapon)
+			{
+				Combat->EquipWeapon(DefaultWeapon);
+				DefaultWeapon->SetWeaponoDestroyed(true);
+			}
+		}
 	}
 }
 

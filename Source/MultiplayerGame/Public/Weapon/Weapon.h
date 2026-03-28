@@ -108,6 +108,8 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Montage")
 	FName ReloadMontageName;
+
+	bool bDestroyWeapon = false;
 public:
 	/**
 	 * Blaster CrossHair HUD Textures
@@ -143,6 +145,8 @@ public:
 	FORCEINLINE USoundCue* GetEquipSound() const {return EquipSound;}
 	FORCEINLINE FName GetReloadMontageName() const {return ReloadMontageName;}
 	FORCEINLINE bool IsFull() const {return Ammo == MagCapcity;}
+	FORCEINLINE bool IsDestroyWeapon() const {return bDestroyWeapon;}
+	FORCEINLINE void SetWeaponoDestroyed(bool bDestroyed) { bDestroyWeapon = bDestroyed;}
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnAmmoChanged OnAmmoChanged;
