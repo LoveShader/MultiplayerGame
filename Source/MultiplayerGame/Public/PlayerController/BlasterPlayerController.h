@@ -63,6 +63,12 @@ protected:
 	void UpdateHUDWarmupCountdown(float CountdownTime);
 
 	void PollInit();
+
+	void HighPingWarning();
+
+	void StopHighPingWarning();
+
+	void CheckPing(float DeltaTime);
 private:
 	UPROPERTY()
 	ABlasterHUD* BlasterHUD;
@@ -88,6 +94,18 @@ private:
 	float TimeSyncRunningTime = 0.f;
 	void CheckTimeSync(float DeltaTime);
 	void HandleCoolDown();
+
+	UPROPERTY(EditAnywhere, Category = "High Ping")
+	float CheckPingFrequency = 20.f;
+
+	UPROPERTY(EditAnywhere, Category = "High Ping")
+	float HighPingThreshold = 50.f;
+
+	UPROPERTY(EditAnywhere, Category = "High Ping")
+	float HighPingDuration = 5.f;
+
+	float HighPingRunningTime = 0.f;
+	float PingAnimationRunningTime = 0.f;
 
 	UPROPERTY(ReplicatedUsing=OnRep_MatchState)
 	FName MatchState;
