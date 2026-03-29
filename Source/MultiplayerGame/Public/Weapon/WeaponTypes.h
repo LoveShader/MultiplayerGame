@@ -16,6 +16,14 @@ enum class EWeaponType : uint8
 };
 
 UENUM(BlueprintType)
+enum class EFireType : uint8
+{
+	EFT_HitScan UMETA(DisplayName = "HitScan"),
+	EFT_Projectile UMETA(DisplayName = "Projectile"),
+	EFT_Shotgun UMETA(DisplayName = "Shotgun")
+};
+
+UENUM(BlueprintType)
 enum class EWeaponOutlineStencil : uint8
 {
 	EWOS_None = 0 UMETA(Hidden),

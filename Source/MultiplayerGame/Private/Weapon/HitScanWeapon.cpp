@@ -5,7 +5,6 @@
 #include "Character/BlasterCharacter.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
 
@@ -95,54 +94,13 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 	}
 }
 
-FVector AHitScanWeapon::TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget)
-{
-	FVector ToTargetNormalized = (HitTarget - TraceStart).GetSafeNormal();
-	FVector SphereCenter = TraceStart + ToTargetNormalized * DistanceToSphere;
-	FVector RandVec = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.0f, SphereRadius);
-	FVector EndLoc = SphereCenter + RandVec;
-	FVector ToEndLoc = EndLoc - TraceStart;
-
-	/*
-	//Draw Sphere 
-	DrawDebugSphere(
-		GetWorld(),
-		SphereCenter,
-		SphereRadius,
-		12,
-		FColor::Red,
-		true
-	);
-	
-	//Draw the point that generate in the sphere
-	DrawDebugSphere(
-		GetWorld(),
-		EndLoc,
-		4.0f,
-		12,
-		FColor::Orange,
-		true
-	);
-
-	//Draw Line that indicate the trace Line
-	DrawDebugLine(
-		GetWorld(),
-		TraceStart,
-		FVector(TraceStart + ToEndLoc * LINETRACE_LENGTH / ToEndLoc.Size()),
-		FColor::Cyan,
-		true
-	);*/
-
-	return FVector(TraceStart + ToEndLoc * LINETRACE_LENGTH / ToEndLoc.Size());
-}
-
-void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& FireHit)
-{
-	UWorld* World = GetWorld();
-	FVector TraceEnd = bUseScatter ? TraceEndWithScatter(TraceStart,HitTarget) : TraceStart + (HitTarget - TraceStart) * 1.25f;
-
-	if (World)
+	void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& FireHit)
 	{
+		UWorld* World = GetWorld();
+		FVector TraceEnd = TraceStart + (HitTarget - TraceStart) * 1.25f;
+
+		if (World)
+		{
 		World->LineTraceSingleByChannel(
 			FireHit,
 			TraceStart,
@@ -150,6 +108,13 @@ void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& Hi
 			ECC_Visibility
 		);
 	}
+
+	DrawDebugSphere(GetWorld(),
+		FireHit.ImpactPoint,
+		16.0f,
+		12,
+		FColor::Red,
+		true);
 	
 	PlayBeamEffect(TraceStart, FireHit.bBlockingHit ? FireHit.ImpactPoint : TraceEnd);
 }

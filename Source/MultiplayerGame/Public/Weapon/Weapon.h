@@ -33,6 +33,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	void ShowPickupWidget(bool bShowWidget);
 	virtual void Fire(const FVector& HitTarget);
+	FVector TraceEndWithScatter(const FVector& HitTarget) const;
 	void BroadcastCurrentAmmo() const;
 	void AddAmmo(int AmmoToReload);
 	void SetWeaponOutlineStencil(EWeaponOutlineStencil NewOutlineStencil);
@@ -98,8 +99,20 @@ private:
 	UPROPERTY(EditAnywhere, Category = "WeaponTypeParameters")
 	EWeaponType WeaponType;
 
+	UPROPERTY(EditAnywhere, Category = "WeaponTypeParameters")
+	EFireType FireType = EFireType::EFT_HitScan;
+
 	UPROPERTY(EditAnywhere, Category = "Weapon Outline")
 	EWeaponOutlineStencil OutlineStencil = EWeaponOutlineStencil::EWOS_Blue;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	float DistanceToSphere = 800.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	float SphereRadius = 75.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	bool bUseScatter = false;
 
 	/** 
 	* Automatic fire
@@ -145,6 +158,7 @@ public:
 	FORCEINLINE int32 GetWeaponAmmo() const {return Ammo;}
 	FORCEINLINE int32 GetMagCapacity() const {return MagCapcity;}
 	FORCEINLINE EWeaponType GetWeaponType() const {return WeaponType;}
+	FORCEINLINE EFireType GetFireType() const { return FireType; }
 	FORCEINLINE bool IsNeedReload() const {return Ammo < MagCapcity;}
 	FORCEINLINE bool IsEmpty() const {return Ammo <= 0;}
 	FORCEINLINE float GetFireDelay() const {return FireDelay;}
@@ -155,6 +169,7 @@ public:
 	FORCEINLINE bool IsDestroyWeapon() const {return bDestroyWeapon;}
 	FORCEINLINE void SetWeaponoDestroyed(bool bDestroyed) { bDestroyWeapon = bDestroyed;}
 	FORCEINLINE EWeaponOutlineStencil GetWeaponOutlineStencil() const { return OutlineStencil; }
+	FORCEINLINE bool IsUseScatter() const { return bUseScatter; }
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnAmmoChanged OnAmmoChanged;

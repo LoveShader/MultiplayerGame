@@ -97,6 +97,9 @@ protected:
 	void SetHUDCrosshairs(float DeltaTime);
 
 	void Fire();
+	void FireProjectileWeapon();
+	void FireHitScanWeapon();
+	void FireShotgun();
 
 	void StartFireTimer();
 
