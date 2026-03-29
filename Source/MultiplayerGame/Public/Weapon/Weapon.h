@@ -53,6 +53,7 @@ protected:
 	void OnEquippedSecondary();
 	void OnDropped();
 	void SetWeaponOutlineEnabled(bool bEnabled) const;
+	FVector TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget) const;
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	USkeletalMeshComponent* WeaponMesh;

@@ -16,6 +16,7 @@ class MULTIPLAYERGAME_API AShotgun : public AHitScanWeapon
 	GENERATED_BODY()
 public:
 	virtual void Fire(const FVector& HitTarget) override;
+	void ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector>& HitTargets);
 private:
 	UPROPERTY(EditAnywhere)
 	uint32 NumberOfPellets = 12;

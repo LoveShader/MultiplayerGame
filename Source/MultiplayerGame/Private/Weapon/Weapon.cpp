@@ -247,6 +247,11 @@ FVector AWeapon::TraceEndWithScatter(const FVector& HitTarget) const
 	}
 
 	const FVector TraceStart = MuzzleFlashSocket->GetSocketTransform(WeaponMesh).GetLocation();
+	return TraceEndWithScatter(TraceStart, HitTarget);
+}
+
+FVector AWeapon::TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget) const
+{
 	const FVector ToTargetNormalized = (HitTarget - TraceStart).GetSafeNormal();
 	const FVector SphereCenter = TraceStart + ToTargetNormalized * DistanceToSphere;
 	const FVector RandVec = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.0f, SphereRadius);

@@ -7,6 +7,23 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
 
+void AShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector>& HitTargets)
+{
+	HitTargets.Reset();
+
+	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
+	if (MuzzleFlashSocket == nullptr)
+	{
+		return;
+	}
+
+	const FVector TraceStart = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh()).GetLocation();
+	for (uint32 i = 0; i < NumberOfPellets; i++)
+	{
+		HitTargets.Add(TraceEndWithScatter(TraceStart, HitTarget));
+	}
+}
+
 void AShotgun::Fire(const FVector& HitTarget)
 {
 	AWeapon::Fire(HitTarget);

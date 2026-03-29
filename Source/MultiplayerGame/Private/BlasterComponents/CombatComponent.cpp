@@ -14,6 +14,7 @@
 #include "PlayerController/BlasterPlayerController.h"
 #include "Sound/SoundCue.h"
 #include "Weapon/Projectile.h"
+#include "Weapon/Shotgun.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -767,8 +768,14 @@ void UCombatComponent::Fire()
 
 void UCombatComponent::FireProjectileWeapon()
 {
-	LocalFire(HitTarget);
-	ServerFire(HitTarget);
+	FVector TraceHitTarget = HitTarget;
+	if (EquippedWeapon && EquippedWeapon->IsUseScatter())
+	{
+		TraceHitTarget = EquippedWeapon->TraceEndWithScatter(HitTarget);
+	}
+
+	LocalFire(TraceHitTarget);
+	ServerFire(TraceHitTarget);
 }
 
 void UCombatComponent::FireHitScanWeapon()
@@ -785,6 +792,15 @@ void UCombatComponent::FireHitScanWeapon()
 
 void UCombatComponent::FireShotgun()
 {
+	if (EquippedWeapon)
+	{
+		TArray<FVector> HitTargets;
+		if (AShotgun* Shotgun = Cast<AShotgun>(EquippedWeapon))
+		{
+			Shotgun->ShotgunTraceEndWithScatter(HitTarget, HitTargets);
+		}
+	}
+
 	LocalFire(HitTarget);
 	ServerFire(HitTarget);
 }
