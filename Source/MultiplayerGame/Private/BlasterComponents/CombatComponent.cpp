@@ -163,11 +163,9 @@ void UCombatComponent::EquipSecondaryWeapon(AWeapon* WeaponToEquip)
 	}
 
 	SecondaryWeapon = WeaponToEquip;
-	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
 	AttachActorToBackpack(SecondaryWeapon);
 	PlayEquipWeaponSound(SecondaryWeapon);
-	SecondaryWeapon->SetWeaponOutlineStencil(EWeaponOutlineStencil::EWOS_TAN);
-	SecondaryWeapon->EnableWeaponOutline(true);
 
 	if (Character)
 	{
@@ -274,11 +272,9 @@ void UCombatComponent::OnRep_SecondaryWeapon()
 {
 	if (SecondaryWeapon && Character)
 	{
-		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
 		AttachActorToBackpack(SecondaryWeapon);
 		PlayEquipWeaponSound(SecondaryWeapon);
-		SecondaryWeapon->SetWeaponOutlineStencil(EWeaponOutlineStencil::EWOS_TAN);
-		SecondaryWeapon->EnableWeaponOutline(true);
 		SecondaryWeapon->SetOwner(Character);
 	}
 }
@@ -340,6 +336,38 @@ void UCombatComponent::PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount)
 			Reload();
 		}
 	}
+}
+
+void UCombatComponent::SwapWeapons_Implementation()
+{
+	if (!Character || !CanSwapWeapon())
+	{
+		return;
+	}
+
+	if (CombatState != ECombatState::ECS_Unoccupied)
+	{
+		return;
+	}
+
+	EquippedWeapon->OnAmmoChanged.RemoveDynamic(this, &UCombatComponent::OnWeaponAmmoChanged);
+	Swap(EquippedWeapon, SecondaryWeapon);
+
+	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	AttachActorToRightHand(EquippedWeapon);
+	EquippedWeapon->OnAmmoChanged.AddDynamic(this, &UCombatComponent::OnWeaponAmmoChanged);
+	EquippedWeapon->BroadcastCurrentAmmo();
+	EquippedWeapon->SetOwner(Character);
+
+	SecondaryWeapon->OnAmmoChanged.RemoveDynamic(this, &UCombatComponent::OnWeaponAmmoChanged);
+	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
+	AttachActorToBackpack(SecondaryWeapon);
+	SecondaryWeapon->SetOwner(Character);
+
+	SetCarriedAmmoFromCarriedAmmoMap();
+	UpdateCurrentCarriedAmmoInHUD();
+	UpdateCurrentWeaponTypeInHUD();
+	PlayEquipWeaponSound(EquippedWeapon);
 }
 
 void UCombatComponent::UpdateShotgunAmmoValues()
@@ -437,6 +465,11 @@ int32 UCombatComponent::GetWeaponMaxCarriedAmmo(EWeaponType WeaponType) const
 	}
 	//If Character don't have this weapon, return 0
 	return 0;
+}
+
+bool UCombatComponent::CanSwapWeapon() const
+{
+	return EquippedWeapon && SecondaryWeapon;
 }
 
 FString UCombatComponent::GetWeaponTypeText()

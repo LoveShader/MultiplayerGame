@@ -60,6 +60,12 @@ public:
 	 */
 	bool CanPickupAmmo(EWeaponType WeaponType) const;
 	void PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount);
+
+	/**
+	 * Swap Weapon
+	 */
+	UFUNCTION(Server, Reliable)
+	void SwapWeapons();
 protected:
 	virtual void BeginPlay() override;
 	void EquipWeapon(AWeapon* WeaponToEquip);
@@ -245,5 +251,6 @@ public:
 	FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
 	FORCEINLINE int32 GetGrenades() const { return Grenades; }
 	FORCEINLINE AWeapon* GetSecondaryWeapon() const { return SecondaryWeapon; }
+	bool CanSwapWeapon() const;
 	FString GetWeaponTypeText();
 };

@@ -176,19 +176,13 @@ void ABlasterCharacter::EquipButtonPressed()
 	
 	if (Combat)
 	{
-		if (Combat->GetCombatState() != ECombatState::ECS_Unoccupied)
+		if (OverlappedWeapon)
 		{
-			return;
+			ServerEquipButtonPressed();
+		} else if (Combat->CanSwapWeapon())
+		{
+			Combat->SwapWeapons();
 		}
-		
-		if (HasAuthority())
-		{
-			Combat->EquipWeapon(OverlappedWeapon);
-		}
-		else
-		{
-			ServerEquipButtonPressed();	
-		} 
 	}
 }
 
