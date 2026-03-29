@@ -583,6 +583,29 @@ void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& Trac
 	NetMulticastFire(TraceHitTarget);
 }
 
+void UCombatComponent::LocalFire(const FVector_NetQuantize& TraceHitTarget)
+{
+	if (EquippedWeapon == nullptr || Character == nullptr)
+	{
+		return;
+	}
+
+	if (EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun &&
+		CombatState == ECombatState::ECS_Reloading)
+	{
+		Character->PlayFireMontage(bIsAiming);
+		EquippedWeapon->Fire(TraceHitTarget);
+		CombatState = ECombatState::ECS_Unoccupied;
+		return;
+	}
+
+	if (CombatState == ECombatState::ECS_Unoccupied)
+	{
+		Character->PlayFireMontage(bIsAiming);
+		EquippedWeapon->Fire(TraceHitTarget);
+	}
+}
+
 void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 {
 	FVector2D ViewPortSize;
@@ -717,6 +740,7 @@ void UCombatComponent::Fire()
 {
 	if (CanFire())
 	{
+		LocalFire(HitTarget);
 		ServerFire(HitTarget);
 		if (EquippedWeapon)
 		{
@@ -886,20 +910,12 @@ void UCombatComponent::OnRep_CarriedAmmo()
 
 void UCombatComponent::NetMulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
-	if (EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun &&
-		CombatState == ECombatState::ECS_Reloading)
+	if (Character && Character->IsLocallyControlled())
 	{
-		Character->PlayFireMontage(bIsAiming);
-		EquippedWeapon->Fire(TraceHitTarget);
-		CombatState = ECombatState::ECS_Unoccupied;
 		return;
 	}
-	
-	if (Character && CombatState == ECombatState::ECS_Unoccupied)
-	{
-		Character->PlayFireMontage(bIsAiming);
-		EquippedWeapon->Fire(TraceHitTarget);
-	}
+
+	LocalFire(TraceHitTarget);
 }
 
 void UCombatComponent::ServerSetAiming_Implementation(bool bAiming)
