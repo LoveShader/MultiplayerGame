@@ -45,13 +45,10 @@ void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (HasAuthority())
-	{
-		AreaSphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
-		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnSphereBeginOverlap);
-		AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AWeapon::OnSphereEndOverlap);
-	}
+	AreaSphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnSphereBeginOverlap);
+	AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AWeapon::OnSphereEndOverlap);
 	ShowPickupWidget(false);
 	ApplyWeaponState();
 }
@@ -108,10 +105,7 @@ void AWeapon::OnInitial()
 	WeaponMesh->SetSimulatePhysics(false);
 	WeaponMesh->SetEnableGravity(false);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	if (HasAuthority())
-	{
-		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	}
+	AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	OutlineStencil = EWeaponOutlineStencil::EWOS_Blue;
 	WeaponMesh->SetCustomDepthStencilValue(static_cast<int32>(OutlineStencil));
 	SetWeaponOutlineEnabled(true);
@@ -123,10 +117,7 @@ void AWeapon::OnEquipped()
 	WeaponMesh->SetSimulatePhysics(false);
 	WeaponMesh->SetEnableGravity(false);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	if (HasAuthority())
-	{
-		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
+	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SetWeaponOutlineEnabled(false);
 }
 
@@ -136,10 +127,7 @@ void AWeapon::OnEquippedSecondary()
 	WeaponMesh->SetSimulatePhysics(false);
 	WeaponMesh->SetEnableGravity(false);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	if (HasAuthority())
-	{
-		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
+	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	OutlineStencil = EWeaponOutlineStencil::EWOS_TAN;
 	WeaponMesh->SetCustomDepthStencilValue(static_cast<int32>(OutlineStencil));
 	SetWeaponOutlineEnabled(true);
@@ -147,10 +135,7 @@ void AWeapon::OnEquippedSecondary()
 
 void AWeapon::OnDropped()
 {
-	if (HasAuthority())
-	{
-		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	}
+	AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	WeaponMesh->SetSimulatePhysics(true);
 	WeaponMesh->SetEnableGravity(true);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
