@@ -433,6 +433,7 @@ void ABlasterCharacter::ReceiveAmmo(EWeaponType WeaponType, int32 AmmoAmount)
 
 void ABlasterCharacter::Elim()
 {
+	DropOrDestroyWeapons();
 	NetMulticastElim();
 	GetWorldTimerManager().SetTimer(
 		ElimTimer,
@@ -448,6 +449,16 @@ void ABlasterCharacter::ShowElimTextIfLocallyControlled()
 	{
 		BlasterPlayerController->StartShowElimTextTimer();
 	}
+}
+
+void ABlasterCharacter::DropOrDestroyWeapons()
+{
+	if (Combat == nullptr)
+	{
+		return;
+	}
+
+	Combat->DropOrDestroyWeapons();
 }
 
 void ABlasterCharacter::ClearWeaponTypeText()
@@ -508,20 +519,10 @@ void ABlasterCharacter::NetMulticastElim_Implementation()
 		);
 	}
 	
-	if (Combat && Combat->EquippedWeapon)
+	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(GetController()) : BlasterPlayerController;
+	if (BlasterPlayerController)
 	{
-		if (Combat->EquippedWeapon->IsDestroyWeapon())
-		{
-			Combat->EquippedWeapon->Destroy();
-		} else
-		{
-			Combat->DroppedWeapon();
-		}
-		BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(GetController()) : BlasterPlayerController;
-		if (BlasterPlayerController)
-		{
-			BlasterPlayerController->ClearWeaponAmmoHUD();
-		}
+		BlasterPlayerController->ClearWeaponAmmoHUD();
 	}
 
 	//Disable character Movement

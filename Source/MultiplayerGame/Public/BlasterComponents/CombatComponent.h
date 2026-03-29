@@ -202,6 +202,8 @@ private:
 
 	FString GetWeaponTypeDisplayName(EWeaponType WeaponType);
 	void DropWeaponIfEquiped();
+	void DropOrDestroyWeapon(AWeapon* Weapon);
+	void DropOrDestroyWeapons();
 	void SetCarriedAmmoFromCarriedAmmoMap();
 	void ReloadEmptyWeapon();
 	void EquipPrimaryWeapon(AWeapon* WeaponToEquip);

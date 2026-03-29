@@ -200,6 +200,30 @@ void UCombatComponent::DroppedWeapon()
 	}
 }
 
+void UCombatComponent::DropOrDestroyWeapon(AWeapon* Weapon)
+{
+	if (Weapon == nullptr)
+	{
+		return;
+	}
+	
+	if (Weapon->IsDestroyWeapon())
+	{
+		Weapon->OnAmmoChanged.RemoveDynamic(this, &UCombatComponent::OnWeaponAmmoChanged);
+		Weapon->Destroy();
+	}
+	else
+	{
+		Weapon->DroppedWeapon();
+	}
+}
+
+void UCombatComponent::DropOrDestroyWeapons()
+{
+	DropOrDestroyWeapon(EquippedWeapon);
+	DropOrDestroyWeapon(SecondaryWeapon);
+}
+
 void UCombatComponent::SetAiming(bool bAiming)
 {
 	if (Character == nullptr || EquippedWeapon == nullptr)

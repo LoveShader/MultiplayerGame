@@ -263,6 +263,7 @@ private:
 	bool bRotateRootBone = false;
 
 	void ShowElimTextIfLocallyControlled();
+	void DropOrDestroyWeapons();
 	void ClearWeaponTypeText();
 	void ClearCarriedAmmoText();
 
