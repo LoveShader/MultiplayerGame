@@ -7,7 +7,7 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
 
-void AShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector>& HitTargets)
+void AShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector_NetQuantize>& HitTargets)
 {
 	HitTargets.Reset();
 
@@ -24,9 +24,14 @@ void AShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVect
 	}
 }
 
-void AShotgun::Fire(const FVector& HitTarget)
+void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 {
-	AWeapon::Fire(HitTarget);
+	if (HitTargets.Num() == 0)
+	{
+		return;
+	}
+
+	AWeapon::Fire(HitTargets[0]);
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
 	if (OwnerPawn == nullptr) return;
 	
@@ -36,20 +41,21 @@ void AShotgun::Fire(const FVector& HitTarget)
 		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
 		FVector Start = SocketTransform.GetLocation();
 		TMap<ABlasterCharacter*, uint32> HitMap;
-		for (uint32 i = 0; i < NumberOfPellets; i++)
+		for (const FVector_NetQuantize& HitTarget : HitTargets)
 		{
 			FHitResult FireHit;
-			WeaponTraceHit(Start, HitTarget,FireHit);
+			WeaponTraceHit(Start, HitTarget, FireHit);
 
 			if (FireHit.bBlockingHit)
 			{
 				ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
-				if (BlasterCharacter && HasAuthority())
+				if (BlasterCharacter)
 				{
 					if (HitMap.Contains(BlasterCharacter))
 					{
 						HitMap[BlasterCharacter]++;
-					} else
+					}
+					else
 					{
 						HitMap.Emplace(BlasterCharacter, 1);
 					}
@@ -67,7 +73,7 @@ void AShotgun::Fire(const FVector& HitTarget)
 				{
 					UGameplayStatics::ApplyDamage(
 						HitPair.Key,
-						HitPair.Value * Damage,
+						static_cast<float>(HitPair.Value) * Damage,
 						InstigatorController,
 						this,
 						UDamageType::StaticClass()
@@ -76,4 +82,11 @@ void AShotgun::Fire(const FVector& HitTarget)
 			}
 		}
 	}
+}
+
+void AShotgun::Fire(const FVector& HitTarget)
+{
+	TArray<FVector_NetQuantize> HitTargets;
+	ShotgunTraceEndWithScatter(HitTarget, HitTargets);
+	FireShotgun(HitTargets);
 }

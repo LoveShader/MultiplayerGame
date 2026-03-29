@@ -584,6 +584,11 @@ void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& Trac
 	NetMulticastFire(TraceHitTarget);
 }
 
+void UCombatComponent::ServerShotgunFire_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets)
+{
+	MulticastShotgunFire(TraceHitTargets);
+}
+
 void UCombatComponent::LocalFire(const FVector_NetQuantize& TraceHitTarget)
 {
 	if (EquippedWeapon == nullptr || Character == nullptr)
@@ -591,19 +596,27 @@ void UCombatComponent::LocalFire(const FVector_NetQuantize& TraceHitTarget)
 		return;
 	}
 
-	if (EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun &&
-		CombatState == ECombatState::ECS_Reloading)
-	{
-		Character->PlayFireMontage(bIsAiming);
-		EquippedWeapon->Fire(TraceHitTarget);
-		CombatState = ECombatState::ECS_Unoccupied;
-		return;
-	}
-
 	if (CombatState == ECombatState::ECS_Unoccupied)
 	{
 		Character->PlayFireMontage(bIsAiming);
 		EquippedWeapon->Fire(TraceHitTarget);
+	}
+}
+
+void UCombatComponent::LocalShotgun(const TArray<FVector_NetQuantize>& TraceHitTargets)
+{
+	AShotgun* Shotgun = Cast<AShotgun>(EquippedWeapon);
+	if (Shotgun == nullptr || Character == nullptr)
+	{
+		return;
+	}
+
+	if (CombatState == ECombatState::ECS_Unoccupied || CombatState == ECombatState::ECS_Reloading)
+	{
+		Character->PlayFireMontage(bIsAiming);
+		Shotgun->FireShotgun(TraceHitTargets);
+
+		CombatState = ECombatState::ECS_Unoccupied;
 	}
 }
 
@@ -794,15 +807,14 @@ void UCombatComponent::FireShotgun()
 {
 	if (EquippedWeapon)
 	{
-		TArray<FVector> HitTargets;
+		TArray<FVector_NetQuantize> HitTargets;
 		if (AShotgun* Shotgun = Cast<AShotgun>(EquippedWeapon))
 		{
 			Shotgun->ShotgunTraceEndWithScatter(HitTarget, HitTargets);
+			LocalShotgun(HitTargets);
+			ServerShotgunFire(HitTargets);
 		}
 	}
-
-	LocalFire(HitTarget);
-	ServerFire(HitTarget);
 }
 
 void UCombatComponent::StartFireTimer()
@@ -970,6 +982,16 @@ void UCombatComponent::NetMulticastFire_Implementation(const FVector_NetQuantize
 	}
 
 	LocalFire(TraceHitTarget);
+}
+
+void UCombatComponent::MulticastShotgunFire_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets)
+{
+	if (Character && Character->IsLocallyControlled())
+	{
+		return;
+	}
+
+	LocalShotgun(TraceHitTargets);
 }
 
 void UCombatComponent::ServerSetAiming_Implementation(bool bAiming)
