@@ -86,17 +86,24 @@ private:
 	float ZoomInterpSpeed = 20.f;
 
 	//Ammo
-	UPROPERTY(EditAnywhere, ReplicatedUsing=OnRep_Ammo, Category = "AmmoParameters")
+	UPROPERTY(EditAnywhere,Category = "AmmoParameters")
 	int32 Ammo;
 
-	UFUNCTION()
-	void OnRep_Ammo();
-
+	//The Number of UnProcessed Server requests for Ammo
+	//Increment in SpendRound, Decrement in ClientUpdateAmmo
+	int32 Sequence = 0;
+	
 	UPROPERTY(EditAnywhere, Category = "AmmoParameters")
 	int MagCapcity;
 
 	void SpendRound();
 
+	UFUNCTION(Client, Reliable)
+	void ClientUpdateAmmo(int32 ServerAmmo);
+
+	UFUNCTION(Client, Reliable)
+	void ClientAddAmmo(int32 AmmoToReload);
+	
 	UPROPERTY(EditAnywhere, Category = "WeaponTypeParameters")
 	EWeaponType WeaponType;
 

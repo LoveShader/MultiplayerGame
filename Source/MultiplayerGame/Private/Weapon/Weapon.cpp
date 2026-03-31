@@ -157,14 +157,37 @@ void AWeapon::SetWeaponOutlineEnabled(bool bEnabled) const
 	WeaponMesh->SetRenderCustomDepth(bEnabled);
 }
 
-void AWeapon::OnRep_Ammo()
-{
-	OnAmmoChanged.Broadcast(Ammo);
-}
-
 void AWeapon::SpendRound()
 {
 	Ammo = FMath::Clamp(Ammo - 1, 0, MagCapcity);
+	if (HasAuthority())
+	{
+		ClientUpdateAmmo(Ammo);
+	} else
+	{
+		Sequence++;
+	}
+	OnAmmoChanged.Broadcast(Ammo);
+}
+
+void AWeapon::ClientAddAmmo_Implementation(int32 AmmoToReload)
+{
+	if (HasAuthority())	return;
+	
+	Ammo = FMath::Clamp(Ammo + AmmoToReload, 0, MagCapcity);
+	OnAmmoChanged.Broadcast(Ammo);
+}
+
+void AWeapon::ClientUpdateAmmo_Implementation(int32 ServerAmmo)
+{
+	//Server Controlled Character don't need Reconciliation
+	if (HasAuthority())	return;
+	//Rollback Server Ammo
+	Ammo = ServerAmmo;
+
+	Sequence--;
+	// Apply All unprocessed movement
+	Ammo -= Sequence;
 	OnAmmoChanged.Broadcast(Ammo);
 }
 
@@ -195,7 +218,6 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLif
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AWeapon, WeaponState);
-	DOREPLIFETIME(AWeapon, Ammo);
 }
 
 void AWeapon::ShowPickupWidget(bool bShowWidget)
@@ -226,11 +248,8 @@ void AWeapon::Fire(const FVector& HitTarget)
 			}
 		}
 	}
-
-	if (HasAuthority())
-	{
-		SpendRound();
-	}
+	
+	SpendRound();
 }
 
 FVector AWeapon::TraceEndWithScatter(const FVector& HitTarget) const
@@ -270,6 +289,8 @@ void AWeapon::AddAmmo(int AmmoToReload)
 {
 	Ammo = FMath::Clamp(Ammo + AmmoToReload, 0, MagCapcity);
 	OnAmmoChanged.Broadcast(Ammo);
+
+	ClientAddAmmo(AmmoToReload);
 }
 
 void AWeapon::SetWeaponOutlineStencil(EWeaponOutlineStencil NewOutlineStencil)
