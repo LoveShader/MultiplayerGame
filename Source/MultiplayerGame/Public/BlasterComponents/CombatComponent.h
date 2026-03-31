@@ -143,8 +143,13 @@ private:
 	UPROPERTY(ReplicatedUsing=OnRep_SecondaryWeapon, VisibleAnywhere)
 	AWeapon* SecondaryWeapon;
 
-	UPROPERTY(Replicated, VisibleAnywhere)
-	bool bIsAiming;
+	UPROPERTY(ReplicatedUsing = OnRep_Aiming, VisibleAnywhere)
+	bool bIsAiming = false;
+
+	bool bAimingButtonPressed = false;
+
+	UFUNCTION()
+	void OnRep_Aiming();
 
 	/* Unequipped Max Speed and Aim Max Walk Speed*/
 	UPROPERTY(EditAnywhere, Category = Movement)

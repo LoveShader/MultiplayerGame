@@ -186,7 +186,7 @@ void AWeapon::ClientUpdateAmmo_Implementation(int32 ServerAmmo)
 	Ammo = ServerAmmo;
 
 	Sequence--;
-	// Apply All unprocessed movement
+	// Apply All unprocessed Sequence
 	Ammo -= Sequence;
 	OnAmmoChanged.Broadcast(Ammo);
 }

@@ -230,6 +230,7 @@ void UCombatComponent::SetAiming(bool bAiming)
 	if (Character == nullptr || EquippedWeapon == nullptr)
 		return;
 	bIsAiming = bAiming;
+	if (Character->IsLocallyControlled()) bAimingButtonPressed = bAiming;
 	ServerSetAiming(bAiming);
 	if (Character)
 	{
@@ -967,6 +968,14 @@ bool UCombatComponent::CanFire() const
 bool UCombatComponent::CanThrowGrenade() const
 {
 	return Character && CombatState == ECombatState::ECS_Unoccupied && EquippedWeapon && Grenades > 0;
+}
+
+void UCombatComponent::OnRep_Aiming()
+{
+	if (Character && Character->IsLocallyControlled())
+	{
+		bIsAiming = bAimingButtonPressed;
+	}
 }
 
 void UCombatComponent::OnRep_CarriedAmmo()
