@@ -207,6 +207,8 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_CombatState)
 	ECombatState CombatState = ECombatState::ECS_Unoccupied;
 
+	bool bLocallyReloading = false;
+
 	UFUNCTION()
 	void OnRep_CombatState();
 
@@ -270,6 +272,7 @@ public:
 	FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
 	FORCEINLINE int32 GetGrenades() const { return Grenades; }
 	FORCEINLINE AWeapon* GetSecondaryWeapon() const { return SecondaryWeapon; }
+	FORCEINLINE bool GetLocallyReloading() const { return bLocallyReloading; }
 	bool CanSwapWeapon() const;
 	FString GetWeaponTypeText();
 };

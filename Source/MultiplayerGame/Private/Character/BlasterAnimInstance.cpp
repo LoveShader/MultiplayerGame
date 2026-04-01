@@ -46,6 +46,14 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bUseAimOffset = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied;
 	bTransformRightHand = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied;
 
+	if (BlasterCharacter->IsLocallyControlled() &&
+		BlasterCharacter->GetCombatState() != ECombatState::ECS_ThrowGrenade)
+	{
+		bUseFABRIK = !BlasterCharacter->IsLocallyReloading();
+		bUseAimOffset = !BlasterCharacter->IsLocallyReloading();
+		bTransformRightHand = !BlasterCharacter->IsLocallyReloading();
+	}
+
 	//Character's base aiming rotation, generally aligned with the controller's rotation.
 	FRotator AimRotation = BlasterCharacter->GetBaseAimRotation();
 	FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(BlasterCharacter->GetVelocity());

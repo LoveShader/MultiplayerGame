@@ -828,6 +828,11 @@ bool ABlasterCharacter::IsAiming() const
 	return Combat && Combat->bIsAiming;
 }
 
+bool ABlasterCharacter::IsLocallyReloading() const
+{
+	return Combat && Combat->GetLocallyReloading();
+}
+
 AWeapon* ABlasterCharacter::GetEquippedWeapon() const
 {
 	if (Combat == nullptr) return nullptr;
