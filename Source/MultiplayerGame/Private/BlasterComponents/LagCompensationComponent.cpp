@@ -83,6 +83,77 @@ void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, c
 	}
 }
 
+void ULagCompensationComponent::ServerSideRewind(
+	ABlasterCharacter* HitCharacter,
+	float HitTime,
+	const FVector_NetQuantize& HitLocation,
+	const FVector_NetQuantize& HitTarget
+) const
+{
+	FFramePackage FrameToCheck;
+	bool bShouldInterpolate = true;
+
+	if (
+		HitCharacter == nullptr ||
+		HitCharacter->GetLagCompensation() == nullptr ||
+		HitCharacter->GetLagCompensation()->FrameHistory.GetHead() == nullptr ||
+		HitCharacter->GetLagCompensation()->FrameHistory.GetTail() == nullptr
+	)
+	{
+		return;
+	}
+
+	const ULagCompensationComponent* HitCharacterLagCompensation = HitCharacter->GetLagCompensation();
+	const float NewestHistoryTime = HitCharacterLagCompensation->FrameHistory.GetHead()->GetValue().Time;
+	const float OldestHistoryTime = HitCharacterLagCompensation->FrameHistory.GetTail()->GetValue().Time;
+
+	if (HitTime < OldestHistoryTime)
+	{
+		return;
+	}
+
+	if (HitTime >= NewestHistoryTime)
+	{
+		FrameToCheck = HitCharacterLagCompensation->FrameHistory.GetHead()->GetValue();
+		bShouldInterpolate = false;
+	}
+	else if (FMath::IsNearlyEqual(HitTime, OldestHistoryTime))
+	{
+		FrameToCheck = HitCharacterLagCompensation->FrameHistory.GetTail()->GetValue();
+		bShouldInterpolate = false;
+	}
+	else
+	{
+		TDoubleLinkedList<FFramePackage>::TDoubleLinkedListNode* Older = HitCharacterLagCompensation->FrameHistory.GetHead();
+		TDoubleLinkedList<FFramePackage>::TDoubleLinkedListNode* Younger = HitCharacterLagCompensation->FrameHistory.GetHead();
+
+		while (Older != nullptr && Older->GetValue().Time > HitTime)
+		{
+			if (Older->GetNextNode() == nullptr)
+			{
+				break;
+			}
+
+			Older = Older->GetNextNode();
+			if (Older->GetValue().Time > HitTime)
+			{
+				Younger = Older;
+			}
+		}
+
+		if (Older != nullptr && FMath::IsNearlyEqual(Older->GetValue().Time, HitTime))
+		{
+			FrameToCheck = Older->GetValue();
+			bShouldInterpolate = false;
+		}
+
+		if (bShouldInterpolate)
+		{
+			// Interpolation between Older and Younger will be implemented next.
+		}
+	}
+}
+
 void ULagCompensationComponent::SaveFrameHistory()
 {
 	if (Character == nullptr)
