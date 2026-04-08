@@ -54,9 +54,16 @@ public:
 	void ShowFramePackage(const FFramePackage& Package, const FColor& Color) const;
 
 private:
+	void SaveFrameHistory();
+
 	UPROPERTY()
 	ABlasterCharacter* Character = nullptr;
 
 	UPROPERTY()
 	ABlasterPlayerController* Controller = nullptr;
+
+	TDoubleLinkedList<FFramePackage> FrameHistory;
+
+	UPROPERTY(EditAnywhere, Category = "Lag Compensation")
+	float MaxRecordTime = 4.f;
 };
