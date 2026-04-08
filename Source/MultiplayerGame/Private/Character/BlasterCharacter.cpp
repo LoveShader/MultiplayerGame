@@ -11,6 +11,7 @@
 #include "NetworkReplayStreaming.h"
 #include "BlasterComponents/BuffComponent.h"
 #include "BlasterComponents/CombatComponent.h"
+#include "BlasterComponents/LagCompensationComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "BlasterComponents/CombatComponent.h"
@@ -51,6 +52,8 @@ ABlasterCharacter::ABlasterCharacter()
 
 	Buff = CreateDefaultSubobject<UBuffComponent>(TEXT("Buff"));
 	Buff->SetIsReplicated(true);
+
+	LagCompensation = CreateDefaultSubobject<ULagCompensationComponent>(TEXT("LagCompensation"));
 
 	//Set Crouch Enabled
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
@@ -705,6 +708,12 @@ void ABlasterCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
+	if (LagCompensation)
+	{
+		LagCompensation->Character = this;
+		LagCompensation->Controller = Cast<ABlasterPlayerController>(NewController);
+	}
+
 	if (!OverheadWidget) return;
 	
 	if (UUserWidget* UserWidget = OverheadWidget->GetUserWidgetObject())
@@ -989,5 +998,14 @@ void ABlasterCharacter::PostInitializeComponents()
 			GetCharacterMovement()->MaxWalkSpeedCrouched
 		);
 		Buff->SetInitialJumpVelocity(GetCharacterMovement()->JumpZVelocity);
+	}
+
+	if (LagCompensation)
+	{
+		LagCompensation->Character = this;
+		if (Controller)
+		{
+			LagCompensation->Controller = Cast<ABlasterPlayerController>(Controller);
+		}
 	}
 }

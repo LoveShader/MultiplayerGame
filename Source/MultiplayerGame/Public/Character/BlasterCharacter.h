@@ -17,6 +17,7 @@ class ABlasterPlayerState;
 class ABlasterPlayerController;
 class UCombatComponent;
 class UBuffComponent;
+class ULagCompensationComponent;
 class AWeapon;
 class UWidgetComponent;
 class UCameraComponent;
@@ -149,6 +150,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	UBuffComponent* Buff;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
+	ULagCompensationComponent* LagCompensation;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	class UWidgetComponent* OverheadWidget;
@@ -355,6 +359,7 @@ public:
 	FORCEINLINE float GetMaxShield() const { return MaxShield; }
 	FORCEINLINE UCombatComponent* GetCombat() const {return Combat;}
 	FORCEINLINE UBuffComponent* GetBuff() const { return Buff; }
+	FORCEINLINE ULagCompensationComponent* GetLagCompensation() const { return LagCompensation; }
 	FORCEINLINE bool GetRotateRootBone() const { return bRotateRootBone; }
 	FORCEINLINE UAnimMontage* GetReloadMontage() const { return ReloadMontage; }
 	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const {return AttachedGrenade;}
