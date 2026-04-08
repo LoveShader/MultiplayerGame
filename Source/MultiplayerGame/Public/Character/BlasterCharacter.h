@@ -338,6 +338,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* foot_r;
+
+	UPROPERTY()
+	TMap<FName, UBoxComponent*> HitCollisionBoxes;
 public:
 	UPROPERTY(Replicated)
 	bool bDisableGameplay = false;
@@ -363,4 +366,5 @@ public:
 	FORCEINLINE bool GetRotateRootBone() const { return bRotateRootBone; }
 	FORCEINLINE UAnimMontage* GetReloadMontage() const { return ReloadMontage; }
 	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const {return AttachedGrenade;}
+	FORCEINLINE const TMap<FName, UBoxComponent*>& GetHitCollisionBoxes() const { return HitCollisionBoxes; }
 };

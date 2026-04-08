@@ -149,6 +149,25 @@ ABlasterCharacter::ABlasterCharacter()
 	foot_r = CreateDefaultSubobject<UBoxComponent>(TEXT("foot_r"));
 	foot_r->SetupAttachment(GetMesh(), FName("foot_r"));
 	foot_r->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	HitCollisionBoxes.Emplace(head->GetFName(), head);
+	HitCollisionBoxes.Emplace(pelvis->GetFName(), pelvis);
+	HitCollisionBoxes.Emplace(spine_02->GetFName(), spine_02);
+	HitCollisionBoxes.Emplace(spine_03->GetFName(), spine_03);
+	HitCollisionBoxes.Emplace(upperarm_l->GetFName(), upperarm_l);
+	HitCollisionBoxes.Emplace(upperarm_r->GetFName(), upperarm_r);
+	HitCollisionBoxes.Emplace(lowerarm_l->GetFName(), lowerarm_l);
+	HitCollisionBoxes.Emplace(lowerarm_r->GetFName(), lowerarm_r);
+	HitCollisionBoxes.Emplace(hand_l->GetFName(), hand_l);
+	HitCollisionBoxes.Emplace(hand_r->GetFName(), hand_r);
+	HitCollisionBoxes.Emplace(backpack->GetFName(), backpack);
+	HitCollisionBoxes.Emplace(blanket->GetFName(), blanket);
+	HitCollisionBoxes.Emplace(thigh_l->GetFName(), thigh_l);
+	HitCollisionBoxes.Emplace(thigh_r->GetFName(), thigh_r);
+	HitCollisionBoxes.Emplace(calf_l->GetFName(), calf_l);
+	HitCollisionBoxes.Emplace(calf_r->GetFName(), calf_r);
+	HitCollisionBoxes.Emplace(foot_l->GetFName(), foot_l);
+	HitCollisionBoxes.Emplace(foot_r->GetFName(), foot_r);
 }
 
 void ABlasterCharacter::UpdateHUDHealth()

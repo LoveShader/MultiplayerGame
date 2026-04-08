@@ -50,6 +50,9 @@ protected:
 public:
 	friend class ABlasterCharacter;
 
+	void SaveFramePackage(FFramePackage& Package);
+	void ShowFramePackage(const FFramePackage& Package, const FColor& Color) const;
+
 private:
 	UPROPERTY()
 	ABlasterCharacter* Character = nullptr;
