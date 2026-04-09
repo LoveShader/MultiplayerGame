@@ -149,9 +149,40 @@ void ULagCompensationComponent::ServerSideRewind(
 
 		if (bShouldInterpolate)
 		{
-			// Interpolation between Older and Younger will be implemented next.
+			FrameToCheck = InterpBetweenFrames(Older->GetValue(), Younger->GetValue(), HitTime);
 		}
 	}
+}
+
+FFramePackage ULagCompensationComponent::InterpBetweenFrames(
+	const FFramePackage& OlderFrame,
+	const FFramePackage& YoungerFrame,
+	float HitTime
+) const
+{
+	const float Distance = YoungerFrame.Time - OlderFrame.Time;
+	const float InterpFraction = Distance > KINDA_SMALL_NUMBER
+		? FMath::Clamp((HitTime - OlderFrame.Time) / Distance, 0.f, 1.f)
+		: 0.f;
+
+	FFramePackage InterpFramePackage;
+	InterpFramePackage.Time = HitTime;
+
+	for (const TPair<FName, FBoxInformation>& YoungerPair : YoungerFrame.HitBoxInfo)
+	{
+		const FName& BoxName = YoungerPair.Key;
+		const FBoxInformation& OlderBox = OlderFrame.HitBoxInfo[BoxName];
+		const FBoxInformation& YoungerBox = YoungerPair.Value;
+
+		FBoxInformation InterpBoxInfo;
+		InterpBoxInfo.Location = FMath::VInterpTo(OlderBox.Location, YoungerBox.Location, 1.f, InterpFraction);
+		InterpBoxInfo.Rotation = FMath::RInterpTo(OlderBox.Rotation, YoungerBox.Rotation, 1.f, InterpFraction);
+		InterpBoxInfo.BoxExtent = YoungerBox.BoxExtent;
+
+		InterpFramePackage.HitBoxInfo.Add(BoxName, InterpBoxInfo);
+	}
+
+	return InterpFramePackage;
 }
 
 void ULagCompensationComponent::SaveFrameHistory()

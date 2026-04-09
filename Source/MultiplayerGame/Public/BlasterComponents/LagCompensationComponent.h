@@ -61,6 +61,7 @@ public:
 
 private:
 	void SaveFrameHistory();
+	FFramePackage InterpBetweenFrames(const FFramePackage& OlderFrame, const FFramePackage& YoungerFrame, float HitTime) const;
 
 	UPROPERTY()
 	ABlasterCharacter* Character = nullptr;
