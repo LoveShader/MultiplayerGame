@@ -154,6 +154,128 @@ void ULagCompensationComponent::ServerSideRewind(
 	}
 }
 
+FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackage& Package,
+	ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitTarget)
+{
+	if (HitCharacter == nullptr)	return FServerSideRewindResult{false, false};
+
+	//Cached Current FramePackage
+	FFramePackage CurrentFrame;
+	CacheBoxPositions(HitCharacter, CurrentFrame);
+
+	//Then Move Box Components to The FrameToCheck's reported Location
+	MoveBoxes(HitCharacter, Package);
+	//Disable Mesh Collision
+	EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::NoCollision);
+
+	// Enable collision for the head first
+	UBoxComponent* HeadBox =  *HitCharacter->GetHitCollisionBoxes().Find(FName("head"));
+	HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	HeadBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+	
+	//Get TraceEnd
+	FHitResult HitResult;
+	FVector TraceEnd = TraceStart + (HitTarget - TraceStart) * 1.25;
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		World->LineTraceSingleByChannel(HitResult,
+			TraceStart,
+			TraceEnd,
+			ECollisionChannel::ECC_Visibility);
+
+		if (HitResult.bBlockingHit)	//we hit the head, return early
+		{
+			ResetHitBoxes(HitCharacter, CurrentFrame);
+			EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryOnly);
+			return FServerSideRewindResult{ true, true };
+		}
+		else //didn't hit the head, check the rest of the body
+		{
+			for (auto& HitBoxPair : HitCharacter->GetHitCollisionBoxes())
+			{
+				if (HitBoxPair.Value == nullptr)
+					continue;
+				HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+				HitBoxPair.Value->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+			}
+			
+			World->LineTraceSingleByChannel(HitResult,
+				TraceStart,
+				TraceEnd,
+				ECollisionChannel::ECC_Visibility);
+
+			if (HitResult.bBlockingHit)
+			{
+				ResetHitBoxes(HitCharacter, CurrentFrame);
+				EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryOnly);
+				return FServerSideRewindResult{ true, false };
+			}
+		}
+	}
+
+	ResetHitBoxes(HitCharacter, CurrentFrame);
+	EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryOnly);
+	return FServerSideRewindResult{ false, false };
+}
+
+void ULagCompensationComponent::CacheBoxPositions(ABlasterCharacter* HitCharacter, FFramePackage& OutFramePackage)
+{
+	if (HitCharacter == nullptr)	return;
+
+	//For Loop Get Every Box's info, and Cached it to the FramePackage,Then it will Restore after server trace
+	for (const TPair<FName, UBoxComponent*>& HitBoxPair : HitCharacter->GetHitCollisionBoxes())
+	{
+		if (HitBoxPair.Value == nullptr)
+			continue;
+		FBoxInformation BoxInfo;
+		BoxInfo.Location = HitBoxPair.Value->GetComponentLocation();
+		BoxInfo.Rotation = HitBoxPair.Value->GetComponentRotation();
+		BoxInfo.BoxExtent = HitBoxPair.Value->GetScaledBoxExtent();
+		//put the {BoxComponent Name, BoxInformation} to the PackageFrame
+ 		OutFramePackage.HitBoxInfo.Add(HitBoxPair.Key, BoxInfo);
+	}
+}
+
+void ULagCompensationComponent::MoveBoxes(ABlasterCharacter* HitCharacter, const FFramePackage& Package)
+{
+	if (HitCharacter == nullptr)	return;
+
+	for (TPair<FName, UBoxComponent*>& HitBoxPair : HitCharacter->GetHitCollisionBoxes())
+	{
+		if (HitBoxPair.Value == nullptr)
+			continue;
+
+		HitBoxPair.Value->SetWorldLocation(Package.HitBoxInfo[HitBoxPair.Key].Location);
+		HitBoxPair.Value->SetWorldRotation(Package.HitBoxInfo[HitBoxPair.Key].Rotation);
+		HitBoxPair.Value->SetBoxExtent(Package.HitBoxInfo[HitBoxPair.Key].BoxExtent);
+	}
+}
+
+void ULagCompensationComponent::ResetHitBoxes(ABlasterCharacter* HitCharacter, const FFramePackage& Package)
+{
+	if (HitCharacter == nullptr)	return;
+
+	for (TPair<FName, UBoxComponent*>& HitBoxPair : HitCharacter->GetHitCollisionBoxes())
+	{
+		if (HitBoxPair.Value == nullptr)
+			continue;
+
+		HitBoxPair.Value->SetWorldLocation(Package.HitBoxInfo[HitBoxPair.Key].Location);
+		HitBoxPair.Value->SetWorldRotation(Package.HitBoxInfo[HitBoxPair.Key].Rotation);
+		HitBoxPair.Value->SetBoxExtent(Package.HitBoxInfo[HitBoxPair.Key].BoxExtent);
+		HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+}
+
+void ULagCompensationComponent::EnableCharacterMeshCollision(ABlasterCharacter* HitCharacter,
+	ECollisionEnabled::Type CollisionEnabled)
+{
+	if (HitCharacter == nullptr || HitCharacter->GetMesh() == nullptr)	return;
+
+	HitCharacter->GetMesh()->SetCollisionEnabled(CollisionEnabled);
+}
+
 FFramePackage ULagCompensationComponent::InterpBetweenFrames(
 	const FFramePackage& OlderFrame,
 	const FFramePackage& YoungerFrame,

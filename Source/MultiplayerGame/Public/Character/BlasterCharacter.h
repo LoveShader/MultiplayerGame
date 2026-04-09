@@ -366,5 +366,5 @@ public:
 	FORCEINLINE bool GetRotateRootBone() const { return bRotateRootBone; }
 	FORCEINLINE UAnimMontage* GetReloadMontage() const { return ReloadMontage; }
 	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const {return AttachedGrenade;}
-	FORCEINLINE const TMap<FName, UBoxComponent*>& GetHitCollisionBoxes() const { return HitCollisionBoxes; }
+	FORCEINLINE TMap<FName, UBoxComponent*>& GetHitCollisionBoxes() { return HitCollisionBoxes; }
 };
