@@ -28,10 +28,10 @@ void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 
 	SaveFrameHistory();
 
-	if (FrameHistory.GetHead())
+	/*if (FrameHistory.GetHead())
 	{
 		ShowFramePackage(FrameHistory.GetHead()->GetValue(), FColor::Red);
-	}
+	}*/
 }
 
 void ULagCompensationComponent::SaveFramePackage(FFramePackage& Package)
@@ -162,6 +162,19 @@ FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(
 {
 	FFramePackage FrameToCheck = GetFrameToCheck(HitCharacter, HitTime);
 	return ConfirmHit(FrameToCheck, HitCharacter, TraceStart, HitTarget);
+}
+
+FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunServerSideRewind(
+	TArray<ABlasterCharacter*> HitCharacters, float HitTime, const FVector_NetQuantize& TraceStart,
+	const TArray<FVector_NetQuantize>& HitTargets)
+{
+	TArray<FFramePackage> FramesToCheck;
+	for (const ABlasterCharacter* HitCharacter : HitCharacters)
+	{
+		FramesToCheck.Add(GetFrameToCheck(HitCharacter, HitTime));
+	}
+
+	return FShotgunServerSideRewindResult();
 }
 
 void ULagCompensationComponent::ServerScoreRequest_Implementation(

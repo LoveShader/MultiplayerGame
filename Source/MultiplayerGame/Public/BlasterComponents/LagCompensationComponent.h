@@ -50,6 +50,19 @@ struct FServerSideRewindResult
 	bool bHeadShot;
 };
 
+USTRUCT(BlueprintType)
+struct FShotgunServerSideRewindResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	TMap<ABlasterCharacter*, uint32> HeadShots;
+
+	UPROPERTY()
+	TMap<ABlasterCharacter*, uint32> BodyShots;
+};
+
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class MULTIPLAYERGAME_API ULagCompensationComponent : public UActorComponent
 {
@@ -73,6 +86,13 @@ public:
 		float HitTime,
 		const FVector_NetQuantize& TraceStart,
 		const FVector_NetQuantize& HitTarget
+	);
+
+	FShotgunServerSideRewindResult ShotgunServerSideRewind(
+		TArray<ABlasterCharacter*> HitCharacters,
+		float HitTime,
+		const FVector_NetQuantize& TraceStart,
+		const TArray<FVector_NetQuantize>& HitTargets
 	);
 
 	UFUNCTION(Server, Reliable)
