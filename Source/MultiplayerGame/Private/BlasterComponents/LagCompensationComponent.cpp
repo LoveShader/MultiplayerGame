@@ -5,6 +5,9 @@
 #include "Character/BlasterCharacter.h"
 #include "Components/BoxComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
+#include "PlayerController/BlasterPlayerController.h"
+#include "Weapon/HitScanWeapon.h"
 
 
 ULagCompensationComponent::ULagCompensationComponent()
@@ -83,12 +86,7 @@ void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, c
 	}
 }
 
-FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(
-	ABlasterCharacter* HitCharacter,
-	float HitTime,
-	const FVector_NetQuantize& HitLocation,
-	const FVector_NetQuantize& HitTarget
-)
+FFramePackage ULagCompensationComponent::GetFrameToCheck(const ABlasterCharacter* HitCharacter, float HitTime)
 {
 	FFramePackage FrameToCheck;
 	bool bShouldInterpolate = true;
@@ -100,7 +98,7 @@ FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(
 		HitCharacter->GetLagCompensation()->FrameHistory.GetTail() == nullptr
 	)
 	{
-		return FServerSideRewindResult{false, false};
+		return FrameToCheck;
 	}
 
 	const ULagCompensationComponent* HitCharacterLagCompensation = HitCharacter->GetLagCompensation();
@@ -109,7 +107,7 @@ FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(
 
 	if (HitTime < OldestHistoryTime)
 	{
-		return FServerSideRewindResult{false, false};
+		return FrameToCheck;
 	}
 
 	if (HitTime >= NewestHistoryTime)
@@ -152,7 +150,44 @@ FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(
 			FrameToCheck = InterpBetweenFrames(Older->GetValue(), Younger->GetValue(), HitTime);
 		}
 	}
-	return ConfirmHit(FrameToCheck, HitCharacter, HitLocation, HitTarget);
+	return FrameToCheck;
+}
+
+FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(
+	ABlasterCharacter* HitCharacter,
+	float HitTime,
+	const FVector_NetQuantize& TraceStart,
+	const FVector_NetQuantize& HitTarget
+)
+{
+	FFramePackage FrameToCheck = GetFrameToCheck(HitCharacter, HitTime);
+	return ConfirmHit(FrameToCheck, HitCharacter, TraceStart, HitTarget);
+}
+
+void ULagCompensationComponent::ServerScoreRequest_Implementation(
+	ABlasterCharacter* HitCharacter,
+	float HitTime,
+	const FVector_NetQuantize& TraceStart,
+	const FVector_NetQuantize& HitTarget,
+	AHitScanWeapon* DamageCauser
+)
+{
+	if (Character == nullptr || Controller == nullptr || HitCharacter == nullptr || DamageCauser == nullptr)
+	{
+		return;
+	}
+
+	const FServerSideRewindResult ConfirmResult = ServerSideRewind(HitCharacter, HitTime, TraceStart, HitTarget);
+	if (ConfirmResult.bHitConfirmed)
+	{
+		UGameplayStatics::ApplyDamage(
+			HitCharacter,
+			DamageCauser->GetDamage(),
+			Controller,
+			DamageCauser,
+			UDamageType::StaticClass()
+		);
+	}
 }
 
 FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackage& Package,
@@ -170,7 +205,14 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 	EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::NoCollision);
 
 	// Enable collision for the head first
-	UBoxComponent* HeadBox =  *HitCharacter->GetHitCollisionBoxes().Find(FName("head"));
+	UBoxComponent* const* HeadBoxPtr = HitCharacter->GetHitCollisionBoxes().Find(FName("head"));
+	if (HeadBoxPtr == nullptr || *HeadBoxPtr == nullptr)
+	{
+		ResetHitBoxes(HitCharacter, CurrentFrame);
+		EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryOnly);
+		return FServerSideRewindResult{ false, false };
+	}
+	UBoxComponent* HeadBox = *HeadBoxPtr;
 	HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	HeadBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 	
@@ -316,6 +358,11 @@ void ULagCompensationComponent::SaveFrameHistory()
 	}
 
 	if (Character == nullptr)
+	{
+		return;
+	}
+
+	if (!Character->HasAuthority())
 	{
 		return;
 	}

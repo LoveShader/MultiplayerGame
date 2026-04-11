@@ -585,6 +585,11 @@ float ABlasterPlayerController::GetServerTime() const
 	else return GetWorld()->GetTimeSeconds() + ClientServerDelta;
 }
 
+float ABlasterPlayerController::GetSingleTripTime() const
+{
+	return SingleTripTime;
+}
+
 void ABlasterPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -611,6 +616,7 @@ void ABlasterPlayerController::ClientReportServerTime_Implementation(float TimeO
 	//when server down to the client, server time is T1 + RTT / 2, and client time is GetWorld()->GetTimeSeconds.
 	//so the two deltaTime = T1 + RTT/2 - CurrentClientTime
 	float RoundTripTime = GetWorld()->GetTimeSeconds() - TimeOfClientRequest;
+	SingleTripTime = 0.5f * RoundTripTime;
 	float CurrentServerTime = TimeServerReceivedClientRequest + (0.5f * RoundTripTime);
 	ClientServerDelta = CurrentServerTime - GetWorld()->GetTimeSeconds();
 }

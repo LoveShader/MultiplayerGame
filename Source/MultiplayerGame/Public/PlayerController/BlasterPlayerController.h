@@ -20,6 +20,7 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void ReceivedPlayer() override; // Sync with server clock as soon as possible
 	virtual float GetServerTime() const;
+	float GetSingleTripTime() const;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void OnRep_Pawn() override;
 	void SetHUDHealth(float Health, float MaxHealth);
@@ -87,6 +88,7 @@ private:
 	uint32 CountdownInt = 0;
 
 	float ClientServerDelta = 0.f; // difference between client and server time
+	float SingleTripTime = 0.f;
 
 	UPROPERTY(EditAnywhere, Category = Time)
 	float TimeSyncFrequency = 5.f;

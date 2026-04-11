@@ -2,10 +2,12 @@
 
 
 #include "Weapon/HitScanWeapon.h"
+#include "BlasterComponents/LagCompensationComponent.h"
 #include "Character/BlasterCharacter.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "PlayerController/BlasterPlayerController.h"
 #include "Sound/SoundCue.h"
 
 void AHitScanWeapon::PlayVFXWhenHitActor(const FHitResult& FireResult) const
@@ -79,7 +81,9 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 		{
 			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireResult.GetActor());
 			AController* InstigatorController = OwnerPawn->GetController();
-			if (BlasterCharacter && HasAuthority() && InstigatorController)
+			ABlasterCharacter* OwnerCharacter = Cast<ABlasterCharacter>(OwnerPawn);
+			ABlasterPlayerController* BlasterPlayerController = OwnerCharacter ? Cast<ABlasterPlayerController>(InstigatorController) : nullptr;
+			if (BlasterCharacter && HasAuthority() && InstigatorController && OwnerPawn->IsLocallyControlled())
 			{
 				UGameplayStatics::ApplyDamage(
 					BlasterCharacter,
@@ -87,6 +91,22 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 					InstigatorController,
 					this,
 					UDamageType::StaticClass()
+				);
+			}
+			else if (
+				BlasterCharacter &&
+				OwnerCharacter &&
+				OwnerCharacter->GetLagCompensation() &&
+				BlasterPlayerController &&
+				OwnerPawn->IsLocallyControlled()
+			)
+			{
+				OwnerCharacter->GetLagCompensation()->ServerScoreRequest(
+					BlasterCharacter,
+					BlasterPlayerController->GetServerTime() - BlasterPlayerController->GetSingleTripTime(),
+					Start,
+					HitTarget,
+					this
 				);
 			}
 			PlayVFXWhenHitActor(FireResult);

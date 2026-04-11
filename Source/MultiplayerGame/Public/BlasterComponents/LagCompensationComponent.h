@@ -3,11 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Character/BlasterCharacter.h"
 #include "Components/ActorComponent.h"
 #include "LagCompensationComponent.generated.h"
 
 class ABlasterCharacter;
 class ABlasterPlayerController;
+class AHitScanWeapon;
 
 USTRUCT(BlueprintType)
 struct FBoxInformation
@@ -64,11 +66,22 @@ public:
 
 	void SaveFramePackage(FFramePackage& Package);
 	void ShowFramePackage(const FFramePackage& Package, const FColor& Color) const;
+	
+	FFramePackage GetFrameToCheck(const ABlasterCharacter* HitCharacter, float HitTime);	
 	FServerSideRewindResult ServerSideRewind(
 		ABlasterCharacter* HitCharacter,
 		float HitTime,
-		const FVector_NetQuantize& HitLocation,
+		const FVector_NetQuantize& TraceStart,
 		const FVector_NetQuantize& HitTarget
+	);
+
+	UFUNCTION(Server, Reliable)
+	void ServerScoreRequest(
+		ABlasterCharacter* HitCharacter,
+		float HitTime,
+		const FVector_NetQuantize& TraceStart,
+		const FVector_NetQuantize& HitTarget,
+		AHitScanWeapon* DamageCauser
 	);
 
 	FServerSideRewindResult ConfirmHit(const FFramePackage& Package, ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitTarget);
