@@ -54,6 +54,9 @@ protected:
 	void OnDropped();
 	void SetWeaponOutlineEnabled(bool bEnabled) const;
 	FVector TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget) const;
+
+	UPROPERTY(EditAnywhere, Category = "WeaponDamage")
+	float Damage = 20.0f;
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	USkeletalMeshComponent* WeaponMesh;
@@ -178,6 +181,7 @@ public:
 	FORCEINLINE void SetWeaponoDestroyed(bool bDestroyed) { bDestroyWeapon = bDestroyed;}
 	FORCEINLINE EWeaponOutlineStencil GetWeaponOutlineStencil() const { return OutlineStencil; }
 	FORCEINLINE bool IsUseScatter() const { return bUseScatter; }
+	FORCEINLINE float GetDamage() const { return Damage; }
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnAmmoChanged OnAmmoChanged;

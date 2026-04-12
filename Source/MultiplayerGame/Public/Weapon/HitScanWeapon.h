@@ -14,15 +14,13 @@ class MULTIPLAYERGAME_API AHitScanWeapon : public AWeapon
 public:
 	
 	virtual void Fire(const FVector& HitTarget) override;
-	FORCEINLINE float GetDamage() const { return Damage; }
 protected:
 	void WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& FireHit);
 	void PlayVFXWhenHitActor(const FHitResult& FireResult) const;
 	void PlayVFXWhenFire(const FTransform& SocketTransform) const;
 	void PlayBeamEffect(const FVector& Start, const FVector& End) const;
 
-	UPROPERTY(EditAnywhere, Category = "WeaponDamage")
-	float Damage = 20.0f;
+	
 private:
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* ImpactParticles;

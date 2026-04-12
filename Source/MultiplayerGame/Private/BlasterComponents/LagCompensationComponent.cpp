@@ -179,8 +179,51 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunServerSideRewin
 		FramesToCheck.Add(GetFrameToCheck(HitCharacter, HitTime));
 	}
 
-	return FShotgunServerSideRewindResult();
 	return ShotgunConfirmHit(FramesToCheck, TraceStart, HitTargets);
+}
+
+void ULagCompensationComponent::ShotgunServerScoreRequest_Implementation(const TArray<ABlasterCharacter*>& HitCharacters,
+	float HitTime, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitTargets)
+{
+	FShotgunServerSideRewindResult ShotgunHitResult = ShotgunServerSideRewind(HitCharacters, HitTime, TraceStart, HitTargets);
+
+	if (Character == nullptr || Character->Controller == nullptr || Character->GetEquippedWeapon() == nullptr)
+		return;
+	// For Loop for every Hit Character that in the HitCharacters Map
+
+	// To Be Done:
+	// There is a risk, if HitCharacters have duplicate character, then
+	// it will receive the damage more than once, so ues map is more safety
+	// or remove duplicate elements first
+	for (ABlasterCharacter* HitCharacter : HitCharacters)
+	{
+		if (HitCharacter == nullptr)
+			continue;
+		
+		float HitDamage = 0.0f;
+		if (ShotgunHitResult.HeadShots.Contains(HitCharacter))
+		{
+			float HeadDamage = ShotgunHitResult.HeadShots[HitCharacter] * Character->GetEquippedWeapon()->GetDamage();
+			HitDamage += HeadDamage;
+		}
+
+		if (ShotgunHitResult.BodyShots.Contains(HitCharacter))
+		{
+			float BodyDamage = ShotgunHitResult.BodyShots[HitCharacter] * Character->GetEquippedWeapon()->GetDamage();
+			HitDamage += BodyDamage;
+		}
+
+		if (HitDamage > 0.0f)
+		{
+			UGameplayStatics::ApplyDamage(
+				HitCharacter,
+				HitDamage,
+				Character->Controller,
+				Character->GetEquippedWeapon(),
+				UDamageType::StaticClass()
+			);
+		}
+	}
 }
 
 void ULagCompensationComponent::ServerScoreRequest_Implementation(
