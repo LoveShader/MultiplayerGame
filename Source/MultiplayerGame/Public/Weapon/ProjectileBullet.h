@@ -16,4 +16,6 @@ class MULTIPLAYERGAME_API AProjectileBullet : public AProjectile
 public:
 	AProjectileBullet();
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
+protected:
+	virtual void BeginPlay() override;
 };

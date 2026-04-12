@@ -13,6 +13,9 @@ AProjectileBullet::AProjectileBullet()
 	//Set Projectile Rotation with it's Velocity
 	ProjectileMovement->SetIsReplicated(true);
 	ProjectileMovement->bRotationFollowsVelocity = true;
+
+	ProjectileMovement->InitialSpeed = InitialSpeed;
+	ProjectileMovement->MaxSpeed = InitialSpeed;
 }
 
 void AProjectileBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
@@ -29,4 +32,29 @@ void AProjectileBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 	}
 	//because the parent class will destroy the actor in OnHit function, we need call it last
 	Super::OnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
+}
+
+void AProjectileBullet::BeginPlay()
+{
+	Super::BeginPlay();
+	FPredictProjectilePathParams PathParams;
+	PathParams.bTraceWithChannel = true;
+	PathParams.bTraceWithCollision = true;
+	PathParams.DrawDebugTime = 5.0f;
+	PathParams.DrawDebugType = EDrawDebugTrace::ForDuration;
+	PathParams.LaunchVelocity = GetActorForwardVector() * InitialSpeed;
+	PathParams.MaxSimTime = 4.0f;
+	PathParams.ProjectileRadius = 5.0f;
+	PathParams.StartLocation = GetActorLocation();
+	PathParams.SimFrequency = 30.0f;
+	PathParams.TraceChannel = ECC_Visibility;
+	PathParams.ActorsToIgnore.Add(this);
+
+	FPredictProjectilePathResult PathResult;
+
+	UGameplayStatics::PredictProjectilePath(
+		this,
+		PathParams,
+		PathResult
+	);
 }
