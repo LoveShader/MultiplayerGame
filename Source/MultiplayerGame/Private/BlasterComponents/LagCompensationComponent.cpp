@@ -16,6 +16,8 @@ ULagCompensationComponent::ULagCompensationComponent()
 
 }
 
+
+
 void ULagCompensationComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -47,8 +49,9 @@ void ULagCompensationComponent::SaveFramePackage(FFramePackage& Package)
 	}
 
 	Package.Time = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
+	Package.Character = Character;
 	Package.HitBoxInfo.Empty();
-
+	
 	for (const TPair<FName, UBoxComponent*>& BoxPair : Character->GetHitCollisionBoxes())
 	{
 		if (BoxPair.Value == nullptr)
@@ -60,7 +63,7 @@ void ULagCompensationComponent::SaveFramePackage(FFramePackage& Package)
 		BoxInformation.Location = BoxPair.Value->GetComponentLocation();
 		BoxInformation.Rotation = BoxPair.Value->GetComponentRotation();
 		BoxInformation.BoxExtent = BoxPair.Value->GetScaledBoxExtent();
-
+		
 		Package.HitBoxInfo.Add(BoxPair.Key, BoxInformation);
 	}
 }
@@ -86,7 +89,7 @@ void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, c
 	}
 }
 
-FFramePackage ULagCompensationComponent::GetFrameToCheck(const ABlasterCharacter* HitCharacter, float HitTime)
+FFramePackage ULagCompensationComponent::GetFrameToCheck(ABlasterCharacter* HitCharacter, float HitTime)
 {
 	FFramePackage FrameToCheck;
 	bool bShouldInterpolate = true;
@@ -109,6 +112,7 @@ FFramePackage ULagCompensationComponent::GetFrameToCheck(const ABlasterCharacter
 	{
 		return FrameToCheck;
 	}
+	
 
 	if (HitTime >= NewestHistoryTime)
 	{
@@ -150,6 +154,7 @@ FFramePackage ULagCompensationComponent::GetFrameToCheck(const ABlasterCharacter
 			FrameToCheck = InterpBetweenFrames(Older->GetValue(), Younger->GetValue(), HitTime);
 		}
 	}
+	FrameToCheck.Character = HitCharacter;
 	return FrameToCheck;
 }
 
@@ -169,12 +174,13 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunServerSideRewin
 	const TArray<FVector_NetQuantize>& HitTargets)
 {
 	TArray<FFramePackage> FramesToCheck;
-	for (const ABlasterCharacter* HitCharacter : HitCharacters)
+	for (ABlasterCharacter* HitCharacter : HitCharacters)
 	{
 		FramesToCheck.Add(GetFrameToCheck(HitCharacter, HitTime));
 	}
 
 	return FShotgunServerSideRewindResult();
+	return ShotgunConfirmHit(FramesToCheck, TraceStart, HitTargets);
 }
 
 void ULagCompensationComponent::ServerScoreRequest_Implementation(
@@ -273,6 +279,156 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 	ResetHitBoxes(HitCharacter, CurrentFrame);
 	EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryOnly);
 	return FServerSideRewindResult{ false, false };
+}
+
+FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(
+	const TArray<FFramePackage>& FramesToCheck, const FVector_NetQuantize& TraceStart,
+	const TArray<FVector_NetQuantize>& HitTargets)
+{
+	for (auto& Frame : FramesToCheck)
+	{
+		if (Frame.Character == nullptr)
+			return FShotgunServerSideRewindResult();
+	}
+
+	FShotgunServerSideRewindResult ShotgunResult;
+	TArray<FFramePackage> CurrentFrames;
+
+	/*
+	 * For Loop, doing these things
+	 * 1. Cache Current Character's BoxComponent
+	 * 2. Move Box Component's To FrameToCheck's Transform
+	 * 3. Disable All Character's Mesh Collision
+	 */
+	for (const FFramePackage& Package : FramesToCheck)
+	{
+		FFramePackage CurrentFrame;
+		CurrentFrame.Character = Package.Character;
+		CacheBoxPositions(Package.Character, CurrentFrame);
+		MoveBoxes(Package.Character, Package);
+		EnableCharacterMeshCollision(Package.Character, ECollisionEnabled::NoCollision);
+		CurrentFrames.Add(CurrentFrame);
+	}
+
+	/*
+	 * First for HeadShot, We need do these things:
+	 * 1. Get Head Box Components of All HitCharacters
+	 * 2. Do Safety Check, Just think how to do it when check head Box Component failed, there just reset state，and return null hit.
+	 * 3. Enable Collision for Head Box Component
+	 */
+	for (const FFramePackage& Package : FramesToCheck)
+	{
+		if (Package.HitBoxInfo.Find(FName("head")))
+		{
+			UBoxComponent* const* HeadBoxPtr = Package.Character->GetHitCollisionBoxes().Find(FName("head"));
+			//Safety check,
+			if (HeadBoxPtr == nullptr || *HeadBoxPtr == nullptr)
+			{
+				for (auto CurrentFrame: CurrentFrames)
+				{
+					ResetHitBoxes(CurrentFrame.Character, CurrentFrame);
+					EnableCharacterMeshCollision(CurrentFrame.Character, ECollisionEnabled::QueryOnly);
+				}
+				return ShotgunResult;
+			}
+			UBoxComponent* HeadBox = *HeadBoxPtr;
+			HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			HeadBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+		}
+	}
+	
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		/*
+		 * Then Do LineTrace, for HeadShot, Add the nums of hit to the HeadShots Map
+		 * Can Reference to the Shotgun.cpp's Shotgun Fire Function
+		 * For each HitTarget, Do Once LineTrace.
+		 * If hit the BlasterCharacter, then accumulate the hit times to the HeadShots
+		 */
+		for (const FVector_NetQuantize& HitTarget : HitTargets)
+		{
+			FHitResult ConfirmHitResult;
+			const FVector TraceEnd = TraceStart + (HitTarget - TraceStart) * 1.25f;
+			World->LineTraceSingleByChannel(
+				ConfirmHitResult,
+				TraceStart,
+				TraceEnd,
+				ECollisionChannel::ECC_Visibility
+				);
+			
+			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(ConfirmHitResult.GetActor());
+			if (ConfirmHitResult.bBlockingHit && BlasterCharacter)
+			{
+				if (ShotgunResult.HeadShots.Contains(BlasterCharacter))
+				{
+					ShotgunResult.HeadShots[BlasterCharacter]++;;
+				} else
+				{
+					ShotgunResult.HeadShots.Emplace(BlasterCharacter, 1);
+				}
+			}
+		}
+
+		/*
+		 * After check headshots, then need to check the BodyShots.So need those steps:
+		 * 1. Enable All Character's BoxComponents except the headBox
+		 * 2. For each HitTarget, Do Once LineTrace.
+		 * 3. If hit the BlasterCharacter, then accumulate the hit times to the BodyShots
+		 */
+		for (const FFramePackage& Package : FramesToCheck)
+		{
+			for (const auto& HitBoxes : Package.Character->GetHitCollisionBoxes())
+			{
+				if (HitBoxes.Value == nullptr)
+					continue;
+				HitBoxes.Value->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+				HitBoxes.Value->SetCollisionResponseToChannel(ECC_Visibility,ECollisionResponse::ECR_Block);
+			}
+
+			UBoxComponent* HeadBox = Package.Character->GetHitCollisionBoxes()[FName("head")];
+			HeadBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			HeadBox->SetCollisionResponseToChannel(ECC_Visibility, ECollisionResponse::ECR_Ignore);
+		}
+
+		for (const FVector_NetQuantize& HitTarget : HitTargets)
+		{
+			FHitResult ConfirmHitResult;
+			const FVector TraceEnd = TraceStart + (HitTarget - TraceStart) * 1.25f;
+			World->LineTraceSingleByChannel(
+				ConfirmHitResult,
+				TraceStart,
+				TraceEnd,
+				ECollisionChannel::ECC_Visibility
+				);
+			
+			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(ConfirmHitResult.GetActor());
+			if (ConfirmHitResult.bBlockingHit)
+			{
+				if (ShotgunResult.BodyShots.Contains(BlasterCharacter))
+				{
+					ShotgunResult.BodyShots[BlasterCharacter]++;;
+				} else
+				{
+					ShotgunResult.BodyShots.Emplace(BlasterCharacter, 1);
+				}
+			}
+		}
+	}
+
+	/*
+	 * After LineTrace, We need do these things:
+	 * 1. Reset the BoxComponents to CurrentFrame.
+	 * 2. Enable Mesh Collision
+	 * 3. Disable all the BoxComponents Collision Test
+	 */
+	for (const FFramePackage& CurrentFrame : CurrentFrames)
+	{
+		ResetHitBoxes(CurrentFrame.Character, CurrentFrame);
+		EnableCharacterMeshCollision(CurrentFrame.Character, ECollisionEnabled::QueryOnly);
+	}
+	
+	return ShotgunResult;
 }
 
 void ULagCompensationComponent::CacheBoxPositions(ABlasterCharacter* HitCharacter, FFramePackage& OutFramePackage)
