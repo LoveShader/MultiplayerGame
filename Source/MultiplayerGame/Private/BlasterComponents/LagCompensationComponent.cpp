@@ -13,16 +13,12 @@
 ULagCompensationComponent::ULagCompensationComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-
 }
-
-
 
 void ULagCompensationComponent::BeginPlay()
 {
 	Super::BeginPlay();
 }
-
 
 void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
@@ -446,7 +442,7 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(
 				);
 			
 			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(ConfirmHitResult.GetActor());
-			if (ConfirmHitResult.bBlockingHit)
+			if (BlasterCharacter && ConfirmHitResult.bBlockingHit)
 			{
 				if (ShotgunResult.BodyShots.Contains(BlasterCharacter))
 				{

@@ -3,9 +3,11 @@
 
 #include "Weapon/Shotgun.h"
 
+#include "BlasterComponents/LagCompensationComponent.h"
 #include "Character/BlasterCharacter.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
+#include "PlayerController/BlasterPlayerController.h"
 
 void AShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector_NetQuantize>& HitTargets)
 {
@@ -39,12 +41,12 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 	if (MuzzleFlashSocket)
 	{
 		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
-		FVector Start = SocketTransform.GetLocation();
+		FVector TraceStart = SocketTransform.GetLocation();
 		TMap<ABlasterCharacter*, uint32> HitMap;
 		for (const FVector_NetQuantize& HitTarget : HitTargets)
 		{
 			FHitResult FireHit;
-			WeaponTraceHit(Start, HitTarget, FireHit);
+			WeaponTraceHit(TraceStart, HitTarget, FireHit);
 
 			if (FireHit.bBlockingHit)
 			{
@@ -66,10 +68,12 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 		}
 
 		AController* InstigatorController = OwnerPawn->GetController();
+		TArray<ABlasterCharacter*> HitCharacters;
 		for (const auto& HitPair : HitMap)
 		{
-			if (HitPair.Key && HasAuthority() && InstigatorController)
+			if (HitPair.Key && InstigatorController)
 			{
+				if (HasAuthority() && OwnerPawn->IsLocallyControlled())
 				{
 					UGameplayStatics::ApplyDamage(
 						HitPair.Key,
@@ -79,9 +83,29 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 						UDamageType::StaticClass()
 					);
 				}
+
+				HitCharacters.Add(HitPair.Key);
+			}
+		}
+
+		//Client Side Call Server RPC to do Shotgun Server Side Rewind
+		ABlasterCharacter* OwnerCharacter = Cast<ABlasterCharacter>(OwnerPawn);
+		if (!HasAuthority() && OwnerCharacter && OwnerCharacter->GetLagCompensation() && OwnerCharacter->IsLocallyControlled())
+		{
+			ABlasterPlayerController* OwnerPlayerController = Cast<ABlasterPlayerController>(OwnerCharacter->GetController());
+			if (OwnerPlayerController)
+			{
+				OwnerCharacter->GetLagCompensation()->ShotgunServerScoreRequest(
+					HitCharacters,
+					OwnerPlayerController->GetServerTime() - OwnerPlayerController->GetSingleTripTime(),
+					TraceStart,
+					HitTargets
+				);
 			}
 		}
 	}
+
+	
 }
 
 void AShotgun::Fire(const FVector& HitTarget)
