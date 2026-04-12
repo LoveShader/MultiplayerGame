@@ -29,8 +29,8 @@ public:
 	FVector_NetQuantize TraceStart;
 	FVector_NetQuantize100 InitialVelocity;
 	
-	UPROPERTY(EditAnywhere)
-	float InitialSpeed = 15000;
+	UPROPERTY(EditAnywhere, Category = "Projectile Properties")
+	float InitialSpeed = 1500;
 protected:
 	virtual void BeginPlay() override;
 	void StartOwnerCollisionIgnoreWindow();

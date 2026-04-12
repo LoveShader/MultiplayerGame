@@ -17,6 +17,9 @@ class MULTIPLAYERGAME_API AProjectileRocket : public AProjectile
 public:
 	AProjectileRocket();
 	virtual void Destroyed() override;
+#if WITH_EDITOR
+	virtual void PostEditChangeChainProperty(struct FPropertyChangedChainEvent& PropertyChangedEvent) override;
+#endif
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
