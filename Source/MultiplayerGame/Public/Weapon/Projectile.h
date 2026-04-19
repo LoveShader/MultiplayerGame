@@ -31,6 +31,12 @@ public:
 	
 	UPROPERTY(EditAnywhere, Category = "Projectile Properties")
 	float InitialSpeed = 1500;
+
+	UPROPERTY()
+    bool bUseServerSideRewind = false;
+
+	UPROPERTY(EditDefaultsOnly)
+	float Damage = 20.0f;
 protected:
 	virtual void BeginPlay() override;
 	void StartOwnerCollisionIgnoreWindow();
@@ -50,9 +56,6 @@ protected:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticastHitEffects();
-
-	UPROPERTY(EditDefaultsOnly)
-	float Damage = 20.0f;
 
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* CollisionBox;

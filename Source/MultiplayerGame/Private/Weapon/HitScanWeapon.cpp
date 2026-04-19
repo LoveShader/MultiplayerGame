@@ -114,13 +114,13 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 	}
 }
 
-	void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& FireHit)
-	{
-		UWorld* World = GetWorld();
-		FVector TraceEnd = TraceStart + (HitTarget - TraceStart) * 1.25f;
+void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& FireHit)
+{
+	UWorld* World = GetWorld();
+	FVector TraceEnd = TraceStart + (HitTarget - TraceStart) * 1.25f;
 
-		if (World)
-		{
+	if (World)
+	{
 		World->LineTraceSingleByChannel(
 			FireHit,
 			TraceStart,

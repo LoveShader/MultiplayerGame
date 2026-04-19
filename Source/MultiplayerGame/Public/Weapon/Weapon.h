@@ -57,6 +57,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "WeaponDamage")
 	float Damage = 20.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Server Side Rewind")
+	bool bUseServerSideRewind = false;
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	USkeletalMeshComponent* WeaponMesh;
