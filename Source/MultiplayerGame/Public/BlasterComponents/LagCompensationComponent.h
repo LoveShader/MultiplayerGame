@@ -77,6 +77,7 @@ public:
 	ULagCompensationComponent();
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	// HitScan Weapon
 	UFUNCTION(Server, Reliable)
 	void ServerScoreRequest(
 		ABlasterCharacter* HitCharacter,
@@ -86,6 +87,7 @@ public:
 		AHitScanWeapon* DamageCauser
 	);
 
+	//Shotgun Weapon
 	UFUNCTION(Server, Reliable)
 	void ShotgunServerScoreRequest(
 		const TArray<ABlasterCharacter*>& HitCharacters,
@@ -103,6 +105,14 @@ protected:
 		const FVector_NetQuantize& TraceStart,
 		const FVector_NetQuantize& HitTarget
 	);
+	// Server side Rewind for Projectile Weapon
+	FServerSideRewindResult ProjectileServerSideRewind(
+		ABlasterCharacter* HitCharacter,
+		float HitTime,
+		const FVector_NetQuantize& TraceStart,
+		const FVector_NetQuantize100& InitialVelocity
+		);
+	
 	//Shotgun Server side Rewind
 	FShotgunServerSideRewindResult ShotgunServerSideRewind(
 		TArray<ABlasterCharacter*> HitCharacters,
@@ -111,7 +121,11 @@ protected:
 		const TArray<FVector_NetQuantize>& HitTargets
 	);
 
+	// HitScan Confirm Hit
 	FServerSideRewindResult ConfirmHit(const FFramePackage& Package, ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitTarget);
+	// Projectile Confirm Hit
+	FServerSideRewindResult ProjectileConfirmHit(const FFramePackage& Package, ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, float HitTime);
+	// Shotgun Confirm Hit
 	FShotgunServerSideRewindResult ShotgunConfirmHit(const TArray<FFramePackage>& FramesToCheck, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitTargets);
 	void CacheBoxPositions(ABlasterCharacter* HitCharacter, FFramePackage& OutFramePackage);
 	void MoveBoxes(ABlasterCharacter* HitCharacter, const FFramePackage& Package);
