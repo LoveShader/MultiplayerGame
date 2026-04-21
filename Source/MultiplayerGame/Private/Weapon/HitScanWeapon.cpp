@@ -83,22 +83,26 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 			AController* InstigatorController = OwnerPawn->GetController();
 			ABlasterCharacter* OwnerCharacter = Cast<ABlasterCharacter>(OwnerPawn);
 			ABlasterPlayerController* BlasterPlayerController = OwnerCharacter ? Cast<ABlasterPlayerController>(InstigatorController) : nullptr;
-			if (BlasterCharacter && HasAuthority() && InstigatorController && OwnerPawn->IsLocallyControlled())
+			if (BlasterCharacter && InstigatorController)
 			{
-				UGameplayStatics::ApplyDamage(
+				bool bCauseAuthDamage = !bUseServerSideRewind || OwnerPawn->IsLocallyControlled();
+				if (HasAuthority() && bCauseAuthDamage)
+				{
+					UGameplayStatics::ApplyDamage(
 					BlasterCharacter,
 					Damage,
 					InstigatorController,
 					this,
 					UDamageType::StaticClass()
-				);
+					);
+				}
 			}
-			else if (
-				BlasterCharacter &&
-				OwnerCharacter &&
+			if (OwnerCharacter &&
 				OwnerCharacter->GetLagCompensation() &&
 				BlasterPlayerController &&
-				OwnerPawn->IsLocallyControlled()
+				OwnerPawn->IsLocallyControlled() &&
+				!HasAuthority() &&
+				bUseServerSideRewind
 			)
 			{
 				OwnerCharacter->GetLagCompensation()->ServerScoreRequest(
@@ -109,6 +113,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 					this
 				);
 			}
+		
 			PlayVFXWhenHitActor(FireResult);
 		}
 	}

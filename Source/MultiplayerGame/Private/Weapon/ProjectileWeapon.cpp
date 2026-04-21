@@ -13,10 +13,10 @@ void AProjectileWeapon::Fire(const FVector& HitTarget)
 	//Get Muzzle flash Socket
 	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
 	UWorld* World = GetWorld();
-
-	AProjectile* SpawnedProjectile = nullptr;
+	
 	if (MuzzleFlashSocket && World)
 	{
+		AProjectile* SpawnedProjectile = nullptr;
 		FActorSpawnParameters SpawnParameters;
 		//This projectile's owner is The Weapon owner
 		SpawnParameters.Owner = GetOwner();
@@ -28,7 +28,7 @@ void AProjectileWeapon::Fire(const FVector& HitTarget)
 		FRotator TargetRotation = ToTarget.Rotation();
 		if (bUseServerSideRewind)	//use Server side Rewind
 		{
-			if (HasAuthority())
+			if (ProjectileInstigator->HasAuthority())
 			{
 				if (ProjectileInstigator->IsLocallyControlled())	//Spawn Projectile(bReplicated = true)
 				{	
@@ -36,10 +36,10 @@ void AProjectileWeapon::Fire(const FVector& HitTarget)
 					SpawnedProjectile->bUseServerSideRewind = false;
 					SpawnedProjectile->Damage = Damage;
 				}
-				else  //Spawn Server side Rewind Projectile(bReplicated = false)
+				else  //Spawn Server side Rewind Projectile, use ssr
 				{
 					SpawnedProjectile = World->SpawnActor<AProjectile>(ServerSideRewindProjectileClass, SocketTransform.GetLocation(),TargetRotation, SpawnParameters);
-					SpawnedProjectile->bUseServerSideRewind = false;
+					SpawnedProjectile->bUseServerSideRewind = true;
 				}
 			}
 			else

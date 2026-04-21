@@ -87,6 +87,15 @@ public:
 		AHitScanWeapon* DamageCauser
 	);
 
+	// Projectile Weapon
+	UFUNCTION(Server, Reliable)
+	void ProjectileServerScoreRequest(
+		ABlasterCharacter* HitCharacter,
+		float HitTime,
+		const FVector_NetQuantize& TraceStart,
+		const FVector_NetQuantize100& InitialVelocity
+	);
+
 	//Shotgun Weapon
 	UFUNCTION(Server, Reliable)
 	void ShotgunServerScoreRequest(
@@ -124,7 +133,7 @@ protected:
 	// HitScan Confirm Hit
 	FServerSideRewindResult ConfirmHit(const FFramePackage& Package, ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitTarget);
 	// Projectile Confirm Hit
-	FServerSideRewindResult ProjectileConfirmHit(const FFramePackage& Package, ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, float HitTime);
+	FServerSideRewindResult ProjectileConfirmHit(const FFramePackage& Package, ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity);
 	// Shotgun Confirm Hit
 	FShotgunServerSideRewindResult ShotgunConfirmHit(const TArray<FFramePackage>& FramesToCheck, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitTargets);
 	void CacheBoxPositions(ABlasterCharacter* HitCharacter, FFramePackage& OutFramePackage);

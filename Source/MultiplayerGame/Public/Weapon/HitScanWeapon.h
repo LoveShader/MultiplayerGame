@@ -19,8 +19,6 @@ protected:
 	void PlayVFXWhenHitActor(const FHitResult& FireResult) const;
 	void PlayVFXWhenFire(const FTransform& SocketTransform) const;
 	void PlayBeamEffect(const FVector& Start, const FVector& End) const;
-
-	
 private:
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* ImpactParticles;

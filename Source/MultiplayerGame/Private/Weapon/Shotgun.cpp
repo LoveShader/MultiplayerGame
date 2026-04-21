@@ -73,7 +73,8 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 		{
 			if (HitPair.Key && InstigatorController)
 			{
-				if (HasAuthority() && OwnerPawn->IsLocallyControlled())
+				bool bCauseAuthDamage = !bUseServerSideRewind || OwnerPawn->IsLocallyControlled();
+				if (HasAuthority() && bCauseAuthDamage)
 				{
 					UGameplayStatics::ApplyDamage(
 						HitPair.Key,
@@ -90,7 +91,7 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 
 		//Client Side Call Server RPC to do Shotgun Server Side Rewind
 		ABlasterCharacter* OwnerCharacter = Cast<ABlasterCharacter>(OwnerPawn);
-		if (!HasAuthority() && OwnerCharacter && OwnerCharacter->GetLagCompensation() && OwnerCharacter->IsLocallyControlled())
+		if (!HasAuthority() && bUseServerSideRewind && OwnerCharacter && OwnerCharacter->GetLagCompensation() && OwnerCharacter->IsLocallyControlled())
 		{
 			ABlasterPlayerController* OwnerPlayerController = Cast<ABlasterPlayerController>(OwnerCharacter->GetController());
 			if (OwnerPlayerController)

@@ -25,7 +25,6 @@ public:
 	/*
 	 * Used with server-side rewind 
 	 */
-	bool bUsedServerSideRewind = false;
 	FVector_NetQuantize TraceStart;
 	FVector_NetQuantize100 InitialVelocity;
 	
